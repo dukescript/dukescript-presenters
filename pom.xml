@@ -15,11 +15,16 @@
             <name>gpl_v3</name>
             <url>http://www.gnu.org/licenses/gpl-3.0.html</url>
             <comments>
-            Visit http://dukescript.com for support and commercial license.
+                Visit http://dukescript.com for support and commercial license.
             </comments>
         </license>
     </licenses>
-    
+    <scm>
+        <connection>scm:git:git@github.com:dukescript/dukescript-presenters.git</connection>
+        <url>scm:git:git@github.com:dukescript/dukescript-presenters.git</url>
+        <developerConnection>scm:git:git@github.com:dukescript/dukescript-presenters.git</developerConnection>
+        <tag>HEAD</tag>
+    </scm>
     <repositories>
         <repository>
             <id>nb</id>
