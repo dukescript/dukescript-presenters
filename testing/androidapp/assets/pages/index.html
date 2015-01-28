@@ -1,0 +1,20 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title></title>
+        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    </head>
+    <body>
+        <h1>ToDo Demo</h1>
+        <input data-bind="value: text, valueUpdate: 'afterkeydown'"/>
+        <button data-bind="click: add, enable: nonempty">Add</button>
+        <ul data-bind="foreach: items">
+            <li>
+                <input type="checkbox" data-bind="checked: done, value: description"/> -
+                <span data-bind="text: description"></span>
+            </li>
+        </ul>
+        <span data-bind="text: pending"></span> pending to-do item(s).
+        <button data-bind="click: archive, enable: selected">Archive</button>
+    </body>
+</html>

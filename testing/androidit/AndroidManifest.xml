@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+  package="com.dukescript.presenters.androidapp.test" 
+  android:versionCode="1" android:versionName="0.5"
+>
+  <application android:label="Android IT">
+    <uses-library android:name="android.test.runner" />
+  </application>
+
+  <instrumentation android:targetPackage="com.dukescript.presenters.androidapp"
+    android:name="android.test.InstrumentationTestRunner" 
+  />
+</manifest>
+

@@ -1,0 +1,132 @@
+package com.dukescript.presenters.androidapp.test;
+
+/*
+ * #%L
+ * Android Integration Tests - a library from the "DukeScript Presenters" project.
+ * Visit http://dukescript.com for support and commercial license.
+ * %%
+ * Copyright (C) 2015 Eppleton IT Consulting
+ * %%
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as
+ * published by the Free Software Foundation, either version 3 of the
+ * License, or (at your option) any later version.
+ * 
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ * 
+ * You should have received a copy of the GNU General Public
+ * License along with this program.  If not, see
+ * <http://www.gnu.org/licenses/gpl-3.0.html>.
+ * #L%
+ */
+
+import java.lang.reflect.Method;
+import java.net.URI;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.concurrent.Executor;
+import static junit.framework.Assert.fail;
+import net.java.html.BrwsrCtx;
+import org.netbeans.html.boot.spi.Fn;
+import org.netbeans.html.context.spi.Contexts;
+import org.netbeans.html.json.spi.Technology;
+import org.netbeans.html.json.spi.Transfer;
+import org.netbeans.html.json.tck.KOTest;
+import org.netbeans.html.json.tck.KnockoutTCK;
+import org.json.JSONException;
+import org.json.JSONObject;
+import org.netbeans.html.ko4j.KO4J;
+
+public final class Knockout extends KnockoutTCK {
+    public static Map<String, Method> assertMethods(Class<?> test) throws Exception {
+        Map<String, Method> all = new HashMap<String, Method>();
+        StringBuilder errors = new StringBuilder();
+        int cnt = 0;
+        final Class<?>[] classes = testClasses();
+        for (Class<?> c : classes) {
+            for (Method method : c.getMethods()) {
+                if (method.getAnnotation(KOTest.class) != null) {
+                    cnt++;
+                    String name = method.getName();
+                    if (!name.startsWith("test")) {
+                        name = "test" + Character.toUpperCase(name.charAt(0)) + name.substring(1);
+                    }
+                    try {
+                        Method m = test.getMethod(name);
+                        all.put(name, method);
+                    } catch (NoSuchMethodException ex) {
+                        errors.append("\n").append(name);
+                    }
+                }
+            }
+        }
+        if (errors.length() > 0) {
+            errors.append("\nTesting classes: ").append(Arrays.toString(classes));
+            fail("Missing method: " + errors);
+        }
+        assert cnt > 0 : "Some methods found";
+        return all;
+    }
+
+    @Override
+    public BrwsrCtx createContext() {
+        final Fn.Presenter ap = Fn.activePresenter();
+        KO4J ko = new KO4J(ap);
+        Object tyrus;
+        try {
+            tyrus = Class.forName("org.netbeans.html.wstyrus.TyrusContext").newInstance();
+        } catch (Exception ex) {
+            throw new IllegalStateException(ex);
+        }
+        Contexts.Builder cb = Contexts.newBuilder().
+            register(Technology.class, ko.knockout(), 10).
+            register(Transfer.class, (Transfer)tyrus, 10);
+        if (ap instanceof Executor) {
+            cb.register(Executor.class, (Executor)ap, 10);
+        }
+        cb.register(Fn.Presenter.class, ap, 10);
+        return cb.build();
+    }
+    
+    @Override
+    public boolean canFailWebSocketTest() {
+        return true;
+    }
+
+    @Override
+    public Object createJSON(Map<String, Object> values) {
+        JSONObject json = new JSONObject();
+        for (Map.Entry<String, Object> entry : values.entrySet()) {
+            try {
+                json.put(entry.getKey(), entry.getValue());
+            } catch (JSONException ex) {
+                throw new IllegalStateException(ex);
+            }
+        }
+        return json;
+    }
+
+    @Override
+    public Object executeScript(String script, Object[] arguments) {
+        Fn.Presenter p = Fn.activePresenter();
+        Fn fn = p.defineFn(
+            "var f = new Function(s); " + "return f.apply(null, args);",
+            "s", "args"
+        );
+        try {
+            return fn.invoke(null, arguments);
+        } catch (Exception ex) {
+            throw new IllegalStateException(ex);
+        }
+    }
+
+    @Override
+    public URI prepareURL(String content, String mimeType, String[] parameters) {
+        return ContentURLHandler.register(content, mimeType, parameters);
+    }
+    
+}

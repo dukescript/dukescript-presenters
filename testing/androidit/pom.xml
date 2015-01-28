@@ -1,0 +1,126 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+
+    <parent>
+        <groupId>com.dukescript.presenters</groupId>
+        <artifactId>testing</artifactId>
+        <version>0.3-SNAPSHOT</version>
+    </parent>
+
+    <artifactId>androidit</artifactId>
+    <version>0.3-SNAPSHOT</version>
+    <packaging>apk</packaging>
+    <name>Android Integration Tests</name>
+    <properties>
+        <debug>false</debug>
+        <skipTests>true</skipTests>
+    </properties>
+
+    <dependencies>
+        <dependency>
+            <groupId>com.google.android</groupId>
+            <artifactId>android-test</artifactId>
+            <scope>provided</scope>
+            <version>4.1.1.4</version>
+            <exclusions>
+                <exclusion>
+                    <groupId>junit</groupId>
+                    <artifactId>junit</artifactId>
+                </exclusion>
+            </exclusions>
+        </dependency>
+        <dependency>
+            <groupId>${project.groupId}</groupId>
+            <artifactId>androidapp</artifactId>
+            <type>apk</type>
+            <version>0.3-SNAPSHOT</version>
+            <scope>provided</scope>
+        </dependency>
+        <dependency>
+            <groupId>${project.groupId}</groupId>
+            <artifactId>androidapp</artifactId>
+            <type>jar</type>
+            <version>0.3-SNAPSHOT</version>
+            <scope>provided</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.netbeans.html</groupId>
+            <artifactId>net.java.html.json.tck</artifactId>
+            <version>${net.java.html.version}</version>
+            <type>jar</type>
+            <scope>provided</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.netbeans.html</groupId>
+            <artifactId>ko4j</artifactId>
+            <type>jar</type>
+            <scope>provided</scope>
+            <version>${net.java.html.version}</version>
+        </dependency>
+        <dependency>
+            <artifactId>ko-ws-tyrus</artifactId>
+            <groupId>org.netbeans.html</groupId>
+            <type>jar</type>
+            <version>${net.java.html.version}</version>
+            <scope>provided</scope>
+        </dependency>
+        <dependency>
+            <artifactId>net.java.html.json</artifactId>
+            <groupId>org.netbeans.html</groupId>
+            <type>jar</type>
+            <version>${net.java.html.version}</version>
+            <scope>provided</scope>
+        </dependency>
+    </dependencies>
+
+    <build>
+        <finalName>${project.artifactId}</finalName>
+        <plugins>
+            <plugin>
+                <groupId>com.jayway.maven.plugins.android.generation2</groupId>
+                <artifactId>android-maven-plugin</artifactId>
+                <version>3.9.0-rc.3</version>
+                <configuration>
+                    <test>
+                        <skip>${skipTests}</skip>
+                        <!--<instrumentationPackage>packageName</instrumentationPackage> -->
+                        <!--<instrumentationRunner>className</instrumentationRunner> -->
+                        <debug>${debug}</debug>
+                        <!--<coverage>true|false</coverage> -->
+                        <!--<logonly>true|false</logonly> avd -->
+                        <!--<testsize>small|medium|large</testsize> -->
+                        <createReport>true</createReport>
+                        <!--<classes> -->
+                        <!--<class>your.package.name.YourTestClass</class> -->
+                        <!--</classes> -->
+                        <!--<packages> -->
+                        <!--<package>your.package.name</package> -->
+                        <!--</packages> -->
+                    </test>
+                </configuration>
+                <extensions>true</extensions>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-deploy-plugin</artifactId>
+                <configuration>
+                    <skip>true</skip>
+                </configuration>
+            </plugin>
+        </plugins>
+    </build>
+    <profiles>
+        <profile>
+            <id>sdk-available</id>
+            <activation>
+                <property>
+                    <name>android.sdk.path</name>
+                </property>
+            </activation>
+            <properties>
+                <skipTests>false</skipTests>
+            </properties>
+        </profile>
+    </profiles>
+</project>
