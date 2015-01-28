@@ -21,7 +21,7 @@
     </licenses>
     <scm>
         <connection>scm:git:git@github.com:dukescript/dukescript-presenters.git</connection>
-        <url>scm:git:git@github.com:dukescript/dukescript-presenters.git</url>
+        <url>https://github.com/dukescript/dukescript-presenters.git</url>
         <developerConnection>scm:git:git@github.com:dukescript/dukescript-presenters.git</developerConnection>
         <tag>HEAD</tag>
     </scm>
