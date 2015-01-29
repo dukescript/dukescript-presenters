@@ -9,6 +9,7 @@
     <name>DukeScript Presenter for Android</name>
     <artifactId>android</artifactId>
     <packaging>jar</packaging>
+              
     <build>
         <plugins>
             <plugin>
@@ -16,6 +17,14 @@
                 <configuration>
                     <skip>false</skip>
                 </configuration>
+                <executions>
+                    <execution>
+                        <id>attach-javadocs</id>
+                        <goals>
+                            <goal>jar</goal>
+                        </goals>
+                    </execution>
+                </executions>
             </plugin>            
         </plugins>
     </build>

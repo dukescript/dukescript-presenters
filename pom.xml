@@ -7,6 +7,22 @@
     <artifactId>pom</artifactId>
     <version>0.7</version>
     <packaging>pom</packaging>
+    <url>http://dukescript.com</url>
+    <developers>
+        <developer>
+            <id>eppleton</id>
+            <name>Anton Epple</name>
+            <email>dukescript@eppleton.de</email>
+            <organization>Eppleton IT Consulting</organization>
+            <organizationUrl>http://www.eppleton.de</organizationUrl>
+            <roles>
+                <role>Project-Administrator</role>
+                <role>Developer</role>
+            </roles>
+            <timezone>+1</timezone>
+        </developer>
+    </developers>
+    <description>Presenters that allow you to deploy DukeScript applications to iOS and Android</description>
     <licenses>
         <license>
             <name>gpl_v3</name>
@@ -36,12 +52,12 @@
     </repositories>
 
     <modules>
-        <module>strings</module>
+        <!--<module>strings</module>-->
         <module>generic</module>
         <module>android</module>
         <module>ios</module>
-        <module>testing</module>
-        <module>fakeandroidemul</module>
+        <!--<module>testing</module>-->
+        <!--<module>fakeandroidemul</module>-->
     </modules>
 
     <properties>
@@ -89,6 +105,19 @@
                 <configuration>
                     <skip>true</skip>
                 </configuration>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-source-plugin</artifactId>
+                <version>2.2.1</version>
+                <executions>
+                    <execution>
+                        <id>attach-sources</id>
+                        <goals>
+                            <goal>jar-no-fork</goal>
+                        </goals>
+                    </execution>
+                </executions>
             </plugin>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
