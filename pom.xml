@@ -20,9 +20,9 @@
         </license>
     </licenses>
     <scm>
-        <connection>scm:git:https://github.com/dukescript/dukescript-presenters.git</connection>
-        <url>https://github.com/dukescript/dukescript-presenters.git</url>
-        <developerConnection>scm:git:https://github.com/dukescript/dukescript-presenters.git</developerConnection>
+        <connection>scm:git:https://DukeScript@github.com/dukescript/dukescript-presenters.git</connection>
+        <url>https://DukeScript@github.com/dukescript/dukescript-presenters.git</url>
+        <developerConnection>scm:git:https://DukeScript@github.com/dukescript/dukescript-presenters.git</developerConnection>
         <tag>HEAD</tag>
     </scm>
     <repositories>
