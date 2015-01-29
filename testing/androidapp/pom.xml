@@ -4,7 +4,7 @@
     <parent>
         <groupId>com.dukescript.presenters</groupId>
         <artifactId>testing</artifactId>
-        <version>0.3-SNAPSHOT</version>
+        <version>0.7</version>
     </parent>
     <artifactId>androidapp</artifactId>
     <name>Android Test Application</name>
