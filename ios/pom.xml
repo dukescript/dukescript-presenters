@@ -4,7 +4,7 @@
     <parent>
         <groupId>com.dukescript.presenters</groupId>
         <artifactId>pom</artifactId>
-        <version>0.7</version>
+        <version>0.8-SNAPSHOT</version>
     </parent>
     
     <name>DukeScript Presenter for iOS</name>

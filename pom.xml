@@ -5,7 +5,7 @@
     <name>DukeScript Presenters</name>
     <groupId>com.dukescript.presenters</groupId>
     <artifactId>pom</artifactId>
-    <version>0.7</version>
+    <version>0.8-SNAPSHOT</version>
     <packaging>pom</packaging>
     <url>http://dukescript.com</url>
     <developers>
@@ -52,12 +52,12 @@
     </repositories>
 
     <modules>
-        <!--<module>strings</module>-->
+        <module>strings</module>
         <module>generic</module>
         <module>android</module>
         <module>ios</module>
-        <!--<module>testing</module>-->
-        <!--<module>fakeandroidemul</module>-->
+        <module>testing</module>
+        <module>fakeandroidemul</module>
     </modules>
 
     <properties>
