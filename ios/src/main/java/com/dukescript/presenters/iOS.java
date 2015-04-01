@@ -48,6 +48,7 @@ import org.robovm.apple.uikit.UIApplicationLaunchOptions;
 import org.robovm.apple.uikit.UIColor;
 import org.robovm.apple.uikit.UIInterfaceOrientation;
 import org.robovm.apple.uikit.UIScreen;
+import org.robovm.apple.uikit.UIViewAutoresizing;
 import org.robovm.apple.uikit.UIViewController;
 import org.robovm.apple.uikit.UIWebView;
 import org.robovm.apple.uikit.UIWebViewDelegate;
@@ -182,7 +183,14 @@ implements Executor {
             final CGRect bounds = UIScreen.getMainScreen().getApplicationFrame();
             webView = new UIWebView(bounds);
             webView.setDelegate(delegate);
-
+            webView.setAutoresizingMask(UIViewAutoresizing.with(
+                UIViewAutoresizing.FlexibleBottomMargin,
+                UIViewAutoresizing.FlexibleHeight,
+                UIViewAutoresizing.FlexibleLeftMargin,
+                UIViewAutoresizing.FlexibleRightMargin,
+                UIViewAutoresizing.FlexibleTopMargin,
+                UIViewAutoresizing.FlexibleWidth
+            ));
             CGRect whole = UIScreen.getMainScreen().getBounds();
             window = new UIWindow(whole);
             window.setRootViewController(new UIViewController() {

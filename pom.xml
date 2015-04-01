@@ -8,6 +8,8 @@
     <version>0.8-SNAPSHOT</version>
     <packaging>pom</packaging>
     <url>http://dukescript.com</url>
+    <description>Presenters that allow you to deploy DukeScript applications to iOS and Android</description>
+    
     <developers>
         <developer>
             <id>eppleton</id>
@@ -22,7 +24,7 @@
             <timezone>+1</timezone>
         </developer>
     </developers>
-    <description>Presenters that allow you to deploy DukeScript applications to iOS and Android</description>
+    
     <licenses>
         <license>
             <name>gpl_v3</name>
@@ -66,7 +68,7 @@
         <testng.version>6.7</testng.version>
         <netbeans.version>RELEASE80</netbeans.version>
         <obfuscation.seed>now</obfuscation.seed>
-        <robovm.version>1.0.0-beta-03</robovm.version>
+        <robovm.version>1.0.0</robovm.version>
     </properties>
     
     <distributionManagement>
@@ -151,11 +153,6 @@
     <profiles> 
         <profile>
             <id>release</id>
-            <modules>
-                <module>generic</module>
-                <module>android</module>
-                <module>ios</module>
-            </modules>
             <build>
                 <plugins>
                     <plugin>
