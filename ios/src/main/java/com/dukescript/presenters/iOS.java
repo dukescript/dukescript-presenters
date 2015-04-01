@@ -22,7 +22,6 @@ package com.dukescript.presenters;
  * <http://www.gnu.org/licenses/gpl-3.0.html>.
  * #L%
  */
-
 import java.io.Closeable;
 import java.io.IOException;
 import java.io.InterruptedIOException;
@@ -56,14 +55,14 @@ import org.robovm.apple.uikit.UIWebViewDelegateAdapter;
 import org.robovm.apple.uikit.UIWebViewNavigationType;
 import org.robovm.apple.uikit.UIWindow;
 
-
 @ServiceProvider(service = Fn.Presenter.class)
-public final class iOS extends Generic 
-implements Executor {
+public final class iOS extends Generic
+        implements Executor {
+
     static final Logger LOG = Logger.getLogger(iOS.class.getName());
     private UIWebView webView;
     private Thread dispatchThread;
-    
+
     public iOS() throws Exception {
         super(true, false, "iOS", NSBundle.getMainBundle().getBundleIdentifier());
     }
@@ -71,7 +70,7 @@ implements Executor {
     @Override
     void log(Level level, String msg, Object... args) {
         if (args.length == 1 && args[0] instanceof Throwable) {
-            LOG.log(level, msg, (Throwable)args[0]);
+            LOG.log(level, msg, (Throwable) args[0]);
         } else {
             LOG.log(level, msg, args);
         }
@@ -89,6 +88,7 @@ implements Executor {
     @Override
     public final void execute(final Runnable command) {
         class CtxRun implements Runnable {
+
             @Override
             public void run() {
                 Closeable c = Fn.activate(iOS.this);
@@ -105,40 +105,42 @@ implements Executor {
         }
         dispatch(new CtxRun());
     }
-    
+
     static void runOnUiThread(Runnable w) {
         NSOperationQueue mq = NSOperationQueue.getMainQueue();
         mq.addOperation(w);
     }
-    
-    @Override String callbackFn(String welcome) {
+
+    @Override
+    String callbackFn(String welcome) {
         loadJS(
-            "function iOS(method, a1, a2, a3, a4) {\n"
-          + "  window.iOSVal = null;\n"
-          + "  var url = 'presenter://' + method;\n"
-          + "  url += '?p0=' + encodeURIComponent(a1);\n"
-          + "  url += '&p1=' + encodeURIComponent(a2);\n"
-          + "  url += '&p2=' + encodeURIComponent(a3);\n"
-          + "  url += '&p3=' + encodeURIComponent(a4);\n"
-          + "  var iframe = document.createElement('iframe');\n"
-          + "  iframe.setAttribute('width','1');\n"
-          + "  iframe.setAttribute('height','1');\n"
-          + "  iframe.setAttribute('frameborder',0);\n"
-          + "  iframe.setAttribute('style','display:none');\n"
-          + "  iframe.setAttribute('src', url);\n"
-          + "  document.documentElement.appendChild(iframe);\n"
-          + "  iframe.parentNode.removeChild(iframe);\n"
-          + "  iframe = null;\n"
-          + "  var r = window.iOSVal;\n"
-          + "  delete window.iOSVal;\n"
-          + "  return r;\n"
-          + "}\n"
+                "function iOS(method, a1, a2, a3, a4) {\n"
+                + "  window.iOSVal = null;\n"
+                + "  var url = 'presenter://' + method;\n"
+                + "  url += '?p0=' + encodeURIComponent(a1);\n"
+                + "  url += '&p1=' + encodeURIComponent(a2);\n"
+                + "  url += '&p2=' + encodeURIComponent(a3);\n"
+                + "  url += '&p3=' + encodeURIComponent(a4);\n"
+                + "  var iframe = document.createElement('iframe');\n"
+                + "  iframe.setAttribute('width','1');\n"
+                + "  iframe.setAttribute('height','1');\n"
+                + "  iframe.setAttribute('frameborder',0);\n"
+                + "  iframe.setAttribute('style','display:none');\n"
+                + "  iframe.setAttribute('src', url);\n"
+                + "  document.documentElement.appendChild(iframe);\n"
+                + "  iframe.parentNode.removeChild(iframe);\n"
+                + "  iframe = null;\n"
+                + "  var r = window.iOSVal;\n"
+                + "  delete window.iOSVal;\n"
+                + "  return r;\n"
+                + "}\n"
         );
         loadJS(welcome);
         return "iOS";
     }
 
-    @Override void loadJS(String js) {
+    @Override
+    void loadJS(String js) {
         String res = webView.evaluateJavaScript(js);
         LOG.log(Level.FINE, "loadJS done: {0}", res);
     }
@@ -156,14 +158,15 @@ implements Executor {
         pool.close();
     }
 
-    @Override public void loadScript(Reader code) throws Exception {
+    @Override
+    public void loadScript(Reader code) throws Exception {
         StringBuilder sb = new StringBuilder();
         for (;;) {
             int ch = code.read();
             if (ch == -1) {
                 break;
             }
-            sb.append((char)ch);
+            sb.append((char) ch);
         }
         webView.evaluateJavaScript(sb.toString());
     }
@@ -180,16 +183,17 @@ implements Executor {
         public boolean didFinishLaunching(UIApplication application, UIApplicationLaunchOptions launchOptions) {
             application.setStatusBarHidden(false);
 
-            final CGRect bounds = UIScreen.getMainScreen().getApplicationFrame();
+            final CGRect bounds = UIScreen.getMainScreen().getBounds();
+
             webView = new UIWebView(bounds);
             webView.setDelegate(delegate);
             webView.setAutoresizingMask(UIViewAutoresizing.with(
-                UIViewAutoresizing.FlexibleBottomMargin,
-                UIViewAutoresizing.FlexibleHeight,
-                UIViewAutoresizing.FlexibleLeftMargin,
-                UIViewAutoresizing.FlexibleRightMargin,
-                UIViewAutoresizing.FlexibleTopMargin,
-                UIViewAutoresizing.FlexibleWidth
+                    UIViewAutoresizing.FlexibleBottomMargin,
+                    UIViewAutoresizing.FlexibleHeight,
+                    UIViewAutoresizing.FlexibleLeftMargin,
+                    UIViewAutoresizing.FlexibleRightMargin,
+                    UIViewAutoresizing.FlexibleTopMargin,
+                    UIViewAutoresizing.FlexibleWidth
             ));
             CGRect whole = UIScreen.getMainScreen().getBounds();
             window = new UIWindow(whole);
@@ -222,6 +226,7 @@ implements Executor {
                 @Override
                 public void didRotate(UIInterfaceOrientation uiio) {
                 }
+
             });
             window.getRootViewController().setView(webView);
             window.setBackgroundColor(UIColor.white());
@@ -248,20 +253,21 @@ implements Executor {
             return webView;
         }
     }
-    
+
     private final class WebViewDelegate extends UIWebViewDelegateAdapter {
+
         private final Runnable onPageLoad;
-  
+
         public WebViewDelegate(Runnable onPageLoad) {
             this.onPageLoad = onPageLoad;
         }
-        
+
         @Override
         public boolean shouldStartLoad(UIWebView webView, NSURLRequest request, UIWebViewNavigationType navigationType) {
             final String url = request.getURL().getAbsoluteString();
             final String pref = "presenter://";
             if (url.startsWith(pref)) {
-                int[] q = { url.indexOf('?') };
+                int[] q = {url.indexOf('?')};
                 String method = url.substring(pref.length(), q[0]);
                 try {
                     String p0 = nextParam(url, q);
@@ -306,7 +312,7 @@ implements Executor {
             }
             return true;
         }
-        
+
         private String nextParam(String text, int[] from) throws Exception {
             int eq = text.indexOf('=', from[0]);
             int amp = text.indexOf('&', eq);
@@ -334,6 +340,8 @@ implements Executor {
                 dispatchThread = Thread.currentThread();
             }
         }
+        
+        
     }
-   
+
 }
