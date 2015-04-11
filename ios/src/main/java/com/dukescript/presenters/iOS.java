@@ -184,7 +184,6 @@ public final class iOS extends Generic
             application.setStatusBarHidden(false);
 
             final CGRect bounds = UIScreen.getMainScreen().getBounds();
-
             webView = new UIWebView(bounds);
             webView.setDelegate(delegate);
             webView.setAutoresizingMask(UIViewAutoresizing.with(
@@ -340,8 +339,7 @@ public final class iOS extends Generic
                 dispatchThread = Thread.currentThread();
             }
         }
-        
-        
+
     }
 
 }
