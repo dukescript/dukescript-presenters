@@ -5,7 +5,7 @@
     <name>DukeScript Presenters</name>
     <groupId>com.dukescript.presenters</groupId>
     <artifactId>pom</artifactId>
-    <version>0.8-SNAPSHOT</version>
+    <version>1.0-SNAPSHOT</version>
     <packaging>pom</packaging>
     <url>http://dukescript.com</url>
     <description>Presenters that allow you to deploy DukeScript applications to iOS and Android</description>
