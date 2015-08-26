@@ -136,6 +136,8 @@ final class DynamicHTTP extends HttpHandler {
                                     sb.append((char) ch);
                                 }
                                 params[i] = sb.toString();
+                            } else if (r.parameters[i].startsWith("http.header.")) {
+                                params[i] = request.getHeader(r.parameters[i].substring(12));
                             }
                         }
                         if (params[i] == null) {
