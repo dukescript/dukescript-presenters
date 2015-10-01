@@ -48,6 +48,14 @@ public class MessagesTest {
     @Test public void newLines() {
         assertEquals(Strings.newLine().toString(), "x\ny");
     }
+
+    @Messages(
+        "annotationProcessorOption=$value"
+    )
+    @Test
+    public void valueFromAnnotationProcessor() {
+        assertEquals(Strings.annotationProcessorOption(), "myValue");
+    }
     
     @Messages({
         "order=2nd: @2 1st: @1"
