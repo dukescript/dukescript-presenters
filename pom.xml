@@ -63,11 +63,11 @@
 
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-        <net.java.html.version>1.2</net.java.html.version>
+        <net.java.html.version>1.2.3</net.java.html.version>
         <testng.version>6.7</testng.version>
         <netbeans.version>RELEASE80</netbeans.version>
         <obfuscation.seed>now</obfuscation.seed>
-        <robovm.version>1.2.0</robovm.version>
+        <robovm.version>1.8.0</robovm.version>
     </properties>
     
     <distributionManagement>

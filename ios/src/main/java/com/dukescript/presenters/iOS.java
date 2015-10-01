@@ -203,17 +203,7 @@ public final class iOS extends Generic
                 }
 
                 @Override
-                public boolean isAutomaticallyForwardAppearanceAndRotationMethodsToChildViewControllers() {
-                    return false;
-                }
-
-                @Override
                 public boolean shouldAutorotate() {
-                    return true;
-                }
-
-                @Override
-                public boolean shouldAutorotate(UIInterfaceOrientation uiio) {
                     return true;
                 }
 

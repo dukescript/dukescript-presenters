@@ -63,18 +63,6 @@ public class KnockoutTest extends KnockoutBase {
         super.setUp();
     }
     
-    public void testAssertAreOn() {
-        try {
-            assert false;
-        } catch (AssertionError err) {
-            return; // OK
-        }
-        fail("Please make sure assertions are on when running the tests! Run:\n"
-           + "$ adb shell setprop debug.assert 1"
-        );
-    }
-    
-    
     @Override
     protected void runTest() throws Throwable {
         // register the TCK
