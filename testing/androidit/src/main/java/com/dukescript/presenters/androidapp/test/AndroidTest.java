@@ -90,19 +90,6 @@ public class AndroidTest extends AndroidBase {
         }
     }
 
-    public void testActivity() {
-        TestActivity activity = getActivity();
-        assertNotNull(activity);
-        try {
-            assert false;
-        } catch (AssertionError err) {
-            return; // OK
-        }
-        fail("Please make sure assertions are on when running the tests! Run:\n"
-           + "$ adb shell setprop debug.assert 1"
-        );
-    }
-
     static final class ScriptTest extends JavaScriptTCK {
         static Map<String,Method> assertMethods(Class<?> test) throws Exception {
             Map<String,Method> all = new HashMap<String, Method>();
