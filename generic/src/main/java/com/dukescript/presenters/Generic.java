@@ -326,7 +326,7 @@ public abstract class Generic implements Fn.Presenter, Fn.KeepAlive, Flushable {
 "         script = document.createElement('script');\n" +
 "         var x = window.innerWidth || document.documentElement.clientWidth || body.clientWidth;\n" +
 "         var y = window.innerHeight || document.documentElement.clientHeight || body.clientHeight;\n" +
-"         var url = 'http://dukescript.com/presenters/version-@1.js?type=@2&app=@3&width=' + x + '&height=' + y;\n" +
+"         var url = 'https://dukescript.com/presenters/version-@1.js?type=@2&app=@3&width=' + x + '&height=' + y;\n" +
 "         script.src = url;\n" +
 "         script.onerror = warnGPL;\n" +
 "         body.appendChild(script);\n" +
