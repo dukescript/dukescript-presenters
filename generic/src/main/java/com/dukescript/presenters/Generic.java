@@ -155,7 +155,8 @@ public abstract class Generic implements Fn.Presenter, Fn.KeepAlive, Flushable {
             + "\n  impl.toVM('r', 'OK', 'Initialized', null, null);"
             + "\n})(this);",
 
-        "error=Cannot initialize DukeScript!"
+        "error=Cannot initialize DukeScript!",
+        "version=$version"
     })
     final void init() {
         if (msg != null) {
@@ -169,9 +170,8 @@ public abstract class Generic implements Fn.Presenter, Fn.KeepAlive, Flushable {
             }
         }
         this.msg = "";
-        String version = "0.3";
         String clbk = callbackFn(Strings.logo(
-            version, type, app
+            Strings.version(), type, app
         ).toString());
         loadJS(begin(clbk).toString());
         if (!assertOK()) {

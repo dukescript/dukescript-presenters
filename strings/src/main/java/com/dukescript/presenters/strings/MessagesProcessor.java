@@ -26,14 +26,12 @@ package com.dukescript.presenters.strings;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.io.Writer;
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Random;
 import java.util.Set;
 import java.util.SortedSet;
 import java.util.TreeMap;
@@ -116,6 +114,9 @@ public final class MessagesProcessor extends AbstractProcessor {
                         continue PACKAGE; // do not generate anything
                     }
                     String value = keyValue.substring(i + 1);
+                    if (value.startsWith("$")) {
+                        value = processingEnv.getOptions().get(value.substring(1));
+                    }
                     pairs.put(key, value);
                     compilationUnits.put(key, simplename);
                 }
