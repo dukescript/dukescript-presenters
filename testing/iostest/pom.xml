@@ -116,6 +116,7 @@
                                 <resources>
                                     <resource>src/main/webapp/pages/</resource>
                                 </resources>
+                                <iosInfoPList>Info.plist.xml</iosInfoPList>
                             </config>
                             <includeJFX>false</includeJFX>
                         </configuration>
