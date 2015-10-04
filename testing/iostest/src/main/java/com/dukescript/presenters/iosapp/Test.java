@@ -105,6 +105,14 @@ public final class Test extends JavaScriptTCK {
     }
 
     private static void runTestsIn(final Class<?> c, int[] cnt, List<String> failed) {
+        if (c.getSimpleName().equals("GCBodyTest")) {
+            LOG.log(Level.INFO, "Skipping {0}", c.getName());
+            return;
+        }
+        if (c.getSimpleName().equals("GCKnockoutTest")) {
+            LOG.log(Level.INFO, "Skipping {0}", c.getName());
+            return;
+        }
         for (final Method method : c.getMethods()) {
             if (method.getAnnotation(KOTest.class) != null) {
                 cnt[0]++;
