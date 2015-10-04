@@ -295,8 +295,9 @@ public final class iOS extends Generic
                 }
                 return false;
             }
-            if (navigationType == UIWebViewNavigationType.LinkClicked) {
-                UIApplication.getSharedApplication().openURL(request.getURL());
+            final NSURL openURL = request.getURL();
+            if (!openURL.isFileURL()) {
+                UIApplication.getSharedApplication().openURL(openURL);
                 return false;
             }
             return true;
