@@ -27,7 +27,9 @@ import static com.dukescript.presenters.Strings.*;
 import com.dukescript.presenters.strings.Messages;
 import java.io.Flushable;
 import java.io.IOException;
+import java.lang.ref.PhantomReference;
 import java.lang.ref.Reference;
+import java.lang.ref.ReferenceQueue;
 import java.lang.ref.WeakReference;
 import java.lang.reflect.Array;
 import java.lang.reflect.Method;
@@ -35,10 +37,12 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.NavigableSet;
+import java.util.Set;
 import java.util.TreeSet;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -1023,8 +1027,9 @@ public abstract class Generic implements Fn.Presenter, Fn.KeepAlive, Flushable {
 
         Exported(int id, boolean ref, Object obj) {
             this.id = id;
-            this.obj = ref ? new WeakReference<Object>(obj) : obj;
+            this.obj = ref ? createReferenceFor(obj) : obj;
             this.ref = ref;
+            WeakHolder.clean();
         }
         
         protected Object get() {
@@ -1038,6 +1043,44 @@ public abstract class Generic implements Fn.Presenter, Fn.KeepAlive, Flushable {
         @Override
         public int compareTo(Exported o) {
             return id - o.id;
+        }
+
+        private static Object createReferenceFor(Object obj) {
+            Reference<Object> ref = new WeakReference<Object>(obj);
+            if (obj instanceof Reference) {
+                Reference<?> myRef = (Reference<?>) obj;
+                if (obj.getClass().getName().equals("org.netbeans.html.ko4j.Knockout")) {
+                    // workaround for #255677
+                    WeakHolder h = new WeakHolder(myRef.get(), obj);
+                    h.register();
+                }
+            }
+            return ref;
+        }
+    }
+
+    private static final class WeakHolder extends PhantomReference<Object> {
+        private static final ReferenceQueue QUEUE = new ReferenceQueue();
+        private static final Set<WeakHolder> active = new HashSet<WeakHolder>();
+        private final Object knockout;
+
+        public WeakHolder(Object referent, Object knockout) {
+            super(referent, QUEUE);
+            this.knockout = knockout;
+        }
+
+        static void clean() {
+            for (;;) {
+                WeakHolder h = (WeakHolder) QUEUE.poll();
+                if (h == null) {
+                    break;
+                }
+                active.remove(h);
+            }
+        }
+
+        void register() {
+            active.add(this);
         }
     }
 }
