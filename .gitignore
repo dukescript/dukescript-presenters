@@ -1,6 +1,3 @@
-/fakeandroidemul/target/
-/android/target/
-/strings/target/
+/*/target/
 /target/
-/generic/target/
-/ios/target/
+/*/*/target/
