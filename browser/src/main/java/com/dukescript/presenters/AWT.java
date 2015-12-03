@@ -37,6 +37,7 @@ final class AWT extends Show {
                 System.getProperty("java.vm.version"),});
             java.awt.Desktop.getDesktop().browse(page);
             Browser.LOG.log(Level.FINE, "Desktop.browse successfully finished");
+            System.in.read();
         } catch (UnsupportedOperationException ex) {
             Browser.LOG.log(Level.FINE, "Desktop.browse not supported: {0}", ex.getMessage());
             throw new IOException(ex);

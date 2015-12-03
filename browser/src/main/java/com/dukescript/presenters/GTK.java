@@ -103,7 +103,6 @@ final class GTK extends Show implements InvokeLater {
             this.page = page;
             doShow();
         } catch (LinkageError err) {
-            err.printStackTrace();
             throw new IOException(err);
         }
     }
