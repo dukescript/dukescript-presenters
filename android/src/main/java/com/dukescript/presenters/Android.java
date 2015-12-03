@@ -139,6 +139,7 @@ public final class Android extends Activity {
             allowFileAccessFromFiles(view);
             allowUnversalAccessFromFiles(view);
             view.getSettings().setJavaScriptEnabled(true);
+            view.getSettings().setDomStorageEnabled(true);
             view.getSettings().setGeolocationEnabled(true);
             view.getSettings().setJavaScriptCanOpenWindowsAutomatically(true);
             view.setWebChromeClient(chrome);

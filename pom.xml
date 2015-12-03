@@ -54,11 +54,13 @@
     </repositories>
 
     <modules>
+        <module>browser</module>
         <module>strings</module>
         <module>generic</module>
         <module>android</module>
         <module>ios</module>
         <module>fakeandroidemul</module>
+        <module>webkit</module>
     </modules>
 
     <properties>
@@ -66,8 +68,9 @@
         <net.java.html.version>1.2.3</net.java.html.version>
         <testng.version>6.7</testng.version>
         <netbeans.version>RELEASE80</netbeans.version>
-        <obfuscation.seed>now</obfuscation.seed>
-        <robovm.version>1.6.0</robovm.version>
+        <grizzly.version>2.3.8</grizzly.version>
+        <netbeans.compile.on.save>none</netbeans.compile.on.save>
+        <robovm.version>1.8.0</robovm.version>
     </properties>
     
     <distributionManagement>
@@ -148,6 +151,29 @@
             </plugin>
         </plugins>
     </build>
+    
+    <dependencyManagement>
+        <dependencies>
+            <dependency>
+                <groupId>net.java.dev.jna</groupId>
+                <artifactId>jna</artifactId>
+                <version>4.1.0</version>
+            </dependency>
+            <dependency>
+                <groupId>org.testng</groupId>
+                <artifactId>testng</artifactId>
+                <version>6.8.1</version>
+                <scope>test</scope>
+            </dependency>
+            <dependency>
+                <groupId>org.netbeans.api</groupId>
+                <artifactId>org-openide-util-lookup</artifactId>
+                <version>RELEASE80</version>
+                <type>jar</type>
+                <scope>provided</scope>
+            </dependency>
+        </dependencies>
+    </dependencyManagement>
 
     <profiles> 
         <profile>

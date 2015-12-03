@@ -50,6 +50,12 @@
             <version>${net.java.html.version}</version>
             <type>jar</type>
             <scope>provided</scope>
+            <exclusions>
+                <exclusion>
+                    <groupId>org.testng</groupId>
+                    <artifactId>testng</artifactId>
+                </exclusion>
+            </exclusions>
         </dependency>
         <dependency>
             <groupId>org.netbeans.html</groupId>
@@ -70,6 +76,12 @@
             <groupId>org.netbeans.html</groupId>
             <type>jar</type>
             <version>${net.java.html.version}</version>
+            <scope>provided</scope>
+        </dependency>
+        <dependency>
+            <groupId>junit</groupId>
+            <artifactId>junit</artifactId>
+            <version>4.10</version>
             <scope>provided</scope>
         </dependency>
     </dependencies>

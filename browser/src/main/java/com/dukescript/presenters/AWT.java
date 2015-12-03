@@ -1,0 +1,45 @@
+package com.dukescript.presenters;
+
+/*
+ * #%L
+ * DukeScript Presenter for any Browser - a library from the "DukeScript Presenters" project.
+ * Visit http://dukescript.com for support and commercial license.
+ * %%
+ * Copyright (C) 2015 Eppleton IT Consulting
+ * %%
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as
+ * published by the Free Software Foundation, either version 3 of the
+ * License, or (at your option) any later version.
+ * 
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ * 
+ * You should have received a copy of the GNU General Public
+ * License along with this program.  If not, see
+ * <http://www.gnu.org/licenses/gpl-3.0.html>.
+ * #L%
+ */
+
+import java.io.IOException;
+import java.net.URI;
+import java.util.logging.Level;
+
+final class AWT extends Show {
+    @Override
+    public void show(URI page) throws IOException {
+        try {
+            Browser.LOG.log(Level.FINE, "Trying Desktop.browse on {0} {2} by {1}", new Object[]{
+                System.getProperty("java.vm.name"),
+                System.getProperty("java.vm.vendor"),
+                System.getProperty("java.vm.version"),});
+            java.awt.Desktop.getDesktop().browse(page);
+            Browser.LOG.log(Level.FINE, "Desktop.browse successfully finished");
+        } catch (UnsupportedOperationException ex) {
+            Browser.LOG.log(Level.FINE, "Desktop.browse not supported: {0}", ex.getMessage());
+            throw new IOException(ex);
+        }
+    }
+}
