@@ -1,4 +1,4 @@
-package com.dukescript.presenters;
+package com.dukescript.presenters.renderer;
 
 /*
  * #%L
@@ -31,15 +31,15 @@ final class AWT extends Show {
     @Override
     public void show(URI page) throws IOException {
         try {
-            Browser.LOG.log(Level.FINE, "Trying Desktop.browse on {0} {2} by {1}", new Object[]{
+            LOG.log(Level.FINE, "Trying Desktop.browse on {0} {2} by {1}", new Object[]{
                 System.getProperty("java.vm.name"),
                 System.getProperty("java.vm.vendor"),
                 System.getProperty("java.vm.version"),});
             java.awt.Desktop.getDesktop().browse(page);
-            Browser.LOG.log(Level.FINE, "Desktop.browse successfully finished");
+            LOG.log(Level.FINE, "Desktop.browse successfully finished");
             System.in.read();
         } catch (UnsupportedOperationException ex) {
-            Browser.LOG.log(Level.FINE, "Desktop.browse not supported: {0}", ex.getMessage());
+            LOG.log(Level.FINE, "Desktop.browse not supported: {0}", ex.getMessage());
             throw new IOException(ex);
         }
     }

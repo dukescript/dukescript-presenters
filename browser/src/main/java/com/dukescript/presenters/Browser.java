@@ -23,6 +23,7 @@ package com.dukescript.presenters;
  * #L%
  */
 
+import com.dukescript.presenters.renderer.Show;
 import java.io.Closeable;
 import java.io.FileNotFoundException;
 import java.io.Flushable;

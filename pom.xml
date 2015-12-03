@@ -61,6 +61,7 @@
         <module>ios</module>
         <module>fakeandroidemul</module>
         <module>webkit</module>
+        <module>renderer</module>
     </modules>
 
     <properties>

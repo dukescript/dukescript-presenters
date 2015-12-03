@@ -1,4 +1,4 @@
-package com.dukescript.presenters;
+package com.dukescript.presenters.renderer;
 
 /*
  * #%L
@@ -23,17 +23,30 @@ package com.dukescript.presenters;
  * #L%
  */
 
-import static com.dukescript.presenters.Browser.LOG;
 import java.io.IOException;
 import java.io.InterruptedIOException;
 import java.net.URI;
 import java.util.Arrays;
 import java.util.logging.Level;
+import java.util.logging.Logger;
 
-abstract class Show {
-    static void show(String impl, URI page) throws IOException {
+/** Support for displaying browser.
+ */
+public abstract class Show {
+    static final Logger LOG = Logger.getLogger(Show.class.getName());
+
+    Show() {
+    }
+    
+    /** Shows a page in a browser.
+     * 
+     * @param impl the name of implementation to use, can be <code>null</code>
+     * @param page the page URL
+     * @throws IOException if something goes wrong
+     */
+    public static void show(String impl, URI page) throws IOException {
         try {
-            Class<?> c = Class.forName("com.dukescript.presenters." + impl);
+            Class<?> c = Class.forName("com.dukescript.presenters.renderer." + impl);
             Show show = (Show) c.newInstance();
             show.show(page);
         } catch (IOException ex) {
@@ -56,5 +69,5 @@ abstract class Show {
         }
     }
 
-    protected abstract void show(URI page) throws IOException;
+    abstract void show(URI page) throws IOException;
 }
