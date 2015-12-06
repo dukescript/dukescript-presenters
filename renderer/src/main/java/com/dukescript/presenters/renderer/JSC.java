@@ -1,8 +1,8 @@
-package com.dukescript.presenters.webkit;
+package com.dukescript.presenters.renderer;
 
 /*
  * #%L
- * WebKit Presenter - a library from the "DukeScript Presenters" project.
+ * Desktop Browser Renderer - a library from the "DukeScript Presenters" project.
  * Visit http://dukescript.com for support and commercial license.
  * %%
  * Copyright (C) 2015 Eppleton IT Consulting
@@ -154,7 +154,7 @@ public interface JSC extends Library {
     @param callAsFunction The JSObjectCallAsFunctionCallback to invoke when the function is called.
     @result A JSObject that is a function. The object's prototype will be the default function prototype.
      */
-    Pointer JSObjectMakeFunctionWithCallback(Pointer ctx, Pointer name, WebKitPresenter.FnCallback callAsFunction);
+    Pointer JSObjectMakeFunctionWithCallback(Pointer ctx, Pointer name, Callback callAsFunction);
 
     /*!
     @function

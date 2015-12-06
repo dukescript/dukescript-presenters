@@ -2,7 +2,7 @@ package com.dukescript.presenters.renderer;
 
 /*
  * #%L
- * DukeScript Presenter for any Browser - a library from the "DukeScript Presenters" project.
+ * Desktop Browser Renderer - a library from the "DukeScript Presenters" project.
  * Visit http://dukescript.com for support and commercial license.
  * %%
  * Copyright (C) 2015 Eppleton IT Consulting
@@ -23,6 +23,7 @@ package com.dukescript.presenters.renderer;
  * #L%
  */
 
+import com.sun.jna.Pointer;
 import java.io.IOException;
 import java.net.URI;
 import java.util.logging.Level;
@@ -42,5 +43,20 @@ final class AWT extends Show {
             LOG.log(Level.FINE, "Desktop.browse not supported: {0}", ex.getMessage());
             throw new IOException(ex);
         }
+    }
+
+    @Override
+    public JSC jsc() {
+        return null;
+    }
+
+    @Override
+    public Pointer jsContext() {
+        return null;
+    }
+
+    @Override
+    public void execute(Runnable command) {
+        command.run();
     }
 }

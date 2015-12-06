@@ -1,4 +1,4 @@
-package com.dukescript.presenters.webkit;
+package com.dukescript.presenters.renderer;
 
 /*
  * #%L
@@ -31,6 +31,7 @@ import com.sun.jna.NativeMapped;
 import com.sun.jna.Pointer;
 import com.sun.jna.Structure;
 import java.io.Closeable;
+import java.net.URI;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
@@ -40,23 +41,32 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import org.netbeans.html.boot.spi.Fn;
 
-public final class Cocoa implements WebKitPresenter.Shell, Callback {
-    private final WebKitPresenter presenter;
+public final class Cocoa extends Show implements Callback {
+    private final Fn.Presenter presenter;
+    private final Runnable onPageLoad;
+    private final Runnable onContext;
     private final JSC jsc;
-    private final Queue<Runnable> queue = new ConcurrentLinkedQueue<>();
+    private final Queue<Runnable> queue = new ConcurrentLinkedQueue<Runnable>();
 
     
     private AppDidStart appDidStart;
     private Ready ready;
     private ContextCreated contextCreated;
+    private Pointer jsContext;
     private Pointer NSApp;
     private String page;
     private Pointer appDelPtr;
     private Pointer doMainSelector;
     private Pointer webView;
 
-    Cocoa(WebKitPresenter presenter) {
-        this.presenter = presenter;
+    Cocoa() {
+        this(null, null, null, false);
+    }
+
+    Cocoa(Fn.Presenter p, Runnable onPageLoad, Runnable onContext, boolean hl) {
+        this.presenter = p;
+        this.onPageLoad = onPageLoad;
+        this.onContext = onContext;
         this.jsc = (JSC) Native.loadLibrary("JavaScriptCore", JSC.class, Collections.singletonMap(Library.OPTION_ALLOW_OBJECTS, true));
     }
 
@@ -66,8 +76,13 @@ public final class Cocoa implements WebKitPresenter.Shell, Callback {
     }
 
     @Override
-    public void doShow(String page) {
-        this.page = page;
+    public Pointer jsContext() {
+        return jsContext;
+    }
+
+    @Override
+    public void show(URI page) {
+        this.page = page.toASCIIString();
         
         Native.loadLibrary("WebKit", WebKit.class);
         
@@ -101,7 +116,7 @@ public final class Cocoa implements WebKitPresenter.Shell, Callback {
             try {
                 process();
             } catch (Exception ex) {
-                Logger.getLogger(WebKitPresenter.class.getName()).log(Level.SEVERE, "Cannot process " + command, ex);
+                LOG.log(Level.SEVERE, "Cannot process " + command, ex);
             }
         } else {
             send(appDelPtr,
@@ -112,7 +127,8 @@ public final class Cocoa implements WebKitPresenter.Shell, Callback {
     }
     
     private void process() throws Exception {
-        try (Closeable c = Fn.activate(presenter)) {
+        Closeable c = Fn.activate(presenter);
+        try {
             for (;;) {
                 Runnable r = queue.poll();
                 if (r == null) {
@@ -120,9 +136,11 @@ public final class Cocoa implements WebKitPresenter.Shell, Callback {
                 }
                 r.run();
             }
+        } finally {
+            c.close();
         }
     }
-    
+
     public interface ObjC extends Library {
 
         public static ObjC INSTANCE = (ObjC) Native.loadLibrary("objc.A", ObjC.class);
@@ -223,7 +241,10 @@ public final class Cocoa implements WebKitPresenter.Shell, Callback {
             frame = new Pointer(send(frame, "mainFrame"));
             ctx = new Pointer(send(frame, "globalContext"));            
             
-            presenter.jsContext(ctx);
+            jsContext = ctx;
+            if (onContext != null) {
+                onContext.run();
+            }
         }
     }
     
@@ -233,7 +254,9 @@ public final class Cocoa implements WebKitPresenter.Shell, Callback {
         
         public void callback(Pointer p1, Pointer frame) {
             send(webView, "stringByEvaluatingJavaScriptFromString:", nsString("1 + 1"));
-            presenter.onPageLoad();
+            if (onPageLoad != null) {
+                onPageLoad.run();
+            }
         }
     }
     

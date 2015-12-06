@@ -23,6 +23,8 @@ package com.dukescript.presenters.webkit;
  * #L%
  */
 
+import com.dukescript.presenters.renderer.JSC;
+import com.dukescript.presenters.renderer.Show;
 import com.dukescript.presenters.strings.Messages;
 import com.sun.jna.Callback;
 import com.sun.jna.Memory;
@@ -46,7 +48,7 @@ import org.openide.util.lookup.ServiceProvider;
 @ServiceProvider(service = Fn.Presenter.class)
 public class WebKitPresenter implements Fn.Presenter, Fn.KeepAlive, Executor {
     private static final Logger LOG = Logger.getLogger(WebKitPresenter.class.getName());
-    private final Shell shell;
+    private final Show shell;
     private Runnable onPageLoad;
     private OnFinalize onFinalize;
     private Pointer ctx;
@@ -61,28 +63,19 @@ public class WebKitPresenter implements Fn.Presenter, Fn.KeepAlive, Executor {
         this(false);
     }
     
-    static interface Shell {
-
-        public void doShow(String url);
-
-        public void execute(Runnable command);
-
-        public JSC jsc();
-    }
-
     WebKitPresenter(boolean headless) {
         String system = System.getProperty("os.name");
-        if (system.contains("Linux")) {
-            shell = new GTK(this, headless, false);
-            return;
-        } else if (system.contains("Windows")) {
-            shell = new GTK(this, headless, true);
-            return;
-        } else if (system.contains("Mac OS")) {
-            shell = new Cocoa(this);
-            return;
-        }
-        throw new IllegalStateException("Not supported OS: " + system);
+        shell = Show.open(this, new Runnable() {
+            @Override
+            public void run() {
+                onPageLoad.run();
+            }
+        }, new Runnable() {
+            @Override
+            public void run() {
+                jsContext(shell.jsContext());
+            }
+        }, headless);
     }
     
     @Override
@@ -115,10 +108,9 @@ public class WebKitPresenter implements Fn.Presenter, Fn.KeepAlive, Executor {
         this.onPageLoad = onPageLoad;
         this.onPageApp = findCalleeClassName();
         try {
-            shell.doShow(page.toExternalForm());
+            shell.show(page.toURI());
         } catch (Throwable t) {
             LOG.log(Level.SEVERE, onPageApp, t);
-            throw t;
         }
     }
 

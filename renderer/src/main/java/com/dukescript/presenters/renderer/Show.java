@@ -2,7 +2,7 @@ package com.dukescript.presenters.renderer;
 
 /*
  * #%L
- * DukeScript Presenter for any Browser - a library from the "DukeScript Presenters" project.
+ * Desktop Browser Renderer - a library from the "DukeScript Presenters" project.
  * Visit http://dukescript.com for support and commercial license.
  * %%
  * Copyright (C) 2015 Eppleton IT Consulting
@@ -23,12 +23,14 @@ package com.dukescript.presenters.renderer;
  * #L%
  */
 
+import com.sun.jna.Pointer;
 import java.io.IOException;
 import java.io.InterruptedIOException;
 import java.net.URI;
 import java.util.Arrays;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import org.netbeans.html.boot.spi.Fn;
 
 /** Support for displaying browser.
  */
@@ -68,6 +70,44 @@ public abstract class Show {
             }
         }
     }
+    
+    /** Initializes native browser window.
+     * 
+     * @param presenter the presenter that will be using the returned value
+     * @param onPageLoad callback when page finishes loading
+     * @param onContext callback when {@link #jsContext()} becomes available
+     * @param headless should the window appear on the monitor or not?
+     *   useful for testing
+     * @return object to query and control the browser window
+     */
+    public static Show open(Fn.Presenter presenter, Runnable onPageLoad, Runnable onContext, boolean headless) {
+        boolean isMac = System.getProperty("os.name").contains("Mac");
+        return isMac ?
+            new Cocoa(presenter, onPageLoad, onContext, headless) :
+            new GTK(presenter, onPageLoad, onContext, headless);
+    }
 
-    abstract void show(URI page) throws IOException;
+    /** Loads a page into the browser window.
+     * 
+     * @param page the URL to load
+     * @throws IOException if something goes wrong
+     */
+    public abstract void show(URI page) throws IOException;
+    
+    /** Access to JavaScriptCore API of the browser window.
+     * @return JavaScriptCore instance or <code>null</code> if not supported
+     *   for this browser
+     */
+    public abstract JSC jsc();
+
+    /** Access to JavaScriptCore context.
+     * @return the context or <code>null</code> if not supported or not 
+     *   yet available
+     */
+    public abstract Pointer jsContext();
+    
+    /** Executes a runnable on "UI thread".
+     * @param command runnable to execute
+     */
+    public abstract void execute(Runnable command);
 }
