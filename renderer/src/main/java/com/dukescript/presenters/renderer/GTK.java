@@ -208,7 +208,9 @@ final class GTK extends Show implements InvokeLater {
         Pointer frame = webKit.webkit_web_view_get_main_frame(webView);
         Pointer ctx = webKit.webkit_web_frame_get_global_context(frame);
         this.jsContext = ctx;
-        onContext.run();
+        if (onContext != null) {
+            onContext.run();
+        }
         onLoad = new OnLoad(webView, gtk, window);
         g.g_signal_connect_data(webView, "notify::load-status", onLoad, null);
 
