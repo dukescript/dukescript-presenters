@@ -125,7 +125,9 @@ public final class Browser implements Fn.Presenter, Fn.KeepAlive, Flushable, Exe
         } else {
             IOException one, two = null;
             try {
-                Show.show("GTK", page);
+                String ui = System.getProperty("os.name").contains("Mac") ?
+                    "Cocoa" : "GTK";
+                Show.show(ui, page);
                 return;
             } catch (IOException ex) {
                 one = ex;
