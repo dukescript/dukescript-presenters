@@ -24,6 +24,7 @@ package com.dukescript.presenters.renderer;
  */
 
 import com.sun.jna.Callback;
+import com.sun.jna.CallbackThreadInitializer;
 import com.sun.jna.FromNativeContext;
 import com.sun.jna.Library;
 import com.sun.jna.Native;
@@ -38,7 +39,6 @@ import java.util.List;
 import java.util.Queue;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.logging.Level;
-import java.util.logging.Logger;
 import org.netbeans.html.boot.spi.Fn;
 
 public final class Cocoa extends Show implements Callback {
@@ -94,6 +94,7 @@ public final class Cocoa extends Show implements Callback {
 	Pointer appDelClass = objC.objc_allocateClassPair(objC.objc_getClass("NSObject"), "AppDelegate", 0);
 	objC.class_addMethod(appDelClass, objC.sel_getUid("applicationDidFinishLaunching:"), appDidStart, "i@:@");
         doMainSelector = objC.sel_getUid("doMain");
+        Native.setCallbackThreadInitializer(this, new CallbackThreadInitializer(false, false, "Cocoa Dispatch Thread"));
 	objC.class_addMethod(appDelClass, doMainSelector, this, "i@");
 	objC.class_addMethod(appDelClass, objC.sel_getUid("webView:didCreateJavaScriptContext:forFrame:"), contextCreated, "v@:@:@");
 	objC.class_addMethod(appDelClass, objC.sel_getUid("webView:didFinishLoadForFrame:"), ready, "v@:@");
