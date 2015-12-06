@@ -46,17 +46,18 @@ public final class Cocoa extends Show implements Callback {
     private final Runnable onPageLoad;
     private final Runnable onContext;
     private final JSC jsc;
-    private final Queue<Runnable> queue = new ConcurrentLinkedQueue<Runnable>();
-
+    
+    private static final Queue<Runnable> queue = new ConcurrentLinkedQueue<Runnable>();
+    private static Pointer NSApp;
+    private static Pointer appDelPtr;
+    private static Pointer doMainSelector;
+    private static Thread dispatchThread;
     
     private AppDidStart appDidStart;
     private Ready ready;
     private ContextCreated contextCreated;
     private Pointer jsContext;
-    private Pointer NSApp;
     private String page;
-    private Pointer appDelPtr;
-    private Pointer doMainSelector;
     private Pointer webView;
 
     Cocoa() {
@@ -90,30 +91,39 @@ public final class Cocoa extends Show implements Callback {
         contextCreated = new ContextCreated();
         ready = new Ready();
         
-        ObjC objC = ObjC.INSTANCE;
-	Pointer appDelClass = objC.objc_allocateClassPair(objC.objc_getClass("NSObject"), "AppDelegate", 0);
-	objC.class_addMethod(appDelClass, objC.sel_getUid("applicationDidFinishLaunching:"), appDidStart, "i@:@");
-        doMainSelector = objC.sel_getUid("doMain");
-        Native.setCallbackThreadInitializer(this, new CallbackThreadInitializer(false, false, "Cocoa Dispatch Thread"));
-	objC.class_addMethod(appDelClass, doMainSelector, this, "i@");
-	objC.class_addMethod(appDelClass, objC.sel_getUid("webView:didCreateJavaScriptContext:forFrame:"), contextCreated, "v@:@:@");
-	objC.class_addMethod(appDelClass, objC.sel_getUid("webView:didFinishLoadForFrame:"), ready, "v@:@");
-	objC.objc_registerClassPair(appDelClass);
+        if (appDelPtr == null) {
+            ObjC objC = ObjC.INSTANCE;
+            Pointer appDelClass = objC.objc_allocateClassPair(objC.objc_getClass("NSObject"), "AppDelegate", 0);
+            objC.class_addMethod(appDelClass, objC.sel_getUid("applicationDidFinishLaunching:"), appDidStart, "i@:@");
+            doMainSelector = objC.sel_getUid("doMain");
+            Native.setCallbackThreadInitializer(this, new CallbackThreadInitializer(false, false, "Cocoa Dispatch Thread"));
+            objC.class_addMethod(appDelClass, doMainSelector, this, "i@");
+            objC.class_addMethod(appDelClass, objC.sel_getUid("webView:didCreateJavaScriptContext:forFrame:"), contextCreated, "v@:@:@");
+            objC.class_addMethod(appDelClass, objC.sel_getUid("webView:didFinishLoadForFrame:"), ready, "v@:@");
+            objC.objc_registerClassPair(appDelClass);
 
-	long appDelObj = send(objC.objc_getClass("AppDelegate"), "alloc");
-        appDelPtr = new Pointer(appDelObj);
-	send(appDelPtr, "init");
-        
-        send(appDelPtr, 
-            "performSelectorOnMainThread:withObject:waitUntilDone:", 
-            doMainSelector, null, 1
-        );
+            long appDelObj = send(objC.objc_getClass("AppDelegate"), "alloc");
+            appDelPtr = new Pointer(appDelObj);
+            send(appDelPtr, "init");
+
+            send(appDelPtr, 
+                "performSelectorOnMainThread:withObject:waitUntilDone:", 
+                doMainSelector, null, 1
+            );
+        } else {
+            execute(new Runnable() {
+                @Override
+                public void run() {
+                    appDidStart.callback(appDelPtr);
+                }
+            });
+        }
     }
 
     @Override
     public void execute(Runnable command) {
         queue.add(command);
-        if (Fn.activePresenter() == presenter) {
+        if (Thread.currentThread() == dispatchThread && Fn.activePresenter() == presenter) {
             try {
                 process();
             } catch (Exception ex) {
@@ -179,6 +189,7 @@ public final class Cocoa extends Show implements Callback {
             System.err.print("Failed to initialized NSApplication...  terminating...\n");
             System.exit(1);
 	}
+        dispatchThread = Thread.currentThread();
         NSApp = new Pointer(res);
 	send(NSApp, "setDelegate:", self);
 	res = send(NSApp, "run");   
