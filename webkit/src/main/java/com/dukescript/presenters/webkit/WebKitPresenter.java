@@ -33,12 +33,16 @@ import com.sun.jna.Pointer;
 import com.sun.jna.ptr.PointerByReference;
 import java.io.Reader;
 import java.io.StringReader;
+import java.lang.ref.PhantomReference;
+import java.lang.ref.ReferenceQueue;
 import java.lang.ref.WeakReference;
 import java.lang.reflect.Array;
 import java.lang.reflect.Method;
 import java.net.URL;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.Executor;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -300,7 +304,7 @@ public class WebKitPresenter implements Fn.Presenter, Fn.KeepAlive, Executor {
                         }
                         return arr;
                     }
-                    ret = new JSObject(value);
+                    ret = new JSObject(this, value);
                 }
                 return expectedType.cast(ret);
             }
@@ -519,8 +523,9 @@ public class WebKitPresenter implements Fn.Presenter, Fn.KeepAlive, Executor {
     private static final class JSObject {
         private final Pointer value;
 
-        public JSObject(Pointer val) {
+        public JSObject(WebKitPresenter p, Pointer val) {
             this.value = val;
+            p.protect(this, val);
         }
 
         @Override
@@ -533,18 +538,53 @@ public class WebKitPresenter implements Fn.Presenter, Fn.KeepAlive, Executor {
             return other instanceof JSObject && value.equals(((JSObject)other).value);
         }
     }
+    
+    private static final ReferenceQueue<? super Object> QUEUE = new ReferenceQueue<Object>();
+    private static final Set<Protector> ALL = new HashSet<>();
+    private void protect(Object obj, Pointer pointer) {
+        JSC jsc = shell.jsc();
+        jsc.JSValueProtect(ctx, pointer);
+        ALL.add(new Protector(obj, pointer));
+        cleanProtected();
+    }
+
+    private void cleanProtected() {
+        for (;;) {
+            Protector p = (Protector)QUEUE.poll();
+            if (p == null) {
+                break;
+            }
+            ALL.remove(p);
+            p.unprotect();
+        }
+    }
+    private final class Protector extends PhantomReference<Object> {
+        private final Pointer pointer;
         
-    private class JSCFn extends Fn {
+        public Protector(Object referent, Pointer p) {
+            super(referent, QUEUE);
+            this.pointer = p;
+        }
+
+        public void unprotect() {
+            JSC jsc = shell.jsc();
+            jsc.JSValueUnprotect(ctx, pointer);
+        }
+    }
+        
+    private final class JSCFn extends Fn {
         private final Pointer fn;
         private final boolean[] keepAlive;
         
         public JSCFn(Pointer fn, boolean[] keepAlive) {
             this.fn = fn;
             this.keepAlive = keepAlive;
+            protect(this, fn);
         }
 
         @Override
         public Object invoke(Object thiz, Object... args) throws Exception {
+            cleanProtected();
             JSC jsc = shell.jsc();
             Pointer[] arr = convertFromJava(args, keepAlive);
             Pointer jsThis = thiz == null ? null : convertFromJava(thiz)[0];
