@@ -51,7 +51,31 @@
                 <enabled>false</enabled>
             </snapshots>
         </repository>
+        <repository>
+            <id>snapshots</id>
+            <name>Java.net Snapshots</name>
+            <url>https://maven.java.net/content/repositories/snapshots/</url>
+            <snapshots>
+                <enabled>true</enabled>
+            </snapshots>
+            <releases>
+                <enabled>false</enabled>
+            </releases>
+        </repository>
     </repositories>
+    <pluginRepositories>
+        <pluginRepository>
+            <id>snapshots</id>
+            <name>Java.net Snapshots</name>
+            <url>https://maven.java.net/content/repositories/snapshots/</url>
+            <snapshots>
+                <enabled>true</enabled>
+            </snapshots>
+            <releases>
+                <enabled>false</enabled>
+            </releases>
+        </pluginRepository>
+    </pluginRepositories>
 
     <modules>
         <module>browser</module>
