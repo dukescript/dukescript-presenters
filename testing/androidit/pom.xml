@@ -134,5 +134,16 @@
                 <skipTests>false</skipTests>
             </properties>
         </profile>
+        <profile>
+            <id>sdk-available-env</id>
+            <activation>
+                <property>
+                    <name>env.ANDROID_HOME</name>
+                </property>
+            </activation>
+            <properties>
+                <skipTests>false</skipTests>
+            </properties>
+        </profile>
     </profiles>
 </project>
