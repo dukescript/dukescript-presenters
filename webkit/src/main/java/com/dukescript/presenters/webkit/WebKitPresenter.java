@@ -50,7 +50,7 @@ import org.netbeans.html.boot.spi.Fn;
 import org.openide.util.lookup.ServiceProvider;
 
 @ServiceProvider(service = Fn.Presenter.class)
-public class WebKitPresenter implements Fn.Presenter, Fn.KeepAlive, Executor {
+public final class WebKitPresenter implements Fn.Presenter, Fn.KeepAlive, Executor {
     private static final Logger LOG = Logger.getLogger(WebKitPresenter.class.getName());
     private final Show shell;
     private Runnable onPageLoad;
