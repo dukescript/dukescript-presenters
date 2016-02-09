@@ -191,6 +191,7 @@ public final class Cocoa extends Show implements Callback {
 	}
         dispatchThread = Thread.currentThread();
         NSApp = new Pointer(res);
+	send(NSApp, "setActivationPolicy:", 0);
 	send(NSApp, "setDelegate:", self);
 	res = send(NSApp, "run");   
         System.err.println("end res: " + res);
