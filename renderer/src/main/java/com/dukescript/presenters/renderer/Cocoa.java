@@ -208,10 +208,11 @@ public final class Cocoa extends Show implements Callback {
 
             Rct r = new Rct(10, 10, 1500, 900);
             int mode = 15;
+            int backingstoreBuffered = 2;
             
 	    send(window, 
                 "initWithContentRect:styleMask:backing:defer:", 
-                r, mode, 0, false
+                r, mode, backingstoreBuffered, false
             );
             send(window, "setTitle:", nsString("Browser demo"));
             Pointer webViewClass = objC.objc_getClass("WebView");
