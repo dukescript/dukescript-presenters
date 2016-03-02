@@ -11,8 +11,6 @@
     <packaging>pom</packaging>
     <modules>
         <module>iostest</module>
-        <module>androidapp</module>
-        <module>androidit</module>
     </modules>
     <build>
         <plugins>
@@ -32,4 +30,19 @@
             </plugin>
         </plugins>
     </build>
+    <profiles>
+        <profile>
+            <activation>
+                <property>
+                    <name>android.sdk.path</name>
+                </property>
+            </activation>
+            <id>android</id>
+            <modules>
+                <module>androidapp</module>
+                <module>androidit</module>
+            </modules>
+        </profile>
+    </profiles>
+
 </project>
