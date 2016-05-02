@@ -91,7 +91,7 @@ public final class Browser implements Fn.Presenter, Fn.KeepAlive, Flushable, Exe
     private Command current;
     
     public Browser() throws Exception {
-        this(System.getProperty("java.clas.path"));
+        this(findCalleeClassName());
     }
     
     Browser(String app) throws Exception {
@@ -316,6 +316,33 @@ public final class Browser implements Fn.Presenter, Fn.KeepAlive, Flushable, Exe
             );
             w.write("  </script>");
         }
+    }
+
+    private static String findCalleeClassName() {
+        StackTraceElement[] frames = new Exception().getStackTrace();
+        for (StackTraceElement e : frames) {
+            String cn = e.getClassName();
+            if (cn.startsWith("com.dukescript.presenters.")) { // NOI18N
+                continue;
+            }
+            if (cn.startsWith("org.netbeans.html.")) { // NOI18N
+                continue;
+            }
+            if (cn.startsWith("net.java.html.")) { // NOI18N
+                continue;
+            }
+            if (cn.startsWith("java.")) { // NOI18N
+                continue;
+            }
+            if (cn.startsWith("javafx.")) { // NOI18N
+                continue;
+            }
+            if (cn.startsWith("com.sun.")) { // NOI18N
+                continue;
+            }
+            return cn;
+        }
+        return "org.netbeans.html"; // NOI18N
     }
     
     private static final class Command extends Generic
