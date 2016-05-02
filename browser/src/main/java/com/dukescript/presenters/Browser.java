@@ -305,7 +305,7 @@ public final class Browser implements Fn.Presenter, Fn.KeepAlive, Flushable, Exe
                     + " try {\n"
                     + "  var cmd = document.getElementById('cmd');\n"
                     + "  if (cmd) cmd.innerHTML = this.responseText.substring(0,80);\n"
-                    + "  new Function(this.responseText).call(window);\n"
+                    + "  (0 || eval)(this.responseText);\n"
                     + " } catch (e) {\n"
                     + "  alert(e); \n"
                     + " } finally { waitForCommand(); }\n"
