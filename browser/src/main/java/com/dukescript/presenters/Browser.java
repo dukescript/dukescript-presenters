@@ -498,12 +498,13 @@ public final class Browser implements Fn.Presenter, Fn.KeepAlive, Flushable, Exe
         @Override
         public final void loadScript(Reader code) throws Exception {
             StringBuilder sb = new StringBuilder();
+            char[] arr = new char[4096];
             for (;;) {
-                int ch = code.read();
-                if (ch == -1) {
+                int len = code.read(arr);
+                if (len == -1) {
                     break;
                 }
-                sb.append((char) ch);
+                sb.append(arr, 0, len);
             }
             add(sb);
         }
