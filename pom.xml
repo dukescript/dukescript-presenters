@@ -154,6 +154,9 @@
                 <version>2.10.1</version>
                 <configuration>
                     <skip>true</skip>
+                    <links>
+                        <link>http://bits.netbeans.org/html4j/1.3/</link>
+                    </links>
                 </configuration>
             </plugin>
             <plugin>

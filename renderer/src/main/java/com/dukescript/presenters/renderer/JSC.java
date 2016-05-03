@@ -32,8 +32,11 @@ import com.sun.jna.ptr.PointerByReference;
 import java.util.Arrays;
 import java.util.List;
 
+/** Interface to JavaScriptCore native library.
+ */
 public interface JSC extends Library {
-
+    /** Data to create new JSC class definition.
+     */
     public static final class JSClassDefinition extends Structure {
 
         public int version; /* current (and only) version is 0 */

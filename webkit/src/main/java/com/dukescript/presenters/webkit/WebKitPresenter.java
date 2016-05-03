@@ -49,6 +49,11 @@ import java.util.logging.Logger;
 import org.netbeans.html.boot.spi.Fn;
 import org.openide.util.lookup.ServiceProvider;
 
+/** Displays using native WebKit component on Linux and Mac OS X.
+ * Requires necessary native libraries to be installed. Uses GTK3 on
+ * Linux which may not co-exist well with GTK2 (used by JDK's default AWT
+ * toolkit).
+ */
 @ServiceProvider(service = Fn.Presenter.class)
 public final class WebKitPresenter implements Fn.Presenter, Fn.KeepAlive, Executor {
     private static final Logger LOG = Logger.getLogger(WebKitPresenter.class.getName());
@@ -68,7 +73,6 @@ public final class WebKitPresenter implements Fn.Presenter, Fn.KeepAlive, Execut
     }
     
     WebKitPresenter(boolean headless) {
-        String system = System.getProperty("os.name");
         shell = Show.open(this, new Runnable() {
             @Override
             public void run() {
