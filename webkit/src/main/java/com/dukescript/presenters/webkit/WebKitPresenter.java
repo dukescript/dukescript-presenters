@@ -211,6 +211,7 @@ public final class WebKitPresenter implements Fn.Presenter, Fn.KeepAlive, Execut
                 } else {
                     toJava.put(p, new WeakVal(v));
                 }
+                protect(v, p);
                 v = p;
             }
             arr[i] = (Pointer) v;
