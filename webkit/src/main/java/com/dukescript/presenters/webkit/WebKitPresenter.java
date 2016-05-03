@@ -112,6 +112,10 @@ public final class WebKitPresenter implements Fn.Presenter, Fn.KeepAlive, Execut
         this.onPageLoad = onPageLoad;
         this.onPageApp = findCalleeClassName();
         try {
+            if ("jar".equals(page.getProtocol())) {
+                page = UnJarResources.extract(page);
+            }
+
             shell.show(page.toURI());
         } catch (Throwable t) {
             LOG.log(Level.SEVERE, onPageApp, t);
