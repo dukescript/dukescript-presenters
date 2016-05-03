@@ -9,6 +9,17 @@
     <artifactId>renderer</artifactId>
     <packaging>jar</packaging>
     <name>Desktop Browser Renderer</name>
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-javadoc-plugin</artifactId>
+                <configuration>
+                    <skip>false</skip>
+                </configuration>
+            </plugin>
+        </plugins>
+    </build>
     <dependencies>
         <dependency>
             <groupId>org.testng</groupId>
