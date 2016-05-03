@@ -41,7 +41,7 @@ import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.logging.Level;
 import org.netbeans.html.boot.spi.Fn;
 
-public final class Cocoa extends Show implements Callback {
+final class Cocoa extends Show implements Callback {
     private final Fn.Presenter presenter;
     private final Runnable onPageLoad;
     private final Runnable onContext;
