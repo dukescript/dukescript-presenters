@@ -473,9 +473,7 @@ public abstract class Generic implements Fn.Presenter, Fn.KeepAlive, Flushable {
             "    var script = v.substring(11);\n" +
 //            "    alert('script: ' + script +\n" +
             "    try {\n" +
-            "      var f = new Function('m', script);\n" +
-//            "    alert('f: ' + f +\n" +
-            "      var r = f(ds(@3));\n" +
+            "      var r = eval.call(null, script);\n" +
 //            "    alert('r: ' + r +\n" +
             "    } catch (e) {  alert('error: ' + e + ' executing: ' + script); }\n" +
             "    v = ds(@3).toVM('jr', null, null, null, null);" +
