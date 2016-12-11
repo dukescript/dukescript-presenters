@@ -521,19 +521,5 @@ public final class Browser implements Fn.Presenter, Fn.KeepAlive, Flushable, Exe
         public void displayPage(URL url, Runnable r) {
             throw new UnsupportedOperationException(url.toString());
         }
-
-        @Override
-        public final void loadScript(Reader code) throws Exception {
-            StringBuilder sb = new StringBuilder();
-            char[] arr = new char[4096];
-            for (;;) {
-                int len = code.read(arr);
-                if (len == -1) {
-                    break;
-                }
-                sb.append(arr, 0, len);
-            }
-            add(sb);
-        }
     } // end of Command
 }

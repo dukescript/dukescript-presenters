@@ -27,6 +27,7 @@ import static com.dukescript.presenters.Strings.*;
 import com.dukescript.presenters.strings.Messages;
 import java.io.Flushable;
 import java.io.IOException;
+import java.io.Reader;
 import java.lang.ref.PhantomReference;
 import java.lang.ref.Reference;
 import java.lang.ref.ReferenceQueue;
@@ -801,6 +802,20 @@ public abstract class Generic implements Fn.Presenter, Fn.KeepAlive, Flushable {
 
     private StringBuilder deferred;
     private Collection<Object> arguments = new LinkedList<Object>();
+
+    public final void loadScript(final Reader reader) throws Exception {
+        StringBuilder sb = new StringBuilder();
+        char[] arr = new char[4092];
+        for (;;) {
+            int len = reader.read(arr);
+            if (len == -1) {
+                break;
+            }
+            sb.append(arr, 0, len);
+        }
+        deferExec(sb);
+    }
+
 
     final void deferExec(StringBuilder sb) {
         synchronized (lock()) {

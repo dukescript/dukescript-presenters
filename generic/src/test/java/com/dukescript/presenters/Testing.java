@@ -23,7 +23,6 @@ package com.dukescript.presenters;
  * #L%
  */
 
-import java.io.Reader;
 import java.net.URL;
 import java.util.concurrent.Executor;
 import java.util.concurrent.Executors;
@@ -114,15 +113,6 @@ class Testing extends Generic {
         QUEUE.execute(r);
     }
 
-    public void loadScript(final Reader reader) throws Exception {
-        try {
-            Object res = eng.eval(reader);
-            LOG.log(Level.FINE, "Result: {0}", res);
-        } catch (Throwable ex) {
-            LOG.log(Level.SEVERE, "Can't process " + reader, ex);
-        }
-    }
-
     void beforeTest(Class<?> declaringClass) throws Exception {
     }
     
@@ -149,16 +139,6 @@ class Testing extends Generic {
         @Override
         public void dispatch(Runnable r) {
             r.run();
-        }
-
-        @Override
-        public void loadScript(final Reader reader) throws Exception {
-            try {
-                Object res = eng.eval(reader);
-                LOG.log(Level.FINE, "Result: {0}", res);
-            } catch (Throwable ex) {
-                LOG.log(Level.SEVERE, "Can't process " + reader, ex);
-            }
         }
 
         @Override

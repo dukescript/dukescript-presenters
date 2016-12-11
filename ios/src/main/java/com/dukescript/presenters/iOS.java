@@ -25,7 +25,6 @@ package com.dukescript.presenters;
 import java.io.Closeable;
 import java.io.IOException;
 import java.io.InterruptedIOException;
-import java.io.Reader;
 import java.net.URL;
 import java.net.URLDecoder;
 import java.util.concurrent.CountDownLatch;
@@ -156,19 +155,6 @@ public final class iOS extends Generic
             throw new IllegalStateException(ex);
         }
         pool.close();
-    }
-
-    @Override
-    public void loadScript(Reader code) throws Exception {
-        StringBuilder sb = new StringBuilder();
-        for (;;) {
-            int ch = code.read();
-            if (ch == -1) {
-                break;
-            }
-            sb.append((char) ch);
-        }
-        webView.evaluateJavaScript(sb.toString());
     }
 
     static final class App extends UIApplicationDelegateAdapter {

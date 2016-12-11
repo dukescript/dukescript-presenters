@@ -47,7 +47,6 @@ import android.widget.EditText;
 import java.io.Closeable;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.Reader;
 import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.URI;
@@ -167,21 +166,6 @@ public final class Android extends Activity {
             view.loadUrl(page.toExternalForm());
         }
 
-        @Override
-        public void loadScript(Reader code) throws Exception {
-            StringBuilder sb = new StringBuilder();
-            char[] buf = new char[16384];
-            sb.append("javascript:");
-            for (;;) {
-                int len = code.read(buf);
-                if (len == -1) {
-                    break;
-                }
-                sb.append(buf, 0, len);
-            }
-            loadScript(sb.toString());
-        }
-        
         private void loadScript(final String js) {
             final String pref = "javascript:";
             assert js.startsWith(pref);
