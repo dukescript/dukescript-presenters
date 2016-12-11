@@ -55,7 +55,7 @@ public class MessagesTest {
         "newLine=x\ny"
     })
     @Test public void newLines() {
-        assertEquals(Strings.newLine().toString(), "x\ny");
+        assertEquals(Strings.newLine(), "x\ny");
     }
 
     @Messages(
