@@ -460,16 +460,14 @@ public abstract class Generic implements Fn.Presenter, Fn.KeepAlive, Flushable {
         "fnHead=var jsvm = {};\n",
         "fnName=jsvm.@1 = function(",
         "fnThiz=thiz",
-        "fnNoThiz=var thiz = null;",
+        "fnNoThiz=  var thiz = null;\n",
         "fnSep=,",
         "fnParam=p@1",
         "fnClose=) {\n",
-        "fnBegin="
-                + "  var m = ds(@1);\n"
-                + "  var encParams = m.toJava(null, [",
+        "fnBegin=  var encParams = ds(@1).toJava(null, [",
         "fnPPar=@2 p@1",
         "fnBody=]);\n" +
-            "  var v = m.toVM('c', @1, '@2', thiz ? thiz.id : null, encParams);\n" +
+            "  var v = ds(@3).toVM('c', @1, '@2', thiz ? thiz.id : null, encParams);\n" +
 //            "  alert('toVM: ' + v + ' inner: ' + (v !== null && v.indexOf && v.indexOf('javascript:') === 0) + ' typeof: ' + (typeof v) +\n" +
             "  while (v !== null && v.indexOf && v.indexOf('javascript:') === 0) {\n" +
             "    var script = v.substring(11);\n" +
@@ -480,7 +478,7 @@ public abstract class Generic implements Fn.Presenter, Fn.KeepAlive, Flushable {
             "      var r = f(ds(@3));\n" +
 //            "    alert('r: ' + r +\n" +
             "    } catch (e) {  alert('error: ' + e + ' executing: ' + script); }\n" +
-            "    v = m.toVM('jr', null, null, null, null);" +
+            "    v = ds(@3).toVM('jr', null, null, null, null);" +
 //            "    alert('javaresult: ' + v +\n" +
             "  }\n" +
             "  return @4 ? eval('(' + v + ')') : v;\n" +
@@ -616,13 +614,13 @@ public abstract class Generic implements Fn.Presenter, Fn.KeepAlive, Flushable {
         } else if (a instanceof Character) {
             sb.append((int)(Character)a);
         } else if (a instanceof JSObject) {
-            sb.append("m.o(").append(((JSObject) a).index).append(")");
+            sb.append("ds(").append(key).append(").o(").append(((JSObject) a).index).append(")");
         } else {
             if (vmId != null) {
-                sb.append("m.v(").append(vmId[0]).append(")");
+                sb.append("ds(").append(key).append(").v(").append(vmId[0]).append(")");
             } else {
                 String[] valueOf = { null };
-                sb.append("m.j(").append(registerObject(a, weak, null, valueOf));
+                sb.append("ds(").append(key).append(").j(").append(registerObject(a, weak, null, valueOf));
                 sb.append(",");
                 encodeObject(valueOf[0], weak, sb, null);
                 if (a instanceof Object[]) {
@@ -991,7 +989,7 @@ public abstract class Generic implements Fn.Presenter, Fn.KeepAlive, Flushable {
         }
 
         @Messages({
-            "invokeImplFn=var m = ds(@3); m.fn(@1, @2, "
+            "invokeImplFn=ds(@3).fn(@1, @2, "
         })
         private Object invokeImpl(boolean wait4js, Object thiz, Object... args) throws Exception {
             if (vmId != null && vmId[0] < 0) {
