@@ -41,6 +41,15 @@ public class MessagesTest {
         assertEquals(hw, "Hello World!");
         assertEquals(Strings.hello("Guys").toString(), "Hello Guys!");
     }
+
+    @Messages({
+        "helloTwice=Hello @1! Hello @1!"
+    })
+    @Test
+    public void testRepeatThePattern() {
+        final CharSequence hw = Strings.helloTwice("Guys");
+        assertEquals(hw.toString(), "Hello Guys! Hello Guys!");
+    }
     
     @Messages({
         "newLine=x\ny"

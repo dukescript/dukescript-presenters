@@ -133,11 +133,18 @@ public final class MessagesProcessor extends AbstractProcessor {
                     int i;
                     for (i = 0; ; i++) {
                         final String subst = "@" + (i + 1);
-                        int where = value.indexOf(subst);
-                        if (where == -1) {
+                        int pos = -1;
+                        for (;;) {
+                            int where = value.indexOf(subst, pos + 1);
+                            if (where == -1) {
+                                break;
+                            }
+                            substitutions.add(new Subst(where, subst.length(), i));
+                            pos = where;
+                        }
+                        if (pos == -1) {
                             break;
                         }
-                        substitutions.add(new Subst(where, subst.length(), i));
                     }
 
                     methods.put(key, new Method(key, substitutions, value));
@@ -270,10 +277,15 @@ public final class MessagesProcessor extends AbstractProcessor {
             }
             method.append(key).append("(");
             {
-                String sep = "";
-                int i = 0;
+                int params = 0;
                 for (Subst sbst : substitutions) {
-                    method.append(sep).append("Object arg").append(i++);
+                    if (sbst.arg >= params) {
+                        params = sbst.arg + 1;
+                    }
+                }
+                String sep = "";
+                for (int i = 0; i < params; i++) {
+                    method.append(sep).append("Object arg").append(i);
                     sep = ", ";
                 }
             }
