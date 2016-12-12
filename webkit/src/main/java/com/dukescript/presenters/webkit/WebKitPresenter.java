@@ -293,7 +293,7 @@ public final class WebKitPresenter implements Fn.Presenter, Fn.KeepAlive, Execut
             }
             case 5: {
                 Object ret;
-                if (jsc.JSValueIsObjectOfClass(ctx, value, javaClazz)) {
+                if (isJavaClazz(value)) {
                     ret = toJava.get(value);
                     if (ret instanceof WeakVal) {
                         ret = ((WeakVal)ret).get();
@@ -335,6 +335,14 @@ public final class WebKitPresenter implements Fn.Presenter, Fn.KeepAlive, Execut
         JSC jsc = shell.jsc();
         onFinalize = new WebKitPresenter.OnFinalize();
         javaClazz = jsc.JSClassCreate(new JSC.JSClassDefinition(onFinalize));
+
+        boolean testInstance = false;
+        assert testInstance = true;
+        if (testInstance) {
+            Pointer testObj = jsc.JSObjectMake(ctx, javaClazz, null);
+            assert isJavaClazz(testObj) : "Own classes has to be recognized";
+        }
+
         {
             Pointer jsGlobal = ctx;
             Pointer arrArg = jsc.JSStringCreateWithUTF8CString("x");
@@ -342,8 +350,7 @@ public final class WebKitPresenter implements Fn.Presenter, Fn.KeepAlive, Execut
             Pointer arrFn = jsc.JSObjectMakeFunction(jsGlobal, null, 1, new Pointer[]{arrArg}, arrT, null, 0, null);
             arrayLength = arrFn;
             jsc.JSValueProtect(ctx, arrFn);
-            assert !jsc.JSValueIsObjectOfClass(ctx, arrayLength, javaClazz);
-
+            assert !isJavaClazz(arrayLength) : "functions aren't Java classes";
         }
         {
             Pointer trueScr = jsc.JSStringCreateWithUTF8CString("true");
@@ -352,7 +359,7 @@ public final class WebKitPresenter implements Fn.Presenter, Fn.KeepAlive, Execut
             jsc.JSValueProtect(ctx, valueTrue);
             int vT = jsc.JSValueGetType(ctx, valueTrue);
             assert vT == 2;
-            assert !jsc.JSValueIsObjectOfClass(ctx, valueTrue, javaClazz);
+            assert !isJavaClazz(valueTrue) : "true isn't Java class";
         }
         {
             Pointer falseScr = jsc.JSStringCreateWithUTF8CString("false");
@@ -361,8 +368,13 @@ public final class WebKitPresenter implements Fn.Presenter, Fn.KeepAlive, Execut
             jsc.JSStringRelease(falseScr);
             int vF = jsc.JSValueGetType(ctx, valueFalse);
             assert vF == 2;
-            assert !jsc.JSValueIsObjectOfClass(ctx, valueFalse, javaClazz);
+            assert !isJavaClazz(valueFalse) : "false isn't Java class";
         }
+    }
+
+    private boolean isJavaClazz(Pointer obj) {
+        final int ret = shell.jsc().JSValueIsObjectOfClass(ctx, obj, javaClazz);
+        return ret == 1;
     }
 
 
