@@ -162,9 +162,11 @@ public final class WebKitPresenter implements Fn.Presenter, Fn.KeepAlive, Execut
             } else if (v instanceof String) {
                 Pointer str = jsc.JSStringCreateWithUTF8CString((String)v);
                 v = jsc.JSValueMakeString(ctx, str);
+                jsc.JSStringRelease(str);
             } else if (v instanceof Enum) {
                 Pointer str = jsc.JSStringCreateWithUTF8CString(((Enum)v).name());
                 v = jsc.JSValueMakeString(ctx, str);
+                jsc.JSStringRelease(str);
             } else if (v instanceof Character) {
                 v = jsc.JSValueMakeNumber(ctx, (Character)v);
             } else if (v instanceof JSObject) {
@@ -330,34 +332,36 @@ public final class WebKitPresenter implements Fn.Presenter, Fn.KeepAlive, Execut
     final void jsContext(Pointer ctx) {
         this.ctx = ctx;
 
+        JSC jsc = shell.jsc();
         onFinalize = new WebKitPresenter.OnFinalize();
-        javaClazz = shell.jsc().JSClassCreate(new JSC.JSClassDefinition(onFinalize));
+        javaClazz = jsc.JSClassCreate(new JSC.JSClassDefinition(onFinalize));
         {
-            JSC j = shell.jsc();
             Pointer jsGlobal = ctx;
-            Pointer arrArg = j.JSStringCreateWithUTF8CString("x");
-            Pointer arrT = j.JSStringCreateWithUTF8CString("var res = x.constructor === Array ? x.length : -1; return res;");
-            Pointer arrFn = j.JSObjectMakeFunction(jsGlobal, null, 1, new Pointer[]{arrArg}, arrT, null, 0, null);
+            Pointer arrArg = jsc.JSStringCreateWithUTF8CString("x");
+            Pointer arrT = jsc.JSStringCreateWithUTF8CString("var res = x.constructor === Array ? x.length : -1; return res;");
+            Pointer arrFn = jsc.JSObjectMakeFunction(jsGlobal, null, 1, new Pointer[]{arrArg}, arrT, null, 0, null);
             arrayLength = arrFn;
-            j.JSValueProtect(ctx, arrFn);
+            jsc.JSValueProtect(ctx, arrFn);
+            assert !jsc.JSValueIsObjectOfClass(ctx, arrayLength, javaClazz);
+
         }
         {
-            JSC j = shell.jsc();
-            Pointer trueScr = j.JSStringCreateWithUTF8CString("true");
-            valueTrue = j.JSEvaluateScript(ctx, trueScr, null, null, 1, null);
-            j.JSStringRelease(trueScr);
-            j.JSValueProtect(ctx, valueTrue);
-            int vT = j.JSValueGetType(ctx, valueTrue);
+            Pointer trueScr = jsc.JSStringCreateWithUTF8CString("true");
+            valueTrue = jsc.JSEvaluateScript(ctx, trueScr, null, null, 1, null);
+            jsc.JSStringRelease(trueScr);
+            jsc.JSValueProtect(ctx, valueTrue);
+            int vT = jsc.JSValueGetType(ctx, valueTrue);
             assert vT == 2;
+            assert !jsc.JSValueIsObjectOfClass(ctx, valueTrue, javaClazz);
         }
         {
-            JSC j = shell.jsc();
-            Pointer falseScr = j.JSStringCreateWithUTF8CString("false");
-            valueFalse = j.JSEvaluateScript(ctx, falseScr, null, null, 1, null);
-            j.JSValueProtect(ctx, valueFalse);
-            j.JSStringRelease(falseScr);
-            int vF = j.JSValueGetType(ctx, valueFalse);
+            Pointer falseScr = jsc.JSStringCreateWithUTF8CString("false");
+            valueFalse = jsc.JSEvaluateScript(ctx, falseScr, null, null, 1, null);
+            jsc.JSValueProtect(ctx, valueFalse);
+            jsc.JSStringRelease(falseScr);
+            int vF = jsc.JSValueGetType(ctx, valueFalse);
             assert vF == 2;
+            assert !jsc.JSValueIsObjectOfClass(ctx, valueFalse, javaClazz);
         }
     }
 
