@@ -521,5 +521,5 @@ public final class Browser implements Fn.Presenter, Fn.KeepAlive, Flushable, Exe
         public void displayPage(URL url, Runnable r) {
             throw new UnsupportedOperationException(url.toString());
         }
-    } // end of Command 
+    } // end of Command  
 }
