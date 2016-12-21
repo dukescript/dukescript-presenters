@@ -1,5 +1,5 @@
 language: java
-script: mvn install -DskipTests=true
+script: mvn install -DskipTests=true && mvn -f generic test
 os:
   - linux
   - osx 
