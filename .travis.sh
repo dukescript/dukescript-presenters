@@ -6,7 +6,7 @@ mvn test&
 PID=$!
 
 while true; do
-    sleep 10
+    sleep 60
     if kill -0 $PID >/dev/null 2>&1; then
         echo Process $PID is still running...
         SURE=`jps | grep surefire | cut -f 1 -d " "`
