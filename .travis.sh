@@ -20,7 +20,12 @@ function waitFor {
             fi
             jps -v
         else
-            echo Finished OK...
+            wait $PID
+            EXITCODE=$?
+            echo Finished with code $EXITCODE
+            if [ $EXITCODE != 0 ]; then
+                exit $EXITCODE
+            fi
             return
         fi
     done
