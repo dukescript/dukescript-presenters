@@ -2,7 +2,7 @@
 
 mvn install -DskipTests
 
-mvn -f generic test&
+mvn test&
 PID=$!
 
 while true; do
