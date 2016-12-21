@@ -1,5 +1,9 @@
 language: java
-script: sh .travis.sh
+script:
+  - jdk_switcher use oraclejdk8
+  - sh .travis.sh
 os:
   - linux
   - osx 
+jdk:
+  - oraclejdk8
