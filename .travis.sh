@@ -2,6 +2,7 @@
 
 mvn install -DskipTests
 
+jdk_switcher use oraclejdk8 || java -version
 
 function waitFor {
     PID=$1

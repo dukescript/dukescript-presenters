@@ -5,5 +5,3 @@ script:
 os:
   - linux
   - osx 
-jdk:
-  - oraclejdk8
