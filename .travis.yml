@@ -1,6 +1,6 @@
 language: java
 script:
-  - jdk_switcher use oraclejdk8
+  - jdk_switcher use oraclejdk8 || java -Xmx32m -version
   - sh .travis.sh
 os:
   - linux
