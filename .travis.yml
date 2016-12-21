@@ -1,7 +1,7 @@
 language: java
 script:
   - java -Xmx32m -version
-  - sh .travis.sh
+  - bash .travis.sh
 os:
   - linux
   - osx 
