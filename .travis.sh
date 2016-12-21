@@ -14,6 +14,7 @@ while true; do
         if [ -n "$SURE" ]; then
             jstack $SURE
         fi
+        jps -v
     else
         echo Finished OK...
         exit 0
