@@ -1,5 +1,5 @@
 language: java
-script: mvn install -DskipTests=true && mvn -f generic test
+script: sh .travis.sh
 os:
   - linux
   - osx 
