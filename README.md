@@ -1,4 +1,7 @@
 # Presenters
+
+[![Build Status](https://travis-ci.org/dukescript/dukescript-presenters.svg?branch=master)](https://travis-ci.org/dukescript/dukescript-presenters)
+
 ## The Glue Between Java and JavaScript!
 
 The presenters are the glue between your **Java** and **JavaScript** code
