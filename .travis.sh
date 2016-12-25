@@ -38,8 +38,15 @@ mvn -f generic test&
 waitFor $!
 
 if type firefox; then
-    echo Skipping browser tests
+    echo Skipping browser tests on Linux
+
+    mvn -f webkit test&
+    waitFor $!
 else
+    echo Running on Mac OS X
     mvn -f browser test&
+    waitFor $!
+
+    mvn -f webkit test&
     waitFor $!
 fi
