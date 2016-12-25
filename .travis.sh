@@ -36,3 +36,10 @@ waitFor $!
 
 mvn -f generic test&
 waitFor $!
+
+if type firefox; then
+    echo Skipping browser tests
+else
+    mvn -f browser test&
+    waitFor $!
+fi
