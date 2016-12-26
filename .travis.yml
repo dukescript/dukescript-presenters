@@ -1,4 +1,8 @@
 language: java
+sudo: required
+before_install:
+  - sudo apt-get -qq update || echo no sudo apt-get
+  - sudo apt-get install -y libwebkitgtk-3.0-0 || echo no sudo apt-get
 before_script:
   - export DISPLAY=:99.0
   - sh -e /etc/init.d/xvfb start || echo No X11
