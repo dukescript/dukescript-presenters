@@ -10,7 +10,7 @@ before_script:
 script:
   - jdk_switcher use oraclejdk8 || java -version
   - mvn install -DskipTests
-  - mvn test
+  - mvn verify
 os:
   - linux
   - osx 
