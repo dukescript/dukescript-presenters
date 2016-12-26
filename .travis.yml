@@ -9,7 +9,8 @@ before_script:
   - sleep 3
 script:
   - jdk_switcher use oraclejdk8 || java -version
-  - bash .travis.sh
+  - mvn install -DskipTests
+  - mvn test
 os:
   - linux
   - osx 
