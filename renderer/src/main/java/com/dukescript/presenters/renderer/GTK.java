@@ -29,8 +29,13 @@ import com.sun.jna.Native;
 import com.sun.jna.Pointer;
 import com.sun.jna.Structure;
 import java.io.Closeable;
+import java.io.File;
+import java.io.PrintWriter;
+import java.io.StringWriter;
 import java.net.URI;
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 import java.util.Queue;
@@ -65,14 +70,49 @@ final class GTK extends Show implements InvokeLater {
         this.headless = hl;
         this.onContext = onContext;
 
-        this.jsc = loadLibrary(JSC.class, true);
-        this.g = loadLibrary(G.class, false);
-        this.glib = loadLibrary(GLib.class, false);
-        this.gdk = loadLibrary(Gdk.class, false);
-        this.webKit = loadLibrary(WebKit.class, false);
+        List<Throwable> errors = new ArrayList<Throwable>();
+        this.jsc = loadLibrary(JSC.class, true, errors);
+        this.g = loadLibrary(G.class, false, errors);
+        this.glib = loadLibrary(GLib.class, false, errors);
+        this.gdk = loadLibrary(Gdk.class, false, errors);
+        this.webKit = loadLibrary(WebKit.class, false, errors);
+
+        if (!errors.isEmpty()) {
+            throw linkageError(errors);
+        }
     }
 
-    private <T> T loadLibrary(Class<T> type, boolean allowObjects) {
+    private LinkageError linkageError(List<Throwable> errors) {
+        StringWriter sw = new StringWriter();
+        String libraryPath = System.getProperty("java.library.path");
+        sw.append("Java Library Path:");
+        if (libraryPath != null) {
+            for (String pathElement : libraryPath.split(File.pathSeparator)) {
+                sw.append("\n  Path ").append(pathElement);
+                File pathFile = new File(pathElement);
+                String[] libraries = pathFile.list();
+                if (libraries != null) {
+                    for (String lib : libraries) {
+                        sw.append("\n    ").append(lib);
+                    }
+                }
+            }
+            sw.append("\n");
+        }
+        PrintWriter pw = new PrintWriter(sw);
+        for (Throwable t : errors) {
+            t.printStackTrace(pw);
+        }
+        sw.append("\nStatus:");
+        sw.append("\n  jsc: " + jsc);
+        sw.append("\n  g: " + g);
+        sw.append("\n  glib: " + glib);
+        sw.append("\n  gdk: " + gdk);
+        sw.append("\n  webKit: " + webKit);
+        return new LinkageError(sw.toString());
+    }
+
+    private <T> T loadLibrary(Class<T> type, boolean allowObjects, Collection<Throwable> errors) {
         String libName = System.getProperty("com.dukescript.presenters.renderer." + type.getSimpleName());
         if (libName == null) {
             if (type == JSC.class) {
@@ -90,10 +130,19 @@ final class GTK extends Show implements InvokeLater {
             }
         }
 
-        Object lib = Native.loadLibrary(libName, type,
-            Collections.singletonMap(Library.OPTION_ALLOW_OBJECTS, allowObjects)
-        );
-        return type.cast(lib);
+        try {
+            Object lib = Native.loadLibrary(libName, type,
+                Collections.singletonMap(Library.OPTION_ALLOW_OBJECTS, allowObjects)
+            );
+            return type.cast(lib);
+        } catch (LinkageError err) {
+            if (errors != null) {
+                errors.add(err);
+                return null;
+            } else {
+                throw err;
+            }
+        }
     }
 
     @Override
@@ -161,7 +210,7 @@ final class GTK extends Show implements InvokeLater {
     private Gtk getInstance(boolean[] initialized) {
         synchronized (GTK.class) {
             if (INSTANCE == null) {
-                INSTANCE = loadLibrary(Gtk.class, false);
+                INSTANCE = loadLibrary(Gtk.class, false, null);
                 initialized[0] = true;
             }
         }
