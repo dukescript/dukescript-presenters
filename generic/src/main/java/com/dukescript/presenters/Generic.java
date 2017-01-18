@@ -91,6 +91,7 @@ public abstract class Generic implements Fn.Presenter, Fn.KeepAlive, Flushable {
             + "\n  function jobject(id,value) { this.id = id; this.v = value; return this; };"
             + "\n  jobject.prototype['native'] = true;"
             + "\n  jobject.prototype.valueOf = function() { return this.v ? this.v : '[jobject ' + this.id + ']'; };"
+            + "\n  jobject.prototype.toString = jobject.prototype.valueOf;"
             + "\n  var toVM = global['@2'];"
             + "\n  delete global['@2'];"
             + "\n  function toJava(method, r) {"
