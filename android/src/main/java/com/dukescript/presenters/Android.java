@@ -47,6 +47,7 @@ import android.widget.EditText;
 import java.io.Closeable;
 import java.io.IOException;
 import java.io.InputStream;
+import java.lang.reflect.Method;
 import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.URI;
@@ -272,19 +273,10 @@ public final class Android extends Activity {
                 ctx.execute(this);
                 return;
             }
-            Closeable c = Fn.activate(this);
             try {
-                try {
-                    loadClass.getMethod(invoke).invoke(null);
-                } catch (NoSuchMethodException ex) {
-                    loadClass.getMethod(invoke, String[].class).invoke(null, (Object) new String[0]);
-                } finally {
-                    c.close();
-                }
+                invokeOnPageLoad(this, view.getContext(), loadClass, invoke);
             } catch (Exception ex) {
                 LOG.log(Level.SEVERE, null, ex);
-            } finally {
-                loadClass = null;
             }
         }
     }
@@ -307,6 +299,34 @@ public final class Android extends Activity {
         }
         PROCESSOR = new Thread(new Queue(), "Browser Event Queue");
         PROCESSOR.start();
+    }
+
+    static void invokeOnPageLoad(Fn.Presenter presenter, Context context, Class<?> clazz, final String method) throws Exception {
+        Closeable c = Fn.activate(presenter);
+        try {
+            for (Method m : clazz.getMethods()) {
+                if (m.getName().equals(method)) {
+                    final Class<?>[] params = m.getParameterTypes();
+                    if (params.length == 0) {
+                        m.invoke(null);
+                        return;
+                    }
+                    if (params.length == 1) {
+                        if (params[0] == String[].class) {
+                            m.invoke(null, (Object) new String[0]);
+                            return;
+                        }
+                        if (Context.class.isAssignableFrom(params[0]) || params[0].isInstance(context)) {
+                            m.invoke(null, context);
+                            return;
+                        }
+                    }
+                    throw new IllegalStateException("Cannot call " + m + " wrong arguments");
+                }
+            }
+        } finally {
+            c.close();
+        }
     }
     
     private static void runOnBrowserThread(Runnable r) {
@@ -593,6 +613,6 @@ public final class Android extends Activity {
             }
             return presenter.callback(method, a1, a2, a3, a4);
         }
-    }    
+    }
 }
 
