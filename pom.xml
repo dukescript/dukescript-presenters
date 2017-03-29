@@ -62,6 +62,11 @@
                 <enabled>false</enabled>
             </releases>
         </repository>
+        <repository>
+            <id>stagging</id>
+            <name>Stagging</name>
+            <url>https://maven.java.net/content/repositories/orgapidesign-1059/</url>
+        </repository>
     </repositories>
     <pluginRepositories>
         <pluginRepository>
@@ -74,6 +79,11 @@
             <releases>
                 <enabled>false</enabled>
             </releases>
+        </pluginRepository>
+        <pluginRepository>
+            <id>stagging</id>
+            <name>Stagging</name>
+            <url>https://maven.java.net/content/repositories/orgapidesign-1059/</url>
         </pluginRepository>
     </pluginRepositories>
 
