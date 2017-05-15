@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<actions>
+    <action>
+        <actionName>run</actionName>
+        <goals>
+            <goal>clean</goal>
+            <goal>package</goal>
+            <goal>android:deploy</goal>
+            <goal>android:run</goal>
+        </goals>
+        <properties>
+            <skipTests>true</skipTests>
+        </properties>
+    </action>
+    <action>
+        <actionName>debug</actionName>
+        <goals>
+            <goal>clean</goal>
+            <goal>package</goal>
+            <goal>android:deploy</goal>
+            <goal>android:run</goal>
+        </goals>
+        <properties>
+            <skipTests>true</skipTests>
+            <android.run.debug>${jpda.attach.port}</android.run.debug>
+            <jpda.attach>true</jpda.attach>
+        </properties>
+    </action>
+    <action>
+        <actionName>CUSTOM-android-run</actionName>
+        <displayName>Run in Android</displayName>
+        <goals>
+            <goal>clean</goal>
+            <goal>package</goal>
+            <goal>android:deploy</goal>
+            <goal>android:run</goal>
+        </goals>
+        <properties>
+            <skipTests>true</skipTests>
+        </properties>
+    </action>
+</actions>

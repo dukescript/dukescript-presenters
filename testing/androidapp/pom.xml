@@ -9,6 +9,9 @@
     <artifactId>androidapp</artifactId>
     <name>Android Test Application</name>
     <packaging>apk</packaging>
+    <properties>
+        <debug>false</debug>
+    </properties>
     <dependencies>
       <dependency>
           <groupId>com.google.android</groupId>
@@ -71,27 +74,22 @@
     </dependencies>
     <build>
         <finalName>${project.artifactId}</finalName>
-        <pluginManagement>
-            <plugins>
-                <plugin>
-                    <groupId>com.jayway.maven.plugins.android.generation2</groupId>
-                    <artifactId>android-maven-plugin</artifactId>
-                    <version>3.9.0-rc.3</version>
-                    <extensions>true</extensions>
-                </plugin>
-            </plugins>
-        </pluginManagement>
         <plugins>
             <plugin>
-                <groupId>com.jayway.maven.plugins.android.generation2</groupId>
+                <groupId>com.simpligility.maven.plugins</groupId>
                 <artifactId>android-maven-plugin</artifactId>
+                <version>4.4.3</version>
+                <extensions>true</extensions>
                 <configuration>
                     <apk>
                         <metaIncludes>
                             <metaInclude>services/org.netbeans.**</metaInclude>
                         </metaIncludes>
                     </apk>
+                    <assetsDirectory>assets</assetsDirectory>
+                    <androidManifestFile>AndroidManifest.xml</androidManifestFile>
                     <extractDuplicates>true</extractDuplicates>
+                    <apkDebug>${debug}</apkDebug>
                 </configuration>
             </plugin>
         </plugins>

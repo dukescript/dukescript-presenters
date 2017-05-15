@@ -34,12 +34,14 @@ import android.graphics.Bitmap;
 import android.media.AudioManager;
 import android.media.MediaPlayer;
 import android.net.Uri;
+import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.Message;
 import android.webkit.GeolocationPermissions;
 import android.webkit.JavascriptInterface;
+import android.webkit.ValueCallback;
 import android.webkit.WebChromeClient;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
@@ -124,6 +126,7 @@ public final class Android extends Activity {
     private static final class Presenter extends Generic implements Executor, Runnable {
         final WebView view;
         final Chrome chrome;
+        final JVM jvm;
         final String page;
         Class<?> loadClass;
         String invoke;
@@ -135,7 +138,8 @@ public final class Android extends Activity {
             this.page = page;
             this.loadClass = loadClass;
             this.invoke = invoke;
-            this.chrome = new Chrome(this);
+            this.chrome = new Chrome();
+            this.jvm = new JVM(this);
             allowFileAccessFromFiles(view);
             allowUnversalAccessFromFiles(view);
             view.getSettings().setJavaScriptEnabled(true);
@@ -143,7 +147,7 @@ public final class Android extends Activity {
             view.getSettings().setGeolocationEnabled(true);
             view.getSettings().setJavaScriptCanOpenWindowsAutomatically(true);
             view.setWebChromeClient(chrome);
-            view.addJavascriptInterface(chrome, "jvm");
+            view.addJavascriptInterface(jvm, "jvm");
         }
 
         @Override
@@ -174,7 +178,11 @@ public final class Android extends Activity {
             a.runOnUiThread(new Runnable() {
                 @Override
                 public void run() {
-                    view.loadUrl(js);
+                    if (Build.VERSION.SDK_INT < 19 /* KITKAT */) {
+                        view.loadUrl(js);
+                    } else {
+                        view.evaluateJavascript(js.substring(pref.length()), null);
+                    }
                 }
             });
         }
@@ -227,8 +235,12 @@ public final class Android extends Activity {
                 }
             });
             
-            while (!chrome.ready) {
-                loadScript("javascript:jvm.ready();");
+            while (!jvm.ready) {
+                loadScript("javascript:try {\n"
+                        + "  jvm.ready();\n"
+                        + "} catch (e) {\n"
+                        + "  alert('jvm' + Object.getOwnPropertyNames(jvm) + ' ready: ' + jvm.ready);\n"
+                        + "}");
                 try {
                     Thread.sleep(10);
                 } catch (InterruptedException ex) {
@@ -541,19 +553,23 @@ public final class Android extends Activity {
     }
 
     private static final class Chrome extends WebChromeClient {
-        private final Presenter presenter;
-        volatile boolean ready;
-
-        private Chrome(Presenter p) {
-            this.presenter = p;
-        }
-
         @Override
         public void onGeolocationPermissionsShowPrompt(String origin, GeolocationPermissions.Callback callback) {
             callback.invoke(origin, true, false);
         }
+    }
 
-        @JavascriptInterface public void ready() {
+    private static final class JVM {
+        volatile boolean ready;
+        private final Presenter presenter;
+
+        JVM(Presenter p) {
+            this.presenter = p;
+        }
+
+
+        @JavascriptInterface
+        public void ready() {
             ready = true;
         }
 
