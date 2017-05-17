@@ -111,7 +111,7 @@ public final class iOS extends Generic
     }
 
     @Override
-    String callbackFn(String welcome) {
+    void callbackFn(String welcome, OnReady onReady) {
         loadJS(
                 "function iOS(method, a1, a2, a3, a4) {\n"
                 + "  window.iOSVal = null;\n"
@@ -135,7 +135,7 @@ public final class iOS extends Generic
                 + "}\n"
         );
         loadJS(welcome);
-        return "iOS";
+        onReady.callbackReady("iOS");
     }
 
     @Override

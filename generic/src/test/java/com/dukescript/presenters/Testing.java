@@ -73,7 +73,7 @@ class Testing extends Generic {
     private final Clbk clbk = new Clbk();
     
     @Override
-    protected String callbackFn(String welcome) {
+    protected void callbackFn(String welcome, OnReady ready) {
         eng.getBindings(ScriptContext.ENGINE_SCOPE).put("jvm", clbk);
         try {
             eng.eval("(function(global) {\n"
@@ -87,7 +87,7 @@ class Testing extends Generic {
             throw new IllegalStateException(ex);
         }
         eng.getBindings(ScriptContext.ENGINE_SCOPE).put("jvm", "");
-        return "testingCB";
+        ready.callbackReady("testingCB");
     }
 
     @Override

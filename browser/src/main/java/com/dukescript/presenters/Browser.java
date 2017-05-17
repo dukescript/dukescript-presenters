@@ -478,7 +478,7 @@ public final class Browser implements Fn.Presenter, Fn.KeepAlive, Flushable, Exe
         }
 
         @Override
-        String callbackFn(String welcome) {
+        void callbackFn(String welcome, OnReady onReady) {
             StringBuilder sb = new StringBuilder();
             sb.append("this.toBrwsrSrvr = function(name, a1, a2, a3, a4) {\n"
                 + "var url = 'command.js?id=" + id + "&name=' + name;\n"
@@ -494,7 +494,7 @@ public final class Browser implements Fn.Presenter, Fn.KeepAlive, Flushable, Exe
                 + "};\n");
             sb.append(welcome);
             add(sb);
-            return "toBrwsrSrvr";
+            onReady.callbackReady("toBrwsrSrvr");
         }
 
         @Override

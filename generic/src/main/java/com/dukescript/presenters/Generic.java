@@ -176,17 +176,21 @@ public abstract class Generic implements Fn.Presenter, Fn.KeepAlive, Flushable {
             }
         }
         this.msg = "";
-        String clbk = callbackFn(Strings.logo(
+        callbackFn(Strings.logo(
             Strings.version(), type, app
-        ).toString());
-        loadJS(begin(clbk).toString());
-        if (!assertOK()) {
-            throw new IllegalStateException(error());
-        }
-        
-        loadJS(Strings.init(key, clbk).toString());
-        
-        initialized.countDown();
+        ).toString(), new OnReady() {
+            @Override
+            public void callbackReady(String clbk) {
+                loadJS(begin(clbk).toString());
+                if (!assertOK()) {
+                    throw new IllegalStateException(error());
+                }
+
+                loadJS(Strings.init(key, clbk).toString());
+
+                initialized.countDown();
+            }
+        });
     }
 
     @Messages(
@@ -345,7 +349,7 @@ public abstract class Generic implements Fn.Presenter, Fn.KeepAlive, Flushable {
 "})();"
     )
     /** @return the name of the callback function */
-    abstract String callbackFn(String welcome);
+    abstract void callbackFn(String welcome, OnReady onReady);
     abstract void loadJS(String js);
     
     /** Dispatches callbacks from JavaScript back into appropriate
@@ -632,6 +636,10 @@ public abstract class Generic implements Fn.Presenter, Fn.KeepAlive, Flushable {
                 sb.append(")");
             }
         }
+    }
+
+    interface OnReady {
+        void callbackReady(String name);
     }
     
     private class Item implements Runnable {

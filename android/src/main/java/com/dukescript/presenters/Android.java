@@ -222,7 +222,7 @@ public final class Android extends Activity {
         }
 
         @Override
-        protected String callbackFn(String welcome) {
+        void callbackFn(final String welcome, final OnReady onReady) {
             Activity a = (Activity) view.getContext();
             a.runOnUiThread(new Runnable() {
                 @Override
@@ -235,41 +235,41 @@ public final class Android extends Activity {
                 }
             });
             
-            while (!jvm.ready) {
-                loadScript("javascript:try {\n"
-                        + "  jvm.ready();\n"
-                        + "} catch (e) {\n"
-                        + "  alert('jvm' + Object.getOwnPropertyNames(jvm) + ' ready: ' + jvm.ready);\n"
-                        + "}");
-                try {
-                    Thread.sleep(10);
-                } catch (InterruptedException ex) {
-                    LOG.log(Level.SEVERE, null, ex);
+            class Ready implements Runnable {
+                @Override
+                public void run() {
+                    if (!jvm.ready) {
+                        loadScript("javascript:try {\n"
+                                + "  jvm.ready();\n"
+                                + "} catch (e) {\n"
+                                + "  alert('jvm' + Object.getOwnPropertyNames(jvm) + ' ready: ' + jvm.ready);\n"
+                                + "}");
+                        view.postDelayed(this, 10);
+                    } else {
+                        loadScript("javascript:(function(global) {\n"
+                                + "  var jvm = global.jvm;\n"
+                                + "  global.androidCB = function(m,a1,a2,a3,a4) {\n"
+                                + "    return jvm.invoke(m,a1,a2,a3,a4);\n"
+                                + "  }\n"
+                                + "  global.alert = function(msg) { jvm.invoke('alert', msg, null, null, null); };"
+                                + "  global.confirm = function(msg) {\n"
+                                + "    var ret = jvm.invoke('confirm', msg, null, null, null);\n"
+                                //                + "    alert('val: ' + ret + ' typeof: ' + typeof ret);\n"
+                                + "    return 'true' == ret;"
+                                + "  };"
+                                + "  global.prompt = function(msg, val) {\n"
+                                + "    var ret = jvm.invoke('prompt', msg, val, null, null);\n"
+                                //                + "    alert('val: ' + ret + ' typeof: ' + typeof ret);\n"
+                                + "    return ret;"
+                                + "  };"
+                                + "})(this);\n" + welcome
+                        );
+                        onReady.callbackReady("androidCB!");
+                    }
                 }
             }
-            
-            loadScript("javascript:(function(global) {\n"
-                + "  var jvm = global.jvm;\n"
-                + "  global.androidCB = function(m,a1,a2,a3,a4) {\n"
-                + "    return jvm.invoke(m,a1,a2,a3,a4);\n"
-                + "  }\n"
-                + "  global.alert = function(msg) { jvm.invoke('alert', msg, null, null, null); };"
-                + "  global.confirm = function(msg) {\n"
-                + "    var ret = jvm.invoke('confirm', msg, null, null, null);\n"
-//                + "    alert('val: ' + ret + ' typeof: ' + typeof ret);\n"
-                + "    return 'true' == ret;"
-                + "  };"
-                + "  global.prompt = function(msg, val) {\n"
-                + "    var ret = jvm.invoke('prompt', msg, val, null, null);\n"
-//                + "    alert('val: ' + ret + ' typeof: ' + typeof ret);\n"
-                + "    return ret;"
-                + "  };"
-                + "})(this);\n" + welcome
-            );
-            
-            return "androidCB";
         }
-        
+
         @Override
         public void run() {
             if (loadClass == null) {
