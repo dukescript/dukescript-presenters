@@ -41,7 +41,6 @@ import android.os.Looper;
 import android.os.Message;
 import android.webkit.GeolocationPermissions;
 import android.webkit.JavascriptInterface;
-import android.webkit.ValueCallback;
 import android.webkit.WebChromeClient;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
@@ -57,7 +56,6 @@ import java.net.URISyntaxException;
 import java.net.URL;
 import java.net.URLConnection;
 import java.util.Locale;
-import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.Executor;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.logging.Level;
@@ -76,7 +74,8 @@ public final class Android extends Activity {
     public static Fn.Presenter create(WebView view, String page) {
         String aPkg = view.getContext().getApplicationInfo().packageName;
         final Presenter p = new Presenter(view, aPkg, page, null, null);
-        p.dispatch(new Runnable() {
+        Activity a = (Activity) view.getContext();
+        a.runOnUiThread(new Runnable() {
             @Override
             public void run() {
                 p.init();
@@ -198,7 +197,10 @@ public final class Android extends Activity {
 
         @Override
         protected final void dispatch(Runnable r) {
-            runOnBrowserThread(r);
+            if (jvm.dispatch(r)) {
+                Activity a = (Activity) view.getContext();
+                a.runOnUiThread(jvm);
+            }
         }
 
         @Override
@@ -223,21 +225,19 @@ public final class Android extends Activity {
 
         @Override
         void callbackFn(final String welcome, final OnReady onReady) {
-            Activity a = (Activity) view.getContext();
-            a.runOnUiThread(new Runnable() {
-                @Override
-                public void run() {
-                    if (page != null) {
-                        view.loadUrl(page);
-                    } else {
-                        view.loadDataWithBaseURL("file:///", "<html><body><script></script></body></html>", "text/html", null, null);
-                    }
-                }
-            });
-            
             class Ready implements Runnable {
+                boolean subsequent;
                 @Override
                 public void run() {
+                    if (!subsequent) {
+                        subsequent = true;
+                        if (page != null) {
+                            view.loadUrl(page);
+                        } else {
+                            view.loadDataWithBaseURL("file:///", "<html><body><script></script></body></html>", "text/html", null, null);
+                        }
+                    }
+
                     if (!jvm.ready) {
                         loadScript("javascript:try {\n"
                                 + "  jvm.ready();\n"
@@ -264,10 +264,13 @@ public final class Android extends Activity {
                                 + "  };"
                                 + "})(this);\n" + welcome
                         );
-                        onReady.callbackReady("androidCB!");
+                        onReady.callbackReady("androidCB");
+                        view.post(jvm);
                     }
                 }
             }
+            Activity a = (Activity) view.getContext();
+            a.runOnUiThread(new Ready());
         }
 
         @Override
@@ -293,26 +296,6 @@ public final class Android extends Activity {
         }
     }
     
-    private static final BlockingQueue<Runnable> QUEUE = new LinkedBlockingQueue<Runnable>();
-    private static final Thread PROCESSOR;
-    static {
-        class Queue implements Runnable {
-            @Override
-            public void run() {
-                for (;;) {
-                    try {
-                        Runnable r = QUEUE.take();
-                        r.run();
-                    } catch (Throwable t) {
-                        t.printStackTrace();
-                    }
-                }
-            }
-        }
-        PROCESSOR = new Thread(new Queue(), "Browser Event Queue");
-        PROCESSOR.start();
-    }
-
     static void invokeOnPageLoad(Fn.Presenter presenter, Context context, Class<?> clazz, final String method) throws Exception {
         Closeable c = Fn.activate(presenter);
         try {
@@ -341,18 +324,6 @@ public final class Android extends Activity {
         }
     }
     
-    private static void runOnBrowserThread(Runnable r) {
-        if (PROCESSOR == Thread.currentThread()) {
-            r.run();
-        } else {
-            for (;;) try {
-                QUEUE.put(r);
-                return;
-            } catch (InterruptedException ex) {
-                LOG.log(Level.INFO, "Interrupted", ex);
-            }
-        }
-    }
 
     private static void allowUnversalAccessFromFiles(WebView v) {
         try {
@@ -559,14 +530,30 @@ public final class Android extends Activity {
         }
     }
 
-    private static final class JVM {
+    private static final class JVM implements Runnable {
         volatile boolean ready;
         private final Presenter presenter;
+        private final LinkedBlockingQueue<Runnable> queue = new LinkedBlockingQueue<Runnable>();
 
         JVM(Presenter p) {
             this.presenter = p;
         }
 
+        boolean dispatch(Runnable r) {
+            queue.add(r);
+            return ready;
+        }
+
+        @Override
+        public void run() {
+            for (;;) {
+                Runnable r = queue.poll();
+                if (r == null) {
+                    return;
+                }
+                r.run();
+            }
+        }
 
         @JavascriptInterface
         public void ready() {
