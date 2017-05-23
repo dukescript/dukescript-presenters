@@ -57,7 +57,9 @@ import java.net.URL;
 import java.net.URLConnection;
 import java.util.Locale;
 import java.util.concurrent.Executor;
+import java.util.concurrent.Executors;
 import java.util.concurrent.LinkedBlockingQueue;
+import java.util.concurrent.ThreadFactory;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import net.java.html.BrwsrCtx;
@@ -74,13 +76,12 @@ public final class Android extends Activity {
     public static Fn.Presenter create(WebView view, String page) {
         String aPkg = view.getContext().getApplicationInfo().packageName;
         final Presenter p = new Presenter(view, aPkg, page, null, null);
-        Activity a = (Activity) view.getContext();
-        a.runOnUiThread(new Runnable() {
+        p.dispatch(new Runnable() {
             @Override
             public void run() {
                 p.init();
             }
-        });
+        }, false);
         return p;
     }
     
@@ -199,7 +200,7 @@ public final class Android extends Activity {
         protected final void dispatch(Runnable r) {
             if (jvm.dispatch(r)) {
                 Activity a = (Activity) view.getContext();
-                a.runOnUiThread(jvm);
+                dispatch(jvm, false);
             }
         }
 
@@ -264,8 +265,13 @@ public final class Android extends Activity {
                                 + "  };"
                                 + "})(this);\n" + welcome
                         );
-                        onReady.callbackReady("androidCB");
-                        view.post(jvm);
+                        dispatch(new Runnable() {
+                            @Override
+                            public void run() {
+                                onReady.callbackReady("androidCB");
+                                jvm.run();
+                            }
+                        }, true);
                     }
                 }
             }
@@ -292,6 +298,28 @@ public final class Android extends Activity {
                 invokeOnPageLoad(this, view.getContext(), loadClass, invoke);
             } catch (Exception ex) {
                 LOG.log(Level.SEVERE, null, ex);
+            }
+        }
+
+        private static Executor DISPATCH;
+
+        final void dispatch(Runnable runnable, boolean delayed) {
+            if (Build.VERSION.SDK_INT < 24) {
+                if (DISPATCH == null) {
+                    DISPATCH = Executors.newSingleThreadExecutor(jvm);
+                }
+                if (!delayed && Thread.currentThread() == DISPATCH) {
+                    runnable.run();
+                } else {
+                    DISPATCH.execute(runnable);
+                }
+            } else {
+                if (delayed) {
+                    view.post(runnable);
+                } else {
+                    Activity a = (Activity) view.getContext();
+                    a.runOnUiThread(runnable);
+                }
             }
         }
     }
@@ -530,7 +558,7 @@ public final class Android extends Activity {
         }
     }
 
-    private static final class JVM implements Runnable {
+    private static final class JVM implements Runnable, ThreadFactory {
         volatile boolean ready;
         private final Presenter presenter;
         private final LinkedBlockingQueue<Runnable> queue = new LinkedBlockingQueue<Runnable>();
@@ -615,6 +643,11 @@ public final class Android extends Activity {
                 return res[0] ? line.getText().toString() : null;
             }
             return presenter.callback(method, a1, a2, a3, a4);
+        }
+
+        @Override
+        public Thread newThread(Runnable r) {
+            return new Thread(r, "Browser Dispatch Thread");
         }
     }
 }
