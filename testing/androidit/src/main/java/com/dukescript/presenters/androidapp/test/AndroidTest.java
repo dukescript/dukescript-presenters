@@ -27,15 +27,15 @@ package com.dukescript.presenters.androidapp.test;
 import android.test.ActivityInstrumentationTestCase2;
 import com.dukescript.presenters.androidapp.JUnitTestMethods;
 import com.dukescript.presenters.androidapp.TestActivity;
-import java.io.Closeable;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.Executor;
 import net.java.html.js.tests.GCBodyTest;
 import net.java.html.js.tests.JavaScriptBodyTest;
-import org.netbeans.html.boot.spi.Fn;
 import org.netbeans.html.json.tck.JavaScriptTCK;
 import org.netbeans.html.json.tck.KOTest;
 
@@ -64,24 +64,33 @@ public class AndroidTest extends AndroidBase {
     
     @Override
     protected void runTest() throws Throwable {
-        Method m = toRun.get(getName());
+        final Method m = toRun.get(getName());
         if (m != null) {
-            Object inst = m.getDeclaringClass().newInstance();
+            final Object inst = m.getDeclaringClass().newInstance();
             for (int cnt = 0;; cnt++) {
-                Closeable a = Fn.activate(getActivity().getPresenter());
                 if (cnt == 100) {
                     throw new InterruptedException("Too many repetitions");
                 }
-                try {
-                    m.invoke(inst);
-                } catch (InvocationTargetException ex) {
-                    if (ex.getTargetException() instanceof InterruptedException) {
+                Executor exec = (Executor) getActivity().getPresenter();
+                final Throwable[] err = { null };
+                CountDownLatch cdl = new CountDownLatch(1);
+                exec.execute(new Runnable() {
+                    @Override
+                    public void run() {
+                        try {
+                            m.invoke(inst);
+                        } catch (Throwable t) {
+                            err[0] = t;
+                        }
+                    }
+                });
+                if (err[0] instanceof InvocationTargetException) {
+                    Throwable target = ((InvocationTargetException) err[0]).getTargetException();
+                    if (target instanceof InterruptedException) {
                         Thread.sleep(100);
                         continue;
                     }
-                    throw ex.getTargetException();
-                } finally {
-                    a.close();
+                    throw target;
                 }
                 break;
             }
