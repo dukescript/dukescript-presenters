@@ -39,6 +39,7 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.Message;
+import android.util.Log;
 import android.webkit.GeolocationPermissions;
 import android.webkit.JavascriptInterface;
 import android.webkit.WebChromeClient;
@@ -56,20 +57,18 @@ import java.net.URISyntaxException;
 import java.net.URL;
 import java.net.URLConnection;
 import java.util.Locale;
+import java.util.Objects;
 import java.util.concurrent.Executor;
 import java.util.concurrent.Executors;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.ThreadFactory;
 import java.util.logging.Level;
-import java.util.logging.Logger;
 import net.java.html.BrwsrCtx;
 import org.netbeans.html.boot.spi.Fn;
 import org.netbeans.html.context.spi.Contexts;
 import org.netbeans.html.sound.spi.AudioEnvironment;
 
 public final class Android extends Activity {
-    private static final Logger LOG = Logger.getLogger(Android.class.getName());
-    
     public Android() {
     }
 
@@ -95,7 +94,7 @@ public final class Android extends Activity {
         try {
             ai = getPackageManager().getApplicationInfo(aPkg, PackageManager.GET_META_DATA);
         } catch (PackageManager.NameNotFoundException ex) {
-            LOG.log(Level.SEVERE, null, ex);
+            androidLog(Level.SEVERE, null, ex);
             ai = null;
         }
 
@@ -112,7 +111,7 @@ public final class Android extends Activity {
                         loadClass = Class.forName(cn);
                     }
                 } catch (ClassNotFoundException ex) {
-                    LOG.log(Level.SEVERE, null, ex);
+                    androidLog(Level.SEVERE, null, ex);
                 }
                 invoke = bundle.getString("invoke");
             }
@@ -123,6 +122,31 @@ public final class Android extends Activity {
         Presenter presenter = new Presenter(webView, aPkg, loadPage, loadClass, invoke);
         presenter.execute(presenter);
     }
+
+    static void androidLog(Level severity, String msg, Object... args) {
+        int priority = Log.WARN;
+        if (severity == Level.FINEST) {
+            priority = Log.DEBUG;
+        }
+        if (severity == Level.FINE || severity == Level.FINER) {
+            priority = Log.VERBOSE;
+        }
+        if (severity == Level.INFO) {
+            priority = Log.INFO;
+        }
+        if (severity == Level.SEVERE) {
+            priority = Log.ERROR;
+        }
+        if (args.length == 1 && args[0] instanceof Throwable) {
+            Log.w("Presenter", msg, (Throwable)args[0]);
+        } else {
+            for (int i = 0; i < args.length; i++) {
+                msg = msg.replace("{" + i + "}", Objects.toString(args[i]));
+            }
+            Log.println(priority, "Presenter", msg);
+        }
+    }
+
     private static final class Presenter extends Generic implements Executor, Runnable {
         final WebView view;
         final Chrome chrome;
@@ -132,7 +156,7 @@ public final class Android extends Activity {
         String invoke;
         BrwsrCtx ctx;
 
-        Presenter(WebView view, String app, String page, Class<?> loadClass, String invoke) {
+        Presenter(final WebView view, String app, String page, Class<?> loadClass, String invoke) {
             super(false, true, "Android", app);
             this.view = view;
             this.page = page;
@@ -140,14 +164,19 @@ public final class Android extends Activity {
             this.invoke = invoke;
             this.chrome = new Chrome();
             this.jvm = new JVM(this);
-            allowFileAccessFromFiles(view);
-            allowUnversalAccessFromFiles(view);
-            view.getSettings().setJavaScriptEnabled(true);
-            view.getSettings().setDomStorageEnabled(true);
-            view.getSettings().setGeolocationEnabled(true);
-            view.getSettings().setJavaScriptCanOpenWindowsAutomatically(true);
-            view.setWebChromeClient(chrome);
-            view.addJavascriptInterface(jvm, "jvm");
+            view.post(new Runnable() {
+                @Override
+                public void run() {
+                    allowFileAccessFromFiles(view);
+                    allowUnversalAccessFromFiles(view);
+                    view.getSettings().setDomStorageEnabled(true);
+                    view.getSettings().setGeolocationEnabled(true);
+                    view.getSettings().setJavaScriptCanOpenWindowsAutomatically(true);
+                    view.setWebChromeClient(chrome);
+                    view.getSettings().setJavaScriptEnabled(true);
+                    view.addJavascriptInterface(jvm, "jvm");
+                }
+            });
         }
 
         @Override
@@ -189,11 +218,7 @@ public final class Android extends Activity {
 
         @Override
         protected void log(Level level, String msg, Object... args) {
-            if (args.length == 1 && args[0] instanceof Throwable) {
-                LOG.log(level, msg, (Throwable)args[0]);
-            } else {
-                LOG.log(level, msg, args);
-            }
+            androidLog(level, msg, args);
         }
 
         @Override
@@ -237,6 +262,8 @@ public final class Android extends Activity {
                         } else {
                             view.loadDataWithBaseURL("file:///", "<html><body><script></script></body></html>", "text/html", null, null);
                         }
+                        dispatch(this, false);
+                        return;
                     }
 
                     if (!jvm.ready) {
@@ -297,7 +324,7 @@ public final class Android extends Activity {
             try {
                 invokeOnPageLoad(this, view.getContext(), loadClass, invoke);
             } catch (Exception ex) {
-                LOG.log(Level.SEVERE, null, ex);
+                androidLog(Level.SEVERE, null, ex);
             }
         }
 
@@ -389,9 +416,9 @@ public final class Android extends Activity {
                 return u.toURI();
             }
         } catch (MalformedURLException ex) {
-            LOG.log(Level.WARNING, resource, ex);
+            androidLog(Level.WARNING, resource, ex);
         } catch (URISyntaxException ex) {
-            LOG.log(Level.WARNING, resource, ex);
+            androidLog(Level.WARNING, resource, ex);
         }
         return null;
     }
@@ -421,7 +448,7 @@ public final class Android extends Activity {
                 fd.close();
                 return true;
             } catch (IOException ex) {
-                LOG.log(Level.FINE, null, ex);
+                androidLog(Level.FINE, null, ex);
                 return false;
             }
         } else if (str.startsWith(assetPrefix2)) {
@@ -430,7 +457,7 @@ public final class Android extends Activity {
                 fd.close();
                 return true;
             } catch (IOException ex) {
-                LOG.log(Level.FINE, null, ex);
+                androidLog(Level.FINE, null, ex);
                 return false;
             }
         }
@@ -445,10 +472,10 @@ public final class Android extends Activity {
             }
             InputStream is = conn.getInputStream();
             is.close();
-            LOG.log(Level.FINE, "found real url: {0}", u);
+            androidLog(Level.FINE, "found real url: {0}", u);
             return true;
         } catch (IOException ignore) {
-            LOG.log(Level.FINE, "Cannot open " + u, ignore);
+            androidLog(Level.FINE, "Cannot open " + u, ignore);
             return false;
         }
     }
@@ -519,7 +546,7 @@ public final class Android extends Activity {
                 mp.setAudioStreamType(AudioManager.STREAM_MUSIC);
                 return mp;
             } catch (Exception ex) {
-                LOG.log(Level.WARNING, "Cannot initialize " + url, ex);
+                androidLog(Level.WARNING, "Cannot initialize " + url, ex);
                 return null;
             }
         }

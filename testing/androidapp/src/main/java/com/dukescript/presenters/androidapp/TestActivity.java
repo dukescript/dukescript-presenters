@@ -60,6 +60,7 @@ public class TestActivity extends Activity {
         final LinearLayout ll = new LinearLayout(this);
         ll.setOrientation(LinearLayout.VERTICAL);
         b.setOnClickListener(new View.OnClickListener() {
+            @Override
             public void onClick(final View view) {
                 clicked = true;
                 try {
@@ -73,6 +74,7 @@ public class TestActivity extends Activity {
         ll.addView(view, new LinearLayout.LayoutParams(LinearLayout.LayoutParams.FILL_PARENT, LinearLayout.LayoutParams.FILL_PARENT));
         view.loadData("<h1 id='h1'>Press Run Button!</h1>", "text/html", "UTF-8");
         setContentView(ll);
+        getPresenter();
     }
 
     @Override
@@ -81,7 +83,6 @@ public class TestActivity extends Activity {
     }
     
     public void click(View v) throws IOException {
-        view.loadUrl("javascript:document.getElementById('h1').innerHTML = 'Running...';");
         final Executor p = (Executor) getPresenter();
         p.execute(new Runnable() {
             @Override
@@ -94,12 +95,7 @@ public class TestActivity extends Activity {
 
     public Fn.Presenter getPresenter() {
         if (presenter == null) {
-            String page;
-            if (clicked) {
-                page = "file:///android_asset/pages/index.html";
-            } else {
-                page = null;
-            }
+            String page = "file:///android_asset/pages/index.html";
             presenter = Android.create(view, page);
         }
         return presenter;
