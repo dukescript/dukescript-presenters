@@ -63,7 +63,7 @@ public final class iOS extends Generic
     private Thread dispatchThread;
 
     public iOS() throws Exception {
-        super(true, false, "iOS", NSBundle.getMainBundle().getBundleIdentifier());
+        super(true, false, "iOS", NSBundle.getMainBundle().getBundleIdentifier(), null);
     }
 
     @Override

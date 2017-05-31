@@ -43,11 +43,10 @@ import net.java.html.json.Function;
 import net.java.html.json.Model;
 import net.java.html.json.Models;
 import net.java.html.json.Property;
-import org.netbeans.html.boot.spi.Fn;
 
 public class TestActivity extends Activity {
     private WebView view;
-    private Fn.Presenter presenter;
+    private Executor presenter;
     private boolean clicked;
 
     @Override
@@ -93,10 +92,10 @@ public class TestActivity extends Activity {
         });
     }
 
-    public Fn.Presenter getPresenter() {
+    public Executor getPresenter() {
         if (presenter == null) {
             String page = "file:///android_asset/pages/index.html";
-            presenter = Android.create(view, page);
+            presenter = Android.create("GPLv3", view, page, null);
         }
         return presenter;
     }

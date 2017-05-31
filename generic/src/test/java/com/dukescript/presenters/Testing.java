@@ -43,7 +43,7 @@ class Testing extends Generic {
     }
     
     protected Testing(boolean sync) {
-        super(sync, true, "Testing", "test");
+        super(sync, true, "Testing", "test", "GPLv3");
         ScriptEngineManager sem = new ScriptEngineManager();
         eng = sem.getEngineByMimeType("text/javascript");
         try {

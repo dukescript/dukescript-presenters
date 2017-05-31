@@ -59,10 +59,11 @@ public abstract class Generic implements Fn.Presenter, Fn.KeepAlive, Flushable {
     private final boolean evalJS;
     private final String type;
     private final String app;
+    private final String licenseKey;
     private final CountDownLatch initialized = new CountDownLatch(1);
     
     Generic(
-        boolean synchronous, boolean evalJS, String type, String app
+        boolean synchronous, boolean evalJS, String type, String app, String licenseKey
     ) {
         this.exported = new TreeSet<Exported>();
         this.key = (int)(System.currentTimeMillis() / 777) % 1000;
@@ -70,6 +71,7 @@ public abstract class Generic implements Fn.Presenter, Fn.KeepAlive, Flushable {
         this.evalJS = evalJS;
         this.type = type;
         this.app = app;
+        this.licenseKey = licenseKey;
     }
     
     final Object lock() {
@@ -176,9 +178,10 @@ public abstract class Generic implements Fn.Presenter, Fn.KeepAlive, Flushable {
             }
         }
         this.msg = "";
-        callbackFn(Strings.logo(
+        String welcome = Strings.license().equals(licenseKey) ? "" : Strings.logo(
             Strings.version(), type, app
-        ).toString(), new OnReady() {
+        ).toString();
+        callbackFn(welcome, new OnReady() {
             @Override
             public void callbackReady(String clbk) {
                 loadJS(begin(clbk).toString());
@@ -193,7 +196,8 @@ public abstract class Generic implements Fn.Presenter, Fn.KeepAlive, Flushable {
         });
     }
 
-    @Messages(
+    @Messages({
+"license=GPLv3",
 "logo=(function() {" +
 "    var logo = document.createElement(\"div\");\n" +
 "    logo.id = \"dukescript.logo\";\n" +
@@ -347,7 +351,7 @@ public abstract class Generic implements Fn.Presenter, Fn.KeepAlive, Flushable {
 "     }\n" +
 "     showLogo();\n" +
 "})();"
-    )
+    })
     /** @return the name of the callback function */
     abstract void callbackFn(String welcome, OnReady onReady);
     abstract void loadJS(String js);

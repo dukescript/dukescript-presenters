@@ -27,11 +27,10 @@ package com.dukescript.presenters.androidapp.test;
 import android.test.ActivityInstrumentationTestCase2;
 import com.dukescript.presenters.androidapp.JUnitTestMethods;
 import com.dukescript.presenters.androidapp.TestActivity;
-import java.io.Closeable;
 import java.lang.reflect.Method;
 import java.util.Map;
+import java.util.concurrent.CountDownLatch;
 import net.java.html.BrwsrCtx;
-import org.netbeans.html.boot.spi.Fn;
 import org.netbeans.html.json.tck.KOTest;
 
 @JUnitTestMethods(annotatedBy = KOTest.class,
@@ -66,7 +65,7 @@ public class KnockoutTest extends KnockoutBase {
     @Override
     protected void runTest() throws Throwable {
         // register the TCK
-        Knockout ko = new Knockout();
+        final Knockout ko = new Knockout();
 
         final Method m = toRun.get(getName());
         if (m != null) {
@@ -92,14 +91,21 @@ public class KnockoutTest extends KnockoutBase {
             }
             RunM r = new RunM();
 
-            Closeable a = Fn.activate(getActivity().getPresenter());
-            BrwsrCtx ctx = ko.createContext();
-            a.close();
+            final CountDownLatch latch = new CountDownLatch(1);
+            final BrwsrCtx[] ctx = { null };
+            getActivity().getPresenter().execute(new Runnable() {
+                @Override
+                public void run() {
+                    ctx[0] = ko.createContext();
+                    latch.countDown();
+                }
+            });
+            latch.await();
             for (int cnt = 0;; cnt++) {
                 if (cnt == 100) {
                     throw new InterruptedException("Too many repetitions!");
                 }
-                ctx.execute(r);
+                ctx[0].execute(r);
                 if (r.ex instanceof InterruptedException) {
                     continue;
                 }

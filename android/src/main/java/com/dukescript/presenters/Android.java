@@ -11,12 +11,12 @@ package com.dukescript.presenters;
  * it under the terms of the GNU General Public License as
  * published by the Free Software Foundation, either version 3 of the
  * License, or (at your option) any later version.
- * 
+ *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU General Public
  * License along with this program.  If not, see
  * <http://www.gnu.org/licenses/gpl-3.0.html>.
@@ -72,9 +72,9 @@ public final class Android extends Activity {
     public Android() {
     }
 
-    public static Fn.Presenter create(WebView view, String page) {
+    public static Executor create(String licenseKey, WebView view, String page, Boolean runOnUiThread) {
         String aPkg = view.getContext().getApplicationInfo().packageName;
-        final Presenter p = new Presenter(view, aPkg, page, null, null);
+        final Presenter p = new Presenter(view, aPkg, page, null, null, licenseKey, runOnUiThread);
         p.dispatch(new Runnable() {
             @Override
             public void run() {
@@ -83,8 +83,72 @@ public final class Android extends Activity {
         }, false);
         return p;
     }
-    
-    @Override public void onCreate(Bundle savedInstanceState) {
+
+    /**
+     * @param view the view to configure
+     * @param page the page to load into the view or <code>null</code>
+     * @return presenter which also implements {@link Executor} interface
+     * @deprecated Consider using {@link #create(java.lang.String, android.webkit.WebView, java.lang.String, java.lang.Boolean)}
+     *    which offers more control over behavior of Android DukeScript presenter.
+     * @since 1.0
+     */
+    @Deprecated
+    public static Fn.Presenter create(WebView view, String page) {
+        return (Fn.Presenter) create(null, view, page, null);
+    }
+
+    /**
+     * Initializes the {@link Activity} by creating a {@link WebView} and
+     * setting it up to allow execution of DukeScript application. The
+     * configuration is performed in <code>AndroidManifest.xml</code> file.
+     * Sample definition looks like:
+     * <pre>
+&lt;application
+    android:allowBackup="true"
+    android:icon="@drawable/ic_launcher"
+    android:label="dstest"
+    android:theme="@android:style/Theme.Black.NoTitleBar.Fullscreen"&gt;
+    &lt;activity android:name="<b>com.dukescript.presenters.Android</b>"
+              android:configChanges="orientation|screenSize"&gt;
+        &lt;intent-filter&gt;
+            &lt;action android:name="android.intent.action.MAIN" /&gt;
+            &lt;category android:name="android.intent.category.LAUNCHER" /&gt;
+        &lt;/intent-filter&gt;
+    &lt;/activity&gt;
+
+    &lt;meta-data android:name="<b>loadPage</b>" android:value="file:///android_asset/pages/index.html" /&gt;
+    &lt;meta-data android:name="<b>loadClass</b>" android:value="org.apidesign.bck2brwsr.dstest.AndroidMain" /&gt;
+    &lt;meta-data android:name="<b>invoke</b>" android:value="main" /&gt;
+&lt;/application&gt;
+     * </pre>
+     * The file specifies fully qualified name of this activity
+     * and additional configuration parameters. Configuration section can define:
+     * <ul>
+     *   <li><b>loadPage</b> - the HTML page to load on start</li>
+     *   <li><b>loadClass</b> - the fully qualified name of a class that contains the main initialization method</li>
+     *   <li><b>invoke</b> - name of static initialization method in the given class that
+     *      will be invoked when the page is loaded and can access the objects
+     *      in the specified HTML page</li>
+     *   <li><b>runOnUiThread</b> - optional parameter that can be set to <code>true</code> or
+     *      <code>false</code> to specify whether to execute the code on standard
+     *      UI thread (only possible on SDK 24 and newer) or on a background thread -
+     *      {@link #create(java.lang.String, android.webkit.WebView, java.lang.String, java.lang.Boolean) more info}.
+     *   </li>
+     * </ul>
+     * <p>
+     * To get more control over the {@link WebView} one can build the scene itself
+     * and use
+     * {@link #create(java.lang.String, android.webkit.WebView, java.lang.String, java.lang.Boolean) }
+     * factory method to initialize the view(s).
+     * <p>
+     * This presenter is licensed under <em>GPLv3</em> license - visit
+     * <a target="top" href="https://dukescript.com/index.html#pricing">DukeScript website</a>
+     * for commercial licenses and support.
+     *
+     * @param savedInstanceState the state of the bundle, unused so far
+     */
+    @Override
+    public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         WebView webView = new WebView(this);
         setContentView(webView);
@@ -101,6 +165,7 @@ public final class Android extends Activity {
         String loadPage = null;
         Class<?> loadClass = null;
         String invoke = null;
+        Boolean runOnUiThread = null;
         if (ai != null) {
             Bundle bundle = ai.metaData;
             if (bundle != null) {
@@ -114,12 +179,18 @@ public final class Android extends Activity {
                     androidLog(Level.SEVERE, null, ex);
                 }
                 invoke = bundle.getString("invoke");
+                if ("true".equals(bundle.getString("runOnUiThread"))) {
+                    runOnUiThread = true;
+                }
+                if ("false".equals(bundle.getString("runOnUiThread"))) {
+                    runOnUiThread = false;
+                }
             }
         }
         if (loadPage == null || loadClass == null || invoke == null) {
             throw new IllegalStateException("Cannot find meta-data ('loadPage', 'loadClass', 'invoke') in " + ai);
         }
-        Presenter presenter = new Presenter(webView, aPkg, loadPage, loadClass, invoke);
+        Presenter presenter = new Presenter(webView, aPkg, loadPage, loadClass, invoke, null, runOnUiThread);
         presenter.execute(presenter);
     }
 
@@ -152,16 +223,18 @@ public final class Android extends Activity {
         final Chrome chrome;
         final JVM jvm;
         final String page;
+        final boolean runOnUiThread;
         Class<?> loadClass;
         String invoke;
         BrwsrCtx ctx;
 
-        Presenter(final WebView view, String app, String page, Class<?> loadClass, String invoke) {
-            super(false, true, "Android", app);
+        Presenter(final WebView view, String app, String page, Class<?> loadClass, String invoke, String licenseKey, Boolean runOnUiThread) {
+            super(false, true, "Android", app, licenseKey);
             this.view = view;
             this.page = page;
             this.loadClass = loadClass;
             this.invoke = invoke;
+            this.runOnUiThread = runOnUiThread == null ? Build.VERSION.SDK_INT >= 24 : runOnUiThread;
             this.chrome = new Chrome();
             this.jvm = new JVM(this);
             view.post(new Runnable() {
@@ -331,7 +404,7 @@ public final class Android extends Activity {
         private static Executor DISPATCH;
 
         final void dispatch(Runnable runnable, boolean delayed) {
-            if (Build.VERSION.SDK_INT < 24) {
+            if (!runOnUiThread) {
                 if (DISPATCH == null) {
                     DISPATCH = Executors.newSingleThreadExecutor(jvm);
                 }
@@ -350,7 +423,7 @@ public final class Android extends Activity {
             }
         }
     }
-    
+
     static void invokeOnPageLoad(Fn.Presenter presenter, Context context, Class<?> clazz, final String method) throws Exception {
         Closeable c = Fn.activate(presenter);
         try {
@@ -378,7 +451,7 @@ public final class Android extends Activity {
             c.close();
         }
     }
-    
+
 
     private static void allowUnversalAccessFromFiles(WebView v) {
         try {
@@ -479,7 +552,7 @@ public final class Android extends Activity {
             return false;
         }
     }
-    
+
     private static final class AlertHandler extends Handler
             implements DialogInterface.OnClickListener, DialogInterface.OnCancelListener {
 
@@ -507,7 +580,7 @@ public final class Android extends Activity {
             sendMessage(obtainMessage());
         }
     }
-    
+
     static final class Audio implements AudioEnvironment<MediaPlayer> {
         private final String baseUrl;
         private final Context ctx;
