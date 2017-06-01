@@ -29,6 +29,12 @@
             <groupId>${project.groupId}</groupId>
             <artifactId>android</artifactId>
             <version>${project.version}</version>
+            <exclusions>
+                <exclusion>
+                    <groupId>${project.groupId}</groupId>
+                    <artifactId>generic</artifactId>
+                </exclusion>
+            </exclusions>
         </dependency>
         <dependency>
             <groupId>org.netbeans.html</groupId>
