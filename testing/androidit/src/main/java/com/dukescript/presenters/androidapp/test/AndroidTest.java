@@ -27,15 +27,15 @@ package com.dukescript.presenters.androidapp.test;
 import android.test.ActivityInstrumentationTestCase2;
 import com.dukescript.presenters.androidapp.JUnitTestMethods;
 import com.dukescript.presenters.androidapp.TestActivity;
-import java.io.Closeable;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.Executor;
 import net.java.html.js.tests.GCBodyTest;
 import net.java.html.js.tests.JavaScriptBodyTest;
-import org.netbeans.html.boot.spi.Fn;
 import org.netbeans.html.json.tck.JavaScriptTCK;
 import org.netbeans.html.json.tck.KOTest;
 
@@ -60,34 +60,65 @@ public class AndroidTest extends AndroidBase {
         super.setUp();
     }
     
-    
-    
     @Override
     protected void runTest() throws Throwable {
-        Method m = toRun.get(getName());
+        final Method m = toRun.get(getName());
         if (m != null) {
-            Object inst = m.getDeclaringClass().newInstance();
-            for (int cnt = 0;; cnt++) {
-                Closeable a = Fn.activate(getActivity().getPresenter());
-                if (cnt == 100) {
-                    throw new InterruptedException("Too many repetitions");
-                }
-                try {
-                    m.invoke(inst);
-                } catch (InvocationTargetException ex) {
-                    if (ex.getTargetException() instanceof InterruptedException) {
-                        Thread.sleep(100);
-                        continue;
-                    }
-                    throw ex.getTargetException();
-                } finally {
-                    a.close();
-                }
-                break;
-            }
+            runMethod(this, m);
         } else {
             super.runTest();
         }
+    }
+
+    static void runMethod(
+        ActivityInstrumentationTestCase2<com.dukescript.presenters.androidapp.TestActivity> activity,
+        final Method m
+    ) throws InstantiationException, Throwable, IllegalAccessException {
+        final Object inst = m.getDeclaringClass().newInstance();
+        Executor e = obtainExecutor(activity);
+        for (int cnt = 0;; cnt++) {
+            if (cnt == 100) {
+                throw new InterruptedException("Too many repetitions");
+            }
+            final CountDownLatch cdl = new CountDownLatch(1);
+            final Throwable[] res = { null };
+            e.execute(new Runnable() {
+                @Override
+                public void run() {
+                    try {
+                        m.invoke(inst);
+                    } catch (Throwable ex) {
+                        res[0] = ex;
+                    } finally {
+                        cdl.countDown();
+                    }
+                }
+            });
+            cdl.countDown();
+            if (res[0] != null) {
+                if (res[0] instanceof InvocationTargetException) {
+                    InvocationTargetException te = (InvocationTargetException) res[0];
+                    if (te.getTargetException() instanceof InterruptedException) {
+                        Thread.sleep(100);
+                        continue;
+                    }
+                    throw te.getTargetException();
+                }
+            }
+            break;
+        }
+    }
+
+    private static Executor obtainExecutor(final ActivityInstrumentationTestCase2<com.dukescript.presenters.androidapp.TestActivity> test) {
+        final Executor[] e = { null };
+        test.getActivity().runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                e[0] = (Executor) test.getActivity().getPresenter();
+            }
+        });
+        test.getInstrumentation().waitForIdleSync();
+        return e[0];
     }
 
     static final class ScriptTest extends JavaScriptTCK {

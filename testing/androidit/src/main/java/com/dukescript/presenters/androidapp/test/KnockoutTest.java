@@ -27,11 +27,9 @@ package com.dukescript.presenters.androidapp.test;
 import android.test.ActivityInstrumentationTestCase2;
 import com.dukescript.presenters.androidapp.JUnitTestMethods;
 import com.dukescript.presenters.androidapp.TestActivity;
-import java.io.Closeable;
+import static com.dukescript.presenters.androidapp.test.AndroidTest.runMethod;
 import java.lang.reflect.Method;
 import java.util.Map;
-import net.java.html.BrwsrCtx;
-import org.netbeans.html.boot.spi.Fn;
 import org.netbeans.html.json.tck.KOTest;
 
 @JUnitTestMethods(annotatedBy = KOTest.class,
@@ -61,53 +59,15 @@ public class KnockoutTest extends KnockoutBase {
             toRun = Knockout.assertMethods(KnockoutTest.class);
         }
         super.setUp();
+        // register the TCK
+        Knockout ko = new Knockout();
     }
     
     @Override
     protected void runTest() throws Throwable {
-        // register the TCK
-        Knockout ko = new Knockout();
-
         final Method m = toRun.get(getName());
         if (m != null) {
-            class RunM implements Runnable {
-
-                Object inst;
-                Throwable ex;
-
-                @Override
-                public void run() {
-                    ex = null;
-                    try {
-                        if (inst == null) {
-                            inst = m.getDeclaringClass().newInstance();
-                        }
-                        m.invoke(inst);
-                    } catch (Exception ex) {
-                        this.ex = ex;
-                    } catch (Error ex) {
-                        this.ex = ex;
-                    }
-                }
-            }
-            RunM r = new RunM();
-
-            Closeable a = Fn.activate(getActivity().getPresenter());
-            BrwsrCtx ctx = ko.createContext();
-            a.close();
-            for (int cnt = 0;; cnt++) {
-                if (cnt == 100) {
-                    throw new InterruptedException("Too many repetitions!");
-                }
-                ctx.execute(r);
-                if (r.ex instanceof InterruptedException) {
-                    continue;
-                }
-                if (r.ex instanceof Throwable) {
-                    throw r.ex;
-                }
-                break;
-            }
+            runMethod(this, m);
         } else {
             super.runTest();
         }
