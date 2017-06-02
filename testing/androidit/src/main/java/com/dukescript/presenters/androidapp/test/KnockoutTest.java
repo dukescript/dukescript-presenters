@@ -59,13 +59,15 @@ public class KnockoutTest extends KnockoutBase {
             toRun = Knockout.assertMethods(KnockoutTest.class);
         }
         super.setUp();
+        // register the TCK
+        Knockout ko = new Knockout();
     }
 
     @Override
     protected void runTest() throws Throwable {
         final Method m = toRun.get(getName());
         if (m != null) {
-            runMethod(getActivity().getPresenter(), m);
+            runMethod(this, m);
         } else {
             super.runTest();
         }

@@ -34,7 +34,6 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.Executor;
-import net.java.html.BrwsrCtx;
 import net.java.html.js.tests.GCBodyTest;
 import net.java.html.js.tests.JavaScriptBodyTest;
 import org.netbeans.html.json.tck.JavaScriptTCK;
@@ -60,59 +59,66 @@ public class AndroidTest extends AndroidBase {
         }
         super.setUp();
     }
-
-
+    
     @Override
     protected void runTest() throws Throwable {
         final Method m = toRun.get(getName());
         if (m != null) {
-            runMethod(getActivity().getPresenter(), m);
+            runMethod(this, m);
         } else {
             super.runTest();
         }
     }
 
-    private static void runInContext(Executor presenter, final Runnable r) {
-        presenter.execute(new Runnable() {
-            @Override
-            public void run() {
-                BrwsrCtx ctx = BrwsrCtx.findDefault(AndroidTest.class);
-                ctx.execute(r);
-            }
-        });
-    }
-
-    static void runMethod(Executor presenter, final Method m) throws Throwable, IllegalAccessException, InstantiationException {
+    static void runMethod(
+        ActivityInstrumentationTestCase2<com.dukescript.presenters.androidapp.TestActivity> activity,
+        final Method m
+    ) throws InstantiationException, Throwable, IllegalAccessException {
         final Object inst = m.getDeclaringClass().newInstance();
+        Executor e = obtainExecutor(activity);
         for (int cnt = 0;; cnt++) {
             if (cnt == 100) {
                 throw new InterruptedException("Too many repetitions");
             }
-            final Throwable[] err = { null };
             final CountDownLatch cdl = new CountDownLatch(1);
-            runInContext(presenter, new Runnable() {
+            final Throwable[] res = { null };
+            e.execute(new Runnable() {
                 @Override
                 public void run() {
                     try {
                         m.invoke(inst);
-                    } catch (Throwable t) {
-                        err[0] = t;
+                    } catch (Throwable ex) {
+                        res[0] = ex;
                     } finally {
                         cdl.countDown();
                     }
                 }
             });
-            cdl.await();
-            if (err[0] instanceof InvocationTargetException) {
-                Throwable target = ((InvocationTargetException) err[0]).getTargetException();
-                if (target instanceof InterruptedException) {
-                    Thread.sleep(100);
-                    continue;
+            cdl.countDown();
+            if (res[0] != null) {
+                if (res[0] instanceof InvocationTargetException) {
+                    InvocationTargetException te = (InvocationTargetException) res[0];
+                    if (te.getTargetException() instanceof InterruptedException) {
+                        Thread.sleep(100);
+                        continue;
+                    }
+                    throw te.getTargetException();
                 }
-                throw target;
             }
             break;
         }
+    }
+
+    private static Executor obtainExecutor(final ActivityInstrumentationTestCase2<com.dukescript.presenters.androidapp.TestActivity> test) {
+        final Executor[] e = { null };
+        test.getActivity().runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                e[0] = (Executor) test.getActivity().getPresenter();
+            }
+        });
+        test.getInstrumentation().waitForIdleSync();
+        return e[0];
     }
 
     static final class ScriptTest extends JavaScriptTCK {

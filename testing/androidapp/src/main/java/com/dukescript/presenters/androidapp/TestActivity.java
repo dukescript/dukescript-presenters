@@ -73,7 +73,6 @@ public class TestActivity extends Activity {
         ll.addView(view, new LinearLayout.LayoutParams(LinearLayout.LayoutParams.FILL_PARENT, LinearLayout.LayoutParams.FILL_PARENT));
         view.loadData("<h1 id='h1'>Press Run Button!</h1>", "text/html", "UTF-8");
         setContentView(ll);
-        getPresenter();
     }
 
     @Override
