@@ -94,7 +94,7 @@ public class TestActivity extends Activity {
     public Executor getPresenter() {
         if (presenter == null) {
             String page = "file:///android_asset/pages/index.html";
-            presenter = Android.create("GPLv3", view, page, null);
+            presenter = Android.configure("GPLv3", view, page, null);
         }
         return presenter;
     }
