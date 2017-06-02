@@ -12,12 +12,12 @@ package com.dukescript.presenters.androidapp.test;
  * it under the terms of the GNU General Public License as
  * published by the Free Software Foundation, either version 3 of the
  * License, or (at your option) any later version.
- * 
+ *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU General Public
  * License along with this program.  If not, see
  * <http://www.gnu.org/licenses/gpl-3.0.html>.
@@ -34,6 +34,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.Executor;
+import net.java.html.BrwsrCtx;
 import net.java.html.js.tests.GCBodyTest;
 import net.java.html.js.tests.JavaScriptBodyTest;
 import org.netbeans.html.json.tck.JavaScriptTCK;
@@ -49,7 +50,7 @@ public class AndroidTest extends AndroidBase {
     private static Map<String,Method> toRun;
 
     public AndroidTest() {
-        super(TestActivity.class); 
+        super(TestActivity.class);
     }
 
     @Override
@@ -59,43 +60,58 @@ public class AndroidTest extends AndroidBase {
         }
         super.setUp();
     }
-    
-    
-    
+
+
     @Override
     protected void runTest() throws Throwable {
         final Method m = toRun.get(getName());
         if (m != null) {
-            final Object inst = m.getDeclaringClass().newInstance();
-            for (int cnt = 0;; cnt++) {
-                if (cnt == 100) {
-                    throw new InterruptedException("Too many repetitions");
-                }
-                Executor exec = (Executor) getActivity().getPresenter();
-                final Throwable[] err = { null };
-                CountDownLatch cdl = new CountDownLatch(1);
-                exec.execute(new Runnable() {
-                    @Override
-                    public void run() {
-                        try {
-                            m.invoke(inst);
-                        } catch (Throwable t) {
-                            err[0] = t;
-                        }
-                    }
-                });
-                if (err[0] instanceof InvocationTargetException) {
-                    Throwable target = ((InvocationTargetException) err[0]).getTargetException();
-                    if (target instanceof InterruptedException) {
-                        Thread.sleep(100);
-                        continue;
-                    }
-                    throw target;
-                }
-                break;
-            }
+            runMethod(getActivity().getPresenter(), m);
         } else {
             super.runTest();
+        }
+    }
+
+    private static void runInContext(Executor presenter, final Runnable r) {
+        presenter.execute(new Runnable() {
+            @Override
+            public void run() {
+                BrwsrCtx ctx = BrwsrCtx.findDefault(AndroidTest.class);
+                ctx.execute(r);
+            }
+        });
+    }
+
+    static void runMethod(Executor presenter, final Method m) throws Throwable, IllegalAccessException, InstantiationException {
+        final Object inst = m.getDeclaringClass().newInstance();
+        for (int cnt = 0;; cnt++) {
+            if (cnt == 100) {
+                throw new InterruptedException("Too many repetitions");
+            }
+            final Throwable[] err = { null };
+            final CountDownLatch cdl = new CountDownLatch(1);
+            runInContext(presenter, new Runnable() {
+                @Override
+                public void run() {
+                    try {
+                        m.invoke(inst);
+                    } catch (Throwable t) {
+                        err[0] = t;
+                    } finally {
+                        cdl.countDown();
+                    }
+                }
+            });
+            cdl.await();
+            if (err[0] instanceof InvocationTargetException) {
+                Throwable target = ((InvocationTargetException) err[0]).getTargetException();
+                if (target instanceof InterruptedException) {
+                    Thread.sleep(100);
+                    continue;
+                }
+                throw target;
+            }
+            break;
         }
     }
 

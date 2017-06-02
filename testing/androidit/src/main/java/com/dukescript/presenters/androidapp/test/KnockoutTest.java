@@ -12,12 +12,12 @@ package com.dukescript.presenters.androidapp.test;
  * it under the terms of the GNU General Public License as
  * published by the Free Software Foundation, either version 3 of the
  * License, or (at your option) any later version.
- * 
+ *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU General Public
  * License along with this program.  If not, see
  * <http://www.gnu.org/licenses/gpl-3.0.html>.
@@ -27,15 +27,14 @@ package com.dukescript.presenters.androidapp.test;
 import android.test.ActivityInstrumentationTestCase2;
 import com.dukescript.presenters.androidapp.JUnitTestMethods;
 import com.dukescript.presenters.androidapp.TestActivity;
+import static com.dukescript.presenters.androidapp.test.AndroidTest.runMethod;
 import java.lang.reflect.Method;
 import java.util.Map;
-import java.util.concurrent.CountDownLatch;
-import net.java.html.BrwsrCtx;
 import org.netbeans.html.json.tck.KOTest;
 
 @JUnitTestMethods(annotatedBy = KOTest.class,
     tests = {
-        net.java.html.json.tests.ConvertTypesTest.class, 
+        net.java.html.json.tests.ConvertTypesTest.class,
         net.java.html.json.tests.JSONTest.class,
         net.java.html.json.tests.KnockoutTest.class,
         net.java.html.json.tests.MinesTest.class,
@@ -51,7 +50,7 @@ public class KnockoutTest extends KnockoutBase {
     private static Map<String,Method> toRun;
 
     public KnockoutTest() {
-        super(TestActivity.class); 
+        super(TestActivity.class);
     }
 
     @Override
@@ -61,59 +60,12 @@ public class KnockoutTest extends KnockoutBase {
         }
         super.setUp();
     }
-    
+
     @Override
     protected void runTest() throws Throwable {
-        // register the TCK
-        final Knockout ko = new Knockout();
-
         final Method m = toRun.get(getName());
         if (m != null) {
-            class RunM implements Runnable {
-
-                Object inst;
-                Throwable ex;
-
-                @Override
-                public void run() {
-                    ex = null;
-                    try {
-                        if (inst == null) {
-                            inst = m.getDeclaringClass().newInstance();
-                        }
-                        m.invoke(inst);
-                    } catch (Exception ex) {
-                        this.ex = ex;
-                    } catch (Error ex) {
-                        this.ex = ex;
-                    }
-                }
-            }
-            RunM r = new RunM();
-
-            final CountDownLatch latch = new CountDownLatch(1);
-            final BrwsrCtx[] ctx = { null };
-            getActivity().getPresenter().execute(new Runnable() {
-                @Override
-                public void run() {
-                    ctx[0] = ko.createContext();
-                    latch.countDown();
-                }
-            });
-            latch.await();
-            for (int cnt = 0;; cnt++) {
-                if (cnt == 100) {
-                    throw new InterruptedException("Too many repetitions!");
-                }
-                ctx[0].execute(r);
-                if (r.ex instanceof InterruptedException) {
-                    continue;
-                }
-                if (r.ex instanceof Throwable) {
-                    throw r.ex;
-                }
-                break;
-            }
+            runMethod(getActivity().getPresenter(), m);
         } else {
             super.runTest();
         }
