@@ -80,6 +80,15 @@ import org.openide.util.lookup.ServiceProvider;
  * If the property is not specified the system tries <b>GTK</b> mode first, 
  * followed by <b>AWT</b> and then tries to execute <code>xdg-open</code>
  * (default LINUX command to launch a browser from a shell script).
+ * <p>
+ * To use this presenter specify following dependency:
+ * <pre>
+ * &lt;dependency&gt;
+ *   &lt;groupId&gt;com.dukescript.presenters&lt;/groupId&gt;
+ *   &lt;artifactId&gt;browser&lt;/artifactId&gt;
+ *   &lt;version&gt;<a target="blank" href="http://search.maven.org/#search%7Cgav%7C1%7Cg%3A%22com.dukescript.presenters%22%20AND%20a%3A%22browser%22">1.x</a>&lt;/version&gt;
+ * &lt;/dependency&gt;
+ * </pre>
  */
 @ServiceProvider(service = Presenter.class)
 public final class Browser implements Fn.Presenter, Fn.KeepAlive, Flushable, Executor {

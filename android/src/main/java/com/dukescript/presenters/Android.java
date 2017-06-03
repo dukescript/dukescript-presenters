@@ -84,6 +84,15 @@ import org.netbeans.html.sound.spi.AudioEnvironment;
  * from Java by using the
  * {@link #configure(java.lang.String, android.webkit.WebView, java.lang.String, java.lang.Boolean)}
  * method.
+ * <p>
+ * To use this presenter specify following dependency:
+ * <pre>
+ * &lt;dependency&gt;
+ *   &lt;groupId&gt;com.dukescript.presenters&lt;/groupId&gt;
+ *   &lt;artifactId&gt;android&lt;/artifactId&gt;
+ *   &lt;version&gt;<a target="blank" href="http://search.maven.org/#search%7Cgav%7C1%7Cg%3A%22com.dukescript.presenters%22%20AND%20a%3A%22android%22">1.x</a>&lt;/version&gt;
+ * &lt;/dependency&gt;
+ * </pre>
  */
 public final class Android extends Activity {
     public Android() {
