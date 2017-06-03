@@ -37,6 +37,7 @@ import org.robovm.apple.corelocation.CLRegionState;
 import org.robovm.apple.foundation.NSArray;
 import org.robovm.apple.foundation.NSError;
 
+@Deprecated
 @ServiceProvider(service = GLProvider.class)
 public final class iOSGeo extends GLProvider<CLLocation,iOSGeo.Adapter> {
     @Override

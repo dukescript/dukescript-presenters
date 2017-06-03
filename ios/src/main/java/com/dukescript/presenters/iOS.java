@@ -54,6 +54,20 @@ import org.robovm.apple.uikit.UIWebViewDelegateAdapter;
 import org.robovm.apple.uikit.UIWebViewNavigationType;
 import org.robovm.apple.uikit.UIWindow;
 
+/** Ultimate <a href="http://dukescript.com">DukeScript</a>
+ * <a href="https://github.com/dukescript/dukescript-presenters">Presenter</a>
+ * for all iOS devices. Builds upon
+ * <a href="http://robovm.org">RoboVM</a> or its
+ * <a href="https://dukescript.com/update/2017/03/06/robovm-fork.html">alternatives</a>.
+ * To use this presenter specify following dependency:
+ * <pre>
+ * &lt;dependency&gt;
+ *   &lt;groupId&gt;com.dukescript.presenters&lt;/groupId&gt;
+ *   &lt;artifactId&gt;ios&lt;/artifactId&gt;
+ *   &lt;version&gt;<a target="blank" href="http://search.maven.org/#search%7Cgav%7C1%7Cg%3A%22com.dukescript.presenters%22%20AND%20a%3A%22ios%22">1.x</a>&lt;/version&gt;
+ * &lt;/dependency&gt;
+ * </pre>
+ */
 @ServiceProvider(service = Fn.Presenter.class)
 public final class iOS extends Generic
         implements Executor {

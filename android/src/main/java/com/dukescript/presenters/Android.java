@@ -68,7 +68,7 @@ import org.netbeans.html.boot.spi.Fn;
 import org.netbeans.html.context.spi.Contexts;
 import org.netbeans.html.sound.spi.AudioEnvironment;
 
-/** *  The ultimate <a href="http://dukescript.com">DukeScript</a>
+/** Ultimate <a href="http://dukescript.com">DukeScript</a>
  * <a href="https://github.com/dukescript/dukescript-presenters">Presenter</a>
  * for all Android devices.
  * <p>
