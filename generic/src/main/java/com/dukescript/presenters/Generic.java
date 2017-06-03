@@ -356,8 +356,15 @@ abstract class Generic implements Fn.Presenter, Fn.KeepAlive, Flushable {
     abstract void callbackFn(String welcome, OnReady onReady);
     abstract void loadJS(String js);
     
-    /** Dispatches callbacks from JavaScript back into appropriate
+    /** Dispatches callback from JavaScript back into appropriate
      * Java implementation.
+     * @param method the type of call to make
+     * @param a1 first argument
+     * @param a2 second argument
+     * @param a3 third argument
+     * @param a4 fourth argument
+     * @return returned string
+     * @throws Exception if something goes wrong
      */
     final String callback(String method, 
         String a1, String a2, String a3, String a4
