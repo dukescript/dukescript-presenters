@@ -109,15 +109,17 @@ public class AndroidTest extends AndroidBase {
         }
     }
 
-    private static Executor obtainExecutor(final ActivityInstrumentationTestCase2<com.dukescript.presenters.androidapp.TestActivity> test) {
+    private static Executor obtainExecutor(final ActivityInstrumentationTestCase2<com.dukescript.presenters.androidapp.TestActivity> test) throws InterruptedException {
         final Executor[] e = { null };
+        final CountDownLatch assigned = new CountDownLatch(1);
         test.getActivity().runOnUiThread(new Runnable() {
             @Override
             public void run() {
                 e[0] = (Executor) test.getActivity().getPresenter();
+                assigned.countDown();
             }
         });
-        test.getInstrumentation().waitForIdleSync();
+        assigned.await();
         return e[0];
     }
 

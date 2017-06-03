@@ -58,6 +58,7 @@ import java.net.URL;
 import java.net.URLConnection;
 import java.util.Locale;
 import java.util.Objects;
+import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.Executor;
 import java.util.concurrent.Executors;
 import java.util.concurrent.LinkedBlockingQueue;
@@ -410,59 +411,69 @@ public final class Android extends Activity {
 
         @Override
         void callbackFn(final String welcome, final OnReady onReady) {
-            class Ready implements Runnable {
-                boolean subsequent;
+            class LoadPage implements Runnable {
+                private final Runnable initialize;
+
+                LoadPage(Runnable initialize) {
+                    this.initialize = initialize;
+                }
+
                 @Override
                 public void run() {
-                    if (!subsequent) {
-                        subsequent = true;
-                        if (page != null) {
-                            view.loadUrl(page);
-                        } else {
-                            view.loadDataWithBaseURL("file:///", "<html><body><script></script></body></html>", "text/html", null, null);
-                        }
-                        dispatch(this, false);
-                        return;
-                    }
-
-                    if (!jvm.ready) {
-                        loadScript("javascript:try {\n"
-                                + "  jvm.ready();\n"
-                                + "} catch (e) {\n"
-                                + "  alert('jvm' + Object.getOwnPropertyNames(jvm) + ' ready: ' + jvm.ready);\n"
-                                + "}");
-                        view.postDelayed(this, 10);
+                    if (page != null) {
+                        view.loadUrl(page);
                     } else {
-                        loadScript("javascript:(function(global) {\n"
-                                + "  var jvm = global.jvm;\n"
-                                + "  global.androidCB = function(m,a1,a2,a3,a4) {\n"
-                                + "    return jvm.invoke(m,a1,a2,a3,a4);\n"
-                                + "  }\n"
-                                + "  global.alert = function(msg) { jvm.invoke('alert', msg, null, null, null); };"
-                                + "  global.confirm = function(msg) {\n"
-                                + "    var ret = jvm.invoke('confirm', msg, null, null, null);\n"
-                                //                + "    alert('val: ' + ret + ' typeof: ' + typeof ret);\n"
-                                + "    return 'true' == ret;"
-                                + "  };"
-                                + "  global.prompt = function(msg, val) {\n"
-                                + "    var ret = jvm.invoke('prompt', msg, val, null, null);\n"
-                                //                + "    alert('val: ' + ret + ' typeof: ' + typeof ret);\n"
-                                + "    return ret;"
-                                + "  };"
-                                + "})(this);\n" + welcome
-                        );
-                        dispatch(new Runnable() {
-                            @Override
-                            public void run() {
-                                onReady.callbackReady("androidCB");
-                                jvm.run();
-                            }
-                        }, true);
+                        view.loadDataWithBaseURL("file:///", "<html><body><script></script></body></html>", "text/html", null, null);
                     }
+                    dispatch(initialize, false);
+                }
+            }
+            class InitializeJSBridge implements Runnable {
+                private final Runnable initialize;
+
+                InitializeJSBridge(Runnable initialize) {
+                    this.initialize = initialize;
+                }
+
+                @Override
+                public void run() {
+                    loadScript("javascript:jvm.ready();\n");
+                    Thread thread = new Thread(initialize, "Initialize JS Bridge");
+                    thread.start();
+                }
+            }
+            class Ready implements Runnable {
+                @Override
+                public void run() {
+                    try {
+                        jvm.ready.await();
+                    } catch (InterruptedException ex) {
+                        throw new IllegalStateException(ex);
+                    }
+                    loadScript("javascript:(function(global) {\n"
+                            + "  var jvm = global.jvm;\n"
+                            + "  global.androidCB = function(m,a1,a2,a3,a4) {\n"
+                            + "    return jvm.invoke(m,a1,a2,a3,a4);\n"
+                            + "  }\n"
+                            + "  global.alert = function(msg) { jvm.invoke('alert', msg, null, null, null); };"
+                            + "  global.confirm = function(msg) {\n"
+                            + "    var ret = jvm.invoke('confirm', msg, null, null, null);\n"
+                            //                + "    alert('val: ' + ret + ' typeof: ' + typeof ret);\n"
+                            + "    return 'true' == ret;"
+                            + "  };"
+                            + "  global.prompt = function(msg, val) {\n"
+                            + "    var ret = jvm.invoke('prompt', msg, val, null, null);\n"
+                            //                + "    alert('val: ' + ret + ' typeof: ' + typeof ret);\n"
+                            + "    return ret;"
+                            + "  };"
+                            + "})(this);\n" + welcome
+                    );
+                    onReady.callbackReady("androidCB");
+                    dispatch(jvm, true);
                 }
             }
             Activity a = (Activity) view.getContext();
-            a.runOnUiThread(new Ready());
+            a.runOnUiThread(new LoadPage(new InitializeJSBridge(new Ready())));
         }
 
         @Override
@@ -745,17 +756,18 @@ public final class Android extends Activity {
     }
 
     private static final class JVM implements Runnable, ThreadFactory {
-        volatile boolean ready;
+        private final CountDownLatch ready;
         private final Presenter presenter;
         private final LinkedBlockingQueue<Runnable> queue = new LinkedBlockingQueue<Runnable>();
 
         JVM(Presenter p) {
             this.presenter = p;
+            this.ready = new CountDownLatch(1);
         }
 
         boolean dispatch(Runnable r) {
             queue.add(r);
-            if (!ready) {
+            if (ready.getCount() > 0) {
                 androidLog(Level.FINE, "dispatch queued {0}", r);
                 return false;
             }
@@ -775,8 +787,8 @@ public final class Android extends Activity {
 
         @JavascriptInterface
         public void ready() {
-            ready = true;
-            androidLog(Level.FINE, "ready set to true. Queue: {0}", queue);
+            ready.countDown();
+            androidLog(Level.FINE, "ready set to done. Queue: {0}", queue);
         }
 
         @JavascriptInterface
