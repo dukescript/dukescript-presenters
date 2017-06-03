@@ -170,7 +170,9 @@ abstract class Generic implements Fn.Presenter, Fn.KeepAlive, Flushable {
         if (msg != null) {
             for (;;) {
                 try {
+                    log(Level.FINE, "Awaiting as of {0}", msg);
                     initialized.await();
+                    log(Level.FINE, "Waiting is over");
                     return;
                 } catch (InterruptedException ex) {
                     log(Level.INFO, "Interrupt", ex);
@@ -184,13 +186,18 @@ abstract class Generic implements Fn.Presenter, Fn.KeepAlive, Flushable {
         callbackFn(welcome, new OnReady() {
             @Override
             public void callbackReady(String clbk) {
+                log(Level.FINE, "callbackReady with {0}", clbk);
                 loadJS(begin(clbk).toString());
+                log(Level.FINE, "checking OK state");
                 if (!assertOK()) {
+                    log(Level.WARNING, "no OK: {0}", error());
                     throw new IllegalStateException(error());
                 }
+                log(Level.FINE, "assertOK");
 
                 loadJS(Strings.init(key, clbk).toString());
 
+                log(Level.FINE, "callbackReady: countingDown");
                 initialized.countDown();
             }
         });
@@ -747,6 +754,7 @@ abstract class Generic implements Fn.Presenter, Fn.KeepAlive, Flushable {
     } // end of Item
     
     final void result(String typeof, String res) {
+        log(Level.FINE, "result@{0}: {1}", typeof, res);
         synchronized (lock()) {
             if ("OK".equals(typeof)) {
                 log(Level.FINE, "init: {0}", res);

@@ -155,13 +155,16 @@ public final class Android extends Activity {
      *    on SDK 24 and newer and background thread otherwise
      * @return the executor to use to safely execute code inside of the HTML content of your view
      */
-    public static Executor configure(String licenseKey, WebView view, String page, Boolean runOnUiThread) {
+    public static Executor configure(String licenseKey, final WebView view, String page, Boolean runOnUiThread) {
         String aPkg = view.getContext().getApplicationInfo().packageName;
         final Presenter p = new Presenter(view, aPkg, page, null, null, licenseKey, runOnUiThread);
+        androidLog(Level.SEVERE, "Creating presenter for {0}", view);
         p.dispatch(new Runnable() {
             @Override
             public void run() {
+                androidLog(Level.SEVERE, "Initializing presenter for {0}", view);
                 p.init();
+                androidLog(Level.SEVERE, "Init done for {0}", view);
             }
         }, false);
         return p;
@@ -320,19 +323,14 @@ public final class Android extends Activity {
             this.runOnUiThread = runOnUiThread == null ? Build.VERSION.SDK_INT >= 24 : runOnUiThread;
             this.chrome = new Chrome();
             this.jvm = new JVM(this);
-            view.post(new Runnable() {
-                @Override
-                public void run() {
-                    allowFileAccessFromFiles(view);
-                    allowUnversalAccessFromFiles(view);
-                    view.getSettings().setDomStorageEnabled(true);
-                    view.getSettings().setGeolocationEnabled(true);
-                    view.getSettings().setJavaScriptCanOpenWindowsAutomatically(true);
-                    view.setWebChromeClient(chrome);
-                    view.getSettings().setJavaScriptEnabled(true);
-                    view.addJavascriptInterface(jvm, "jvm");
-                }
-            });
+            allowFileAccessFromFiles(view);
+            allowUnversalAccessFromFiles(view);
+            view.getSettings().setDomStorageEnabled(true);
+            view.getSettings().setGeolocationEnabled(true);
+            view.getSettings().setJavaScriptCanOpenWindowsAutomatically(true);
+            view.setWebChromeClient(chrome);
+            view.getSettings().setJavaScriptEnabled(true);
+            view.addJavascriptInterface(jvm, "jvm");
         }
 
         @Override
@@ -400,6 +398,11 @@ public final class Android extends Activity {
                             Presenter.this.log(Level.SEVERE, null, ex);
                         }
                     }
+                }
+
+                @Override
+                public String toString() {
+                    return "CtxRun:" + command.toString();
                 }
             }
             dispatch(new CtxRun());
@@ -752,7 +755,11 @@ public final class Android extends Activity {
 
         boolean dispatch(Runnable r) {
             queue.add(r);
-            return ready;
+            if (!ready) {
+                androidLog(Level.FINE, "dispatch queued {0}", r);
+                return false;
+            }
+            return true;
         }
 
         @Override
@@ -769,6 +776,7 @@ public final class Android extends Activity {
         @JavascriptInterface
         public void ready() {
             ready = true;
+            androidLog(Level.FINE, "ready set to true. Queue: {0}", queue);
         }
 
         @JavascriptInterface
