@@ -50,7 +50,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 import java.util.logging.Level;
 import org.netbeans.html.boot.spi.Fn;
 
-public abstract class Generic implements Fn.Presenter, Fn.KeepAlive, Flushable {
+abstract class Generic implements Fn.Presenter, Fn.KeepAlive, Flushable {
     private String msg;
     private Item call;
     private final NavigableSet<Exported> exported;
