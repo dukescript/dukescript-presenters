@@ -65,17 +65,18 @@ import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.ThreadFactory;
 import java.util.logging.Level;
 import net.java.html.BrwsrCtx;
+import net.java.html.js.JavaScriptBody;
 import org.netbeans.html.boot.spi.Fn;
 import org.netbeans.html.context.spi.Contexts;
 import org.netbeans.html.sound.spi.AudioEnvironment;
 
-/** Ultimate <a href="http://dukescript.com">DukeScript</a>
- * <a href="https://github.com/dukescript/dukescript-presenters">Presenter</a>
+/** Ultimate <a target="_blank" href="http://dukescript.com">DukeScript</a>
+ * <a target="_blank" href="https://github.com/dukescript/dukescript-presenters">Presenter</a>
  * for all Android devices.
  * <p>
  * Use as a {@linkplain #onCreate(android.os.Bundle) launching activity}
  * of your
- * <a href="https://dukescript.com/getting_started.html">portable DukeScript application</a>
+ * <a target="_blank" href="https://dukescript.com/getting_started.html">portable DukeScript application</a>
  * or configure any {@link WebView} in your (existing) Android application to
  * give you easy access to HTML features (like
  * <a target="_blank" href="https://dukescript.com/javadoc/charts/">charts</a>,
@@ -91,9 +92,24 @@ import org.netbeans.html.sound.spi.AudioEnvironment;
  * &lt;dependency&gt;
  *   &lt;groupId&gt;com.dukescript.presenters&lt;/groupId&gt;
  *   &lt;artifactId&gt;android&lt;/artifactId&gt;
- *   &lt;version&gt;<a target="blank" href="http://search.maven.org/#search%7Cgav%7C1%7Cg%3A%22com.dukescript.presenters%22%20AND%20a%3A%22android%22">1.x</a>&lt;/version&gt;
+ *   &lt;version&gt;<a target="blank" href="http://search.maven.org/#search%7Cgav%7C1%7Cg%3A%22com.dukescript.presenters%22%20AND%20a%3A%22android%22">1.3</a>&lt;/version&gt;
  * &lt;/dependency&gt;
  * </pre>
+ * <p>
+ * <b>Embedding</b>
+ * <p>
+ * Read more about embedding DukeScript technology into existing
+ * Android application. Start at the
+ * {@link #configure(java.lang.String, android.webkit.WebView, java.lang.String, java.lang.Boolean) configure}
+ * method.
+ *
+ * <p>
+ * <b>Cross-Platform</b>
+ * <p>
+ * Learn how to build fully portable (iOS, browser, desktop) Java applications
+ * in <a target="_blank" href="https://dukescript.com/getting_started.html">DukeScript getting
+ * started</a> tutorial. Details about configuring Android manifest file
+ * can be found in the {@link #onCreate(android.os.Bundle) activity definition} section.
  */
 public final class Android extends Activity {
     public Android() {
@@ -111,10 +127,39 @@ public final class Android extends Activity {
      * <li><a target="_blank" href="https://dukescript.com/javadoc/canvas/">canvas</a></li>
      * <li><a target="_blank" href="http://bits.netbeans.org/html+java/">UI bindings</a></li>
      * </ul>
-     * and you can still code in the same language that you use for the rest
+     * and still code in the same language that you use for the rest
      * of your application.
      *
-     * <!-- <h3>Simple Usage</h3> -->
+     * <p>
+     * <b>Accessing the HTML Content</b>
+     * <p>
+     *
+     * There can be multiple {@link WebView} components in your application
+     * and it is thus essential to always identify the one you are working with.
+     * As such the HTML content of your {@link WebView} needs to be accessed from
+     * a dedicated {@link Executor} provided to you as a return value of the
+     * {@link #configure(java.lang.String, android.webkit.WebView, java.lang.String, java.lang.Boolean) configure}
+     * method. Use {@link Executor#execute(java.lang.Runnable)} to switch
+     * into the context of the {@link WebView} and perform an action.
+     * <p>
+     * Here is an example to display an alert in your {@link WebView view} and
+     * its associated {@link Executor executor} created as a result of
+     * 
+     * <pre>
+     * {@link Executor} executor = {@link #configure(java.lang.String, android.webkit.WebView, java.lang.String, java.lang.Boolean) Android.configure}(null, view, null, null);
+     * {@link Executor executor}.execute(<b>new</b> {@link Runnable} {
+     *     <b>public void</b> run() {
+     *        alert("Hello World!");
+     *     }
+     *     {@link JavaScriptBody @JavaScriptBody}(args = { "msg" }, body = "alert(msg);")
+     *     <b>native void</b> alert(String msg);
+     * });
+     * </pre>
+     * The example is using {@link JavaScriptBody} annotation (you can read
+     * more about this building block of DukeScript system {@link net.java.html.js here}),
+     * but in most cases you are likely to use one of the predefined Java wrappers. For example there
+     * are <a target="_blank" href="https://dukescript.com/javadoc/libs/net/java/html/lib/jquery/JQuery.html">
+     * JQuery bindings</a> which you may consider to use instead.
      *
      * <p>
      * <b>Threading</b>
@@ -128,24 +173,39 @@ public final class Android extends Activity {
      * <p>
      * Now the tougher part: the thread for accessing the HTML content can be
      * the same as {@linkplain Activity#runOnUiThread(java.lang.Runnable) Android UI thread},
-     * but due to a
-     * <a href="https://chromium.googlesource.com/chromium/src/+/a4b0d4cc0b9780aecd3e23a94293b2e3002baf7e">bug 438255</a>
+     * but due to
+     * <a target="_blank" href="https://chromium.googlesource.com/chromium/src/+/a4b0d4cc0b9780aecd3e23a94293b2e3002baf7e">bug 438255</a>
      * this reliably works only on Android SDK 24 and newer - otherwise it may
-     * cause deadlocks (especially during synchronous callbacks from the HTML
-     * view to Java).
+     * cause deadlocks.
      * <p>
      * To control whether the {@linkplain Activity#runOnUiThread(java.lang.Runnable) Android UI thread}
      * is the one to make calls into your {@link WebView} or whether one shall use
      * a background thread and access it via returned {@linkplain Executor#execute(java.lang.Runnable) executor's execute}
-     * method, one can use the <code>runOnUiThread</code> option.
+     * method, one can use the <code>runOnUiThread</code> parameter of the
+     * {@link #configure(java.lang.String, android.webkit.WebView, java.lang.String, java.lang.Boolean)} method.
      * <p>
      * It is usually more comfortable to set the <code>runOnUiThread</code> parameter to <code>true</code>
      * as one can make direct calls between {@link WebView} HTML content and other Android widgets. Whether
-     * that is safe depends on the SDK you are targeting (24 and newer is safe) and complexity of your
-     * callbacks - many applications run without deadlocks even on older SDKs. The choice is yours.
+     * that is safe depends on the minimal SDK you are targeting (24 and newer is safe). For now it is probably
+     * more useful to stick with verbose:
+     * <pre>
+     * {@link Executor} executor = {@link #configure(java.lang.String, android.webkit.WebView, java.lang.String, java.lang.Boolean) Android.configure}(null, view, null, <b>false</b>);
+     * {@link Executor executor}.execute(<b>new</b> {@link Runnable} {
+     *     <b>public void</b> run() {
+     *        // access the HTML Content of your view
+     *        {@link Activity#runOnUiThread(java.lang.Runnable) runOnUiThread}(<b>new</b> {@link Runnable} {
+     *          // access native UI of your application
+     *        });
+     *     }
+     * });
+     * </pre>
+     * <p>
+     * This presenter is licensed under <em>GPLv3</em> license - visit
+     * <a target="top" href="https://dukescript.com/index.html#pricing">DukeScript website</a>
+     * for commercial licenses and support.
      *
      * @param licenseKey the license key obtained from
-     *   <a href="https://dukescript.com/index.html#pricing">DukeScript support</a>
+     *   <a target="_blank" href="https://dukescript.com/index.html#pricing">DukeScript support</a>
      *   or <b>GPLv3</b> when using the open source version
      * @param view the {@link WebView} to configure and make ready for access from Java code
      * @param page the initial page to load - usually read from assets - e.g. the URL looks like: <code>file:///android_asset/mypage.html</code>
@@ -155,6 +215,7 @@ public final class Android extends Activity {
      *    the default which is the {@linkplain Activity#runOnUiThread(java.lang.Runnable) Android UI thread}
      *    on SDK 24 and newer and background thread otherwise
      * @return the executor to use to safely execute code inside of the HTML content of your view
+     * @since 1.3
      */
     public static Executor configure(String licenseKey, final WebView view, String page, Boolean runOnUiThread) {
         String aPkg = view.getContext().getApplicationInfo().packageName;
