@@ -220,13 +220,13 @@ public final class Android extends Activity {
     public static Executor configure(String licenseKey, final WebView view, String page, Boolean runOnUiThread) {
         String aPkg = view.getContext().getApplicationInfo().packageName;
         final Presenter p = new Presenter(view, aPkg, page, null, null, licenseKey, runOnUiThread);
-        androidLog(Level.SEVERE, "Creating presenter for {0}", view);
+        androidLog(Level.FINE, "Creating presenter for {0}", view);
         p.dispatch(new Runnable() {
             @Override
             public void run() {
-                androidLog(Level.SEVERE, "Initializing presenter for {0}", view);
+                androidLog(Level.FINE, "Initializing presenter for {0}", view);
                 p.init();
-                androidLog(Level.SEVERE, "Init done for {0}", view);
+                androidLog(Level.FINE, "Init done for {0}", view);
             }
         }, false);
         return p;
@@ -355,6 +355,9 @@ public final class Android extends Activity {
         }
         if (severity == Level.SEVERE) {
             priority = Log.ERROR;
+        }
+        if (!Log.isLoggable("Presenter", priority)) {
+            return;
         }
         if (args.length == 1 && args[0] instanceof Throwable) {
             Log.w("Presenter", msg, (Throwable)args[0]);
