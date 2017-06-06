@@ -30,6 +30,7 @@
                 <artifactId>maven-javadoc-plugin</artifactId>
                 <configuration>
                     <skip>false</skip>
+                    <subpackages>com.dukescript.presenters</subpackages>
                 </configuration>
                 <executions>
                     <execution>
