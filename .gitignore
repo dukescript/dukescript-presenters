@@ -2,3 +2,5 @@
 /target/
 /*/*/target/
 /*/dependency-reduced-pom.xml
+fakeiosemul/.gradle/
+fakeiosemul/build/
