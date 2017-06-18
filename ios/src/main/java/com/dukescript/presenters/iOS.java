@@ -31,8 +31,14 @@ import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.Executor;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+
+import org.moe.natj.general.ann.RegisterOnStartup;
+import org.moe.natj.general.ann.Runtime;
+import org.moe.natj.objc.ObjCRuntime;
 import org.netbeans.html.boot.spi.Fn;
 import org.openide.util.lookup.ServiceProvider;
+
+import apple.NSObject;
 import apple.coregraphics.struct.CGRect;
 import apple.foundation.NSBundle;
 import apple.foundation.NSDictionary;
@@ -198,13 +204,20 @@ public final class iOS extends Generic
 //        pool.close();
     }
 
-    static final class App implements UIApplicationDelegate {
+    @Runtime(ObjCRuntime.class)
+    @ObjCClassName("iOSApp")
+    @RegisterOnStartup
+    public static final class App extends NSObject implements UIApplicationDelegate {
 
         private static UIWindow window;
         private static UIWebView webView;
         private static UIWebViewDelegate delegate;
         private static String page;
         private static CountDownLatch waitFor;
+
+        protected App(Pointer p) {
+            super(p);
+        }
 
         @Override
         public boolean applicationDidFinishLaunchingWithOptions(UIApplication application, NSDictionary<?, ?> launchOptions) {
@@ -240,7 +253,7 @@ public final class iOS extends Generic
             page = p;
             waitFor = new CountDownLatch(1);
             delegate = d;
-            UIKit.UIApplicationMain(0, null, null, App.class.getName());
+            UIKit.UIApplicationMain(0, null, null, "iOSApp");
             try {
                 waitFor.await();
             } catch (InterruptedException ex) {
@@ -249,8 +262,10 @@ public final class iOS extends Generic
             return webView;
         }
 
+        @Runtime(ObjCRuntime.class)
+        @RegisterOnStartup
         @ObjCClassName("MainController")
-        static class MainController extends UIViewController {
+        public static class MainController extends UIViewController {
             static {
                 NatJ.register();
             }
