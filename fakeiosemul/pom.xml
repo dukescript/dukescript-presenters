@@ -47,16 +47,9 @@
             </plugin>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-eclipse-plugin</artifactId>
-                <version>2.9</version>
+                <artifactId>maven-shade-plugin</artifactId>
+                <version>3.0.0</version>
                 <configuration>
-                    <additionalProjectnatures>
-                        <projectnature>org.multi-os-engine.project</projectnature>
-                        <projectnature>org.eclipse.m2e.core.maven2Nature</projectnature>
-                    </additionalProjectnatures>
-                    <additionalBuildcommands>
-                        <buildcommand>org.eclipse.m2e.core.maven2Builder</buildcommand>
-                    </additionalBuildcommands>
                 </configuration>
             </plugin>
             <plugin>

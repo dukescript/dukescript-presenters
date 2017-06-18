@@ -50,9 +50,10 @@
     </build>
     <dependencies>
         <dependency>
-            <groupId>com.mobidevelop.robovm</groupId>
-            <artifactId>robovm-cocoatouch</artifactId>
-            <version>${robovm.version}</version>
+            <groupId>com.dukescript.presenters</groupId>
+            <artifactId>fakeiosemul</artifactId>
+            <version>${project.version}</version>
+            <scope>provided</scope>
         </dependency>
         <dependency>
             <groupId>org.netbeans.html</groupId>
@@ -74,11 +75,6 @@
             <groupId>org.netbeans.html</groupId>
             <artifactId>net.java.html.geo</artifactId>
             <version>${net.java.html.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>com.mobidevelop.robovm</groupId>
-            <artifactId>robovm-rt</artifactId>
-            <version>${robovm.version}</version>
         </dependency>
     </dependencies>
 </project>
