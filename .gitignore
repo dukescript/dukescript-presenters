@@ -4,3 +4,5 @@
 /*/dependency-reduced-pom.xml
 fakeiosemul/.gradle/
 fakeiosemul/build/
+/testing/iostest/.gradle/
+/testing/iostest/build/
