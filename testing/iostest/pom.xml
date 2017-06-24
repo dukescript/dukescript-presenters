@@ -70,6 +70,11 @@
             <artifactId>javax.servlet-api</artifactId>
             <version>3.1.0</version>
         </dependency>
+        <dependency>
+            <groupId>org.ow2.asm</groupId>
+            <artifactId>asm</artifactId>
+            <version>5.0</version>
+        </dependency>
     </dependencies>
     <build>
         <plugins>
@@ -133,21 +138,17 @@
                     </plugin>
                     -->
                     <plugin>
-                        <groupId>org.multi-os-engine</groupId>
-                        <artifactId>moe-maven</artifactId>
-                        <version>1.3.0</version>
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-shade-plugin</artifactId>
+                        <version>3.0.0</version>
+                        <configuration>
+                            <!-- put your configurations here -->
+                        </configuration>
                         <executions>
                             <execution>
-                                <phase>validate</phase>
+                                <phase>package</phase>
                                 <goals>
-                                    <goal>setupSDK</goal>
-                                </goals>
-                            </execution>
-                            <execution>
-                                <id>it</id>
-                                <phase>verify</phase>
-                                <goals>
-                                    <goal>launch</goal>
+                                    <goal>shade</goal>
                                 </goals>
                             </execution>
                         </executions>
