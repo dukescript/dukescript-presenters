@@ -26,6 +26,11 @@
 	<true/>
 	<key>MOE.Main.Class</key>
 	<string>com.dukescript.presenters.iosapp.Test</string>
+	<key>NSAppTransportSecurity</key>
+	<dict>
+		<key>NSAllowsArbitraryLoads</key>
+		<true/>
+	</dict>
 	<key>UIApplicationExitsOnSuspend</key>
 	<false/>
 	<key>UILaunchStoryboardName</key>
