@@ -115,6 +115,12 @@ public final class iOS extends Generic
                 Closeable c = Fn.activate(iOS.this);
                 try {
                     command.run();
+                } catch (Error ex) {
+                    iOS.this.log(Level.SEVERE, "Error executing " + command.getClass().getName(), ex);
+                    throw ex;
+                } catch (RuntimeException ex) {
+                    iOS.this.log(Level.SEVERE, "Error executing " + command.getClass().getName(), ex);
+                    throw ex;
                 } finally {
                     try {
                         c.close();
