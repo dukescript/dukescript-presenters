@@ -23,7 +23,6 @@ package com.dukescript.presenters.iosapp;
  * #L%
  */
 
-import com.dukescript.presenters.iOS;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
@@ -36,7 +35,6 @@ import net.java.html.BrwsrCtx;
 import net.java.html.boot.BrowserBuilder;
 import org.netbeans.html.json.tck.JavaScriptTCK;
 import org.netbeans.html.json.tck.KOTest;
-import org.netbeans.html.ko4j.KO4J;
 
 public final class Test extends JavaScriptTCK {
     static final Logger LOG = Logger.getLogger(Test.class.getName());
@@ -72,10 +70,7 @@ public final class Test extends JavaScriptTCK {
             }
         }
 
-        KO4J ko = new KO4J();
-        iOS p = new iOS();
-
-        BrowserBuilder.newBrowser(p, ko).loadPage("pages/test.html").
+        BrowserBuilder.newBrowser().loadPage("pages/test.html").
                 loadClass(Test.class).
                 loadFinished(new OnLoad()).
                 showAndWait();

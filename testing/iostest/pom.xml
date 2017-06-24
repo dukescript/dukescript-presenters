@@ -28,7 +28,6 @@
         <dependency>
             <groupId>org.netbeans.api</groupId>
             <artifactId>org-openide-util-lookup</artifactId>
-            <version>RELEASE80</version>
             <type>jar</type>
         </dependency>
         <dependency>
@@ -41,7 +40,7 @@
             <groupId>org.netbeans.html</groupId>
             <artifactId>ko4j</artifactId>
             <version>${net.java.html.version}</version>
-            <scope>compile</scope>
+            <scope>runtime</scope>
         </dependency>
         <dependency>
             <groupId>${project.groupId}</groupId>
