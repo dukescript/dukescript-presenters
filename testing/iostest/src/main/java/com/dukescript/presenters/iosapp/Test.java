@@ -11,18 +11,19 @@ package com.dukescript.presenters.iosapp;
  * it under the terms of the GNU General Public License as
  * published by the Free Software Foundation, either version 3 of the
  * License, or (at your option) any later version.
- * 
+ *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU General Public
  * License along with this program.  If not, see
  * <http://www.gnu.org/licenses/gpl-3.0.html>.
  * #L%
  */
 
+import com.dukescript.presenters.iOS;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
@@ -35,12 +36,12 @@ import net.java.html.BrwsrCtx;
 import net.java.html.boot.BrowserBuilder;
 import org.netbeans.html.json.tck.JavaScriptTCK;
 import org.netbeans.html.json.tck.KOTest;
+import org.netbeans.html.ko4j.KO4J;
 
 public final class Test extends JavaScriptTCK {
     static final Logger LOG = Logger.getLogger(Test.class.getName());
-    private static final CountDownLatch CDL = new CountDownLatch(1);
     static BrwsrCtx CTX;
-    
+
     public static void main(final String... args) throws Exception {
         Logger l = Logger.getLogger("com.dukescript");
         l.setLevel(Level.FINE);
@@ -48,11 +49,13 @@ public final class Test extends JavaScriptTCK {
         ch.setLevel(Level.FINE);
         l.addHandler(ch);
         l.setUseParentHandlers(false);
-        
+
+        final CountDownLatch CDL = new CountDownLatch(1);
         Thread t = new Thread("Testing harness") {
             @Override
             public void run() {
                 try {
+                    CDL.await();
                     processTests();
                 } catch (Exception ex) {
                     LOG.log(Level.SEVERE, null, ex);
@@ -60,15 +63,25 @@ public final class Test extends JavaScriptTCK {
             }
         };
         t.start();
-        
-        BrowserBuilder.newBrowser().loadPage("pages/test.html").
-                loadClass(Test.class).invoke("onLoad", args).
+
+        class OnLoad implements Runnable {
+            @Override
+            public void run() {
+                CTX = BrwsrCtx.findDefault(Test.class);
+                CDL.countDown();
+            }
+        }
+
+        KO4J ko = new KO4J();
+        iOS p = new iOS();
+
+        BrowserBuilder.newBrowser(p, ko).loadPage("pages/test.html").
+                loadClass(Test.class).
+                loadFinished(new OnLoad()).
                 showAndWait();
     }
-    
+
     private static void processTests() throws Exception {
-        CDL.await();
-        
         int[] cnt = { 0 };
         List<String> failed = new ArrayList<String>();
         for (Class<?> c : Test.testClasses()) {
@@ -79,7 +92,7 @@ public final class Test extends JavaScriptTCK {
             LOG.log(Level.INFO, "processing KO tests from {0}", c.getName());
             runTestsIn(c, cnt, failed);
         }
-        if (failed.size() > 0) {
+        if (failed.size() > 0 || cnt[0] == 0) {
             final StringBuilder sb = new StringBuilder();
             sb.append("Failed tests: ").append(failed.size()).append(" from ").append(cnt[0]).append("\n");
             for (String n : failed) {
@@ -97,11 +110,6 @@ public final class Test extends JavaScriptTCK {
         }
         LOG.log(Level.INFO, "All {0} tests are OK!", cnt[0]);
         System.exit(0);
-    }
-    
-    public static void onLoad(String... args) {
-        CTX = BrwsrCtx.findDefault(Test.class);
-        CDL.countDown();
     }
 
     private static void runTestsIn(final Class<?> c, int[] cnt, List<String> failed) {
@@ -122,7 +130,7 @@ public final class Test extends JavaScriptTCK {
                     Exception ex;
                     int cnt;
                     CountDownLatch cdl;
-                    
+
                     @Override
                     public void run() {
                         try {

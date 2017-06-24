@@ -41,7 +41,7 @@
             <groupId>org.netbeans.html</groupId>
             <artifactId>ko4j</artifactId>
             <version>${net.java.html.version}</version>
-            <scope>runtime</scope>
+            <scope>compile</scope>
         </dependency>
         <dependency>
             <groupId>${project.groupId}</groupId>
