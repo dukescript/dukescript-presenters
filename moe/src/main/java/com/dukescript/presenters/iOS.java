@@ -57,6 +57,7 @@ import apple.uikit.UIWebView;
 import apple.uikit.protocol.UIWebViewDelegate;
 import apple.uikit.UIWindow;
 import apple.uikit.c.UIKit;
+import java.io.Flushable;
 import org.moe.natj.general.NatJ;
 import org.moe.natj.general.Pointer;
 import org.moe.natj.objc.ann.ObjCClassName;
@@ -78,7 +79,7 @@ import org.moe.natj.objc.ann.Selector;
  */
 @ServiceProvider(service = Fn.Presenter.class)
 public final class iOS extends Generic
-        implements Executor {
+        implements Executor, Fn.Presenter, Fn.KeepAlive, Flushable {
 
     static final Logger LOG = Logger.getLogger(iOS.class.getName());
     private UIWebView webView;
@@ -213,7 +214,7 @@ public final class iOS extends Generic
     @Runtime(ObjCRuntime.class)
     @ObjCClassName("iOSApp")
     @RegisterOnStartup
-    public static final class App extends NSObject implements UIApplicationDelegate {
+    static final class App extends NSObject implements UIApplicationDelegate {
 
         private static UIWindow window;
         private static UIWebView webView;
@@ -271,7 +272,7 @@ public final class iOS extends Generic
         @Runtime(ObjCRuntime.class)
         @RegisterOnStartup
         @ObjCClassName("MainController")
-        public static class MainController extends UIViewController {
+        final static class MainController extends UIViewController {
             static {
                 NatJ.register();
             }

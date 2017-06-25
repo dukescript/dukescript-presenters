@@ -46,6 +46,21 @@
                     </execution>
                 </executions>
             </plugin>
+            <plugin>
+                <groupId>org.netbeans.tools</groupId>
+                <artifactId>sigtest-maven-plugin</artifactId>
+                <version>1.0</version>
+                <executions>
+                    <execution>
+                        <goals>
+                            <goal>generate</goal>
+                        </goals>
+                    </execution>
+                </executions>
+                <configuration>
+                    <packages>com.dukescript.presenters</packages>
+                </configuration>
+            </plugin>
         </plugins>
     </build>
     <dependencies>

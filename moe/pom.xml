@@ -46,12 +46,36 @@
                     </execution>
                 </executions>
             </plugin>
+            <plugin>
+                <groupId>org.netbeans.tools</groupId>
+                <artifactId>sigtest-maven-plugin</artifactId>
+                <version>1.0</version>
+                <executions>
+                    <execution>
+                        <phase>verify</phase>
+                        <goals>
+                            <goal>check</goal>
+                        </goals>
+                    </execution>
+                </executions>
+                <configuration>
+                    <action>strictcheck</action>
+                    <packages>com.dukescript.presenters</packages>
+                    <sigfile>${basedir}/../ios/target/ios-${project.version}.sigfile</sigfile>
+                </configuration>
+            </plugin>
         </plugins>
     </build>
     <dependencies>
         <dependency>
             <groupId>com.dukescript.presenters</groupId>
             <artifactId>fakeiosemul</artifactId>
+            <version>${project.version}</version>
+            <scope>provided</scope>
+        </dependency>
+        <dependency>
+            <groupId>com.dukescript.presenters</groupId>
+            <artifactId>ios</artifactId>
             <version>${project.version}</version>
             <scope>provided</scope>
         </dependency>

@@ -23,6 +23,7 @@ package com.dukescript.presenters;
  * #L%
  */
 import java.io.Closeable;
+import java.io.Flushable;
 import java.io.IOException;
 import java.io.InterruptedIOException;
 import java.net.URL;
@@ -70,7 +71,7 @@ import org.robovm.apple.uikit.UIWindow;
  */
 @ServiceProvider(service = Fn.Presenter.class)
 public final class iOS extends Generic
-        implements Executor {
+        implements Executor, Fn.Presenter, Fn.KeepAlive, Flushable {
 
     static final Logger LOG = Logger.getLogger(iOS.class.getName());
     private UIWebView webView;

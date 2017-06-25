@@ -1,5 +1,5 @@
 
-package com.dukescript.presenters;
+package com.dukescript.presenters.moe;
 
 /*
  * #%L
@@ -34,9 +34,11 @@ import apple.corelocation.CLRegion;
 import apple.foundation.NSArray;
 import apple.foundation.NSError;
 
-@Deprecated
+/** Implements geolocation services for Multi OS Engine.
+ * Use {@link OnLocation} annotation to access this implementation.
+ */
 @ServiceProvider(service = GLProvider.class)
-public final class iOSGeo extends GLProvider<CLLocation,iOSGeo.Adapter> {
+public final class MoeGeo extends GLProvider<CLLocation,MoeGeo.Adapter> {
     @Override
     protected Adapter start(Query query) {
         if (
@@ -124,7 +126,7 @@ public final class iOSGeo extends GLProvider<CLLocation,iOSGeo.Adapter> {
 
         public void didUpdateToLocation(CLLocationManager manager, CLLocation newLocation, CLLocation oldLocation) {
             long time = (long)newLocation.timestamp().timeIntervalSince1970();
-            iOSGeo.super.callback(q, time, newLocation, null);
+            MoeGeo.super.callback(q, time, newLocation, null);
             if (q.isOneTime()) {
                 m.stopUpdatingLocation();
             }
