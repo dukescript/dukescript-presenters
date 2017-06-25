@@ -26,13 +26,16 @@ package com.dukescript.presenters;
 
 import org.netbeans.html.geo.spi.GLProvider;
 import org.openide.util.lookup.ServiceProvider;
-import apple.corelocation.enums.CLAuthorizationStatus;
-import apple.corelocation.CLLocation;
-import apple.corelocation.CLLocationManager;
-import apple.corelocation.protocol.CLLocationManagerDelegate;
-import apple.corelocation.CLRegion;
-import apple.foundation.NSArray;
-import apple.foundation.NSError;
+import org.robovm.apple.corelocation.CLAuthorizationStatus;
+import org.robovm.apple.corelocation.CLBeaconRegion;
+import org.robovm.apple.corelocation.CLHeading;
+import org.robovm.apple.corelocation.CLLocation;
+import org.robovm.apple.corelocation.CLLocationManager;
+import org.robovm.apple.corelocation.CLLocationManagerDelegateAdapter;
+import org.robovm.apple.corelocation.CLRegion;
+import org.robovm.apple.corelocation.CLRegionState;
+import org.robovm.apple.foundation.NSArray;
+import org.robovm.apple.foundation.NSError;
 
 @Deprecated
 @ServiceProvider(service = GLProvider.class)
@@ -40,11 +43,11 @@ public final class iOSGeo extends GLProvider<CLLocation,iOSGeo.Adapter> {
     @Override
     protected Adapter start(Query query) {
         if (
-            CLLocationManager.authorizationStatus() == CLAuthorizationStatus.Denied
+            CLLocationManager.getAuthorizationStatus() == CLAuthorizationStatus.Denied
         ) {
             return null;
         }
-        CLLocationManager cl = CLLocationManager.alloc();
+        CLLocationManager cl = new CLLocationManager();
         if (query.isHighAccuracy()) {
             cl.setDesiredAccuracy(10.0);
         }
@@ -61,52 +64,52 @@ public final class iOSGeo extends GLProvider<CLLocation,iOSGeo.Adapter> {
 
     @Override
     protected double latitude(CLLocation coords) {
-        return coords.coordinate().latitude();
+        return coords.getCoordinate().getLatitude();
     }
 
     @Override
     protected double longitude(CLLocation coords) {
-        return coords.coordinate().longitude();
+        return coords.getCoordinate().getLongitude();
     }
 
     @Override
     protected double accuracy(CLLocation coords) {
-        return coords.horizontalAccuracy();
+        return coords.getHorizontalAccuracy();
     }
 
     @Override
     protected Double altitude(CLLocation coords) {
-        if (coords.verticalAccuracy() < 0) {
+        if (coords.getVerticalAccuracy() < 0) {
             return null;
         }
-        return coords.altitude();
+        return coords.getAltitude();
     }
 
     @Override
     protected Double altitudeAccuracy(CLLocation coords) {
-        if (coords.verticalAccuracy() < 0) {
+        if (coords.getVerticalAccuracy() < 0) {
             return null;
         }
-        return coords.verticalAccuracy();
+        return coords.getVerticalAccuracy();
     }
 
     @Override
     protected Double heading(CLLocation coords) {
-        if (coords.course() < 0) {
+        if (coords.getCourse() < 0) {
             return null;
         }
-        return coords.course();
+        return coords.getCourse();
     }
 
     @Override
     protected Double speed(CLLocation coords) {
-        if (coords.speed() < 0) {
+        if (coords.getSpeed() < 0) {
             return null;
         }
-        return coords.speed();
+        return coords.getSpeed();
     }
     
-    final class Adapter implements CLLocationManagerDelegate {
+    final class Adapter extends CLLocationManagerDelegateAdapter {
         final Query q;
         final CLLocationManager m;
 
@@ -115,15 +118,10 @@ public final class iOSGeo extends GLProvider<CLLocation,iOSGeo.Adapter> {
             this.m = m;
         }
 
+        
         @Override
-        public void locationManagerDidUpdateLocations(CLLocationManager manager, NSArray<? extends CLLocation> locations) {
-            didUpdateToLocation(manager, locations.get(0), null);
-        }
-
-
-
         public void didUpdateToLocation(CLLocationManager manager, CLLocation newLocation, CLLocation oldLocation) {
-            long time = (long)newLocation.timestamp().timeIntervalSince1970();
+            long time = (long)newLocation.getTimestamp().getTimeIntervalSince1970();
             iOSGeo.super.callback(q, time, newLocation, null);
             if (q.isOneTime()) {
                 m.stopUpdatingLocation();
@@ -131,23 +129,68 @@ public final class iOSGeo extends GLProvider<CLLocation,iOSGeo.Adapter> {
         }
 
         @Override
-        public boolean locationManagerShouldDisplayHeadingCalibration(CLLocationManager manager) {
+        public void didUpdateLocations(CLLocationManager manager, NSArray<CLLocation> locations) {
+            didUpdateToLocation(manager, locations.get(0), null);
+        }
+
+        @Override
+        public void didUpdateHeading(CLLocationManager manager, CLHeading newHeading) {
+        }
+
+        @Override
+        public boolean shouldDisplayHeadingCalibration(CLLocationManager manager) {
             return false;
         }
 
         @Override
-        public void locationManagerDidFailWithError(CLLocationManager manager, NSError error) {
-            callback(q, System.currentTimeMillis(), null, new Exception(error.localizedFailureReason()));
+        public void didDetermineState(CLLocationManager manager, CLRegionState state, CLRegion region) {
         }
 
         @Override
-        public void locationManagerMonitoringDidFailForRegionWithError(CLLocationManager manager, CLRegion region, NSError error) {
-            callback(q, System.currentTimeMillis(), null, new Exception(error.localizedFailureReason()));
+        public void didRangeBeacons(CLLocationManager manager, NSArray<?> beacons, CLBeaconRegion region) {
         }
 
         @Override
-        public void locationManagerDidFinishDeferredUpdatesWithError(CLLocationManager manager, NSError error) {
-            callback(q, System.currentTimeMillis(), null, new Exception(error.localizedFailureReason()));
+        public void rangingBeaconsDidFail(CLLocationManager manager, CLBeaconRegion region, NSError error) {
+        }
+
+        @Override
+        public void didEnterRegion(CLLocationManager manager, CLRegion region) {
+        }
+
+        @Override
+        public void didExitRegion(CLLocationManager manager, CLRegion region) {
+        }
+
+        @Override
+        public void didFail(CLLocationManager manager, NSError error) {
+            callback(q, System.currentTimeMillis(), null, new Exception(error.getLocalizedFailureReason()));
+        }
+
+        @Override
+        public void monitoringDidFail(CLLocationManager manager, CLRegion region, NSError error) {
+            callback(q, System.currentTimeMillis(), null, new Exception(error.getLocalizedFailureReason()));
+        }
+
+        @Override
+        public void didChangeAuthorizationStatus(CLLocationManager manager, CLAuthorizationStatus status) {
+        }
+
+        @Override
+        public void didStartMonitoring(CLLocationManager manager, CLRegion region) {
+        }
+
+        @Override
+        public void didPauseLocationUpdates(CLLocationManager manager) {
+        }
+
+        @Override
+        public void didResumeLocationUpdates(CLLocationManager manager) {
+        }
+
+        @Override
+        public void didFinishDeferredUpdates(CLLocationManager manager, NSError error) {
+            callback(q, System.currentTimeMillis(), null, new Exception(error.getLocalizedFailureReason()));
         }
     }
 }

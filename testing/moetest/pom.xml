@@ -49,17 +49,40 @@
                             <goal>setupSDK</goal>
                         </goals>
                     </execution>
-                    <execution>
-                        <id>it</id>
-                        <phase>verify</phase>
-                        <goals>
-                            <goal>launch</goal>
-                        </goals>
-                    </execution>
                 </executions>
                 <configuration>
                 </configuration>
             </plugin>
         </plugins>
     </build>
+    <profiles>
+        <profile>
+            <activation>
+                <os>
+                    <family>Mac OS X</family>
+                </os>
+            </activation>
+            <id>ios</id>
+            <build>
+                <plugins>
+                    <plugin>
+                        <groupId>org.multi-os-engine</groupId>
+                        <artifactId>moe-maven</artifactId>
+                        <version>${moe.version}</version>
+                        <executions>
+                            <execution>
+                                <id>it</id>
+                                <phase>verify</phase>
+                                <goals>
+                                    <goal>launch</goal>
+                                </goals>
+                            </execution>
+                        </executions>
+                        <configuration>
+                        </configuration>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
+    </profiles>
 </project>

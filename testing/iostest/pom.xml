@@ -89,6 +89,22 @@
                     </execution>
                 </executions>
             </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-shade-plugin</artifactId>
+                <version>3.0.0</version>
+                <configuration>
+                    <!-- put your configurations here -->
+                </configuration>
+                <executions>
+                    <execution>
+                        <phase>package</phase>
+                        <goals>
+                            <goal>shade</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
         </plugins>
     </build>
     <profiles>
@@ -101,7 +117,6 @@
             <id>ios</id>
             <build>
                 <plugins>
-                    <!--
                     <plugin>
                         <groupId>com.mobidevelop.robovm</groupId>
                         <artifactId>robovm-maven-plugin</artifactId>
@@ -131,23 +146,6 @@
                                 <phase>verify</phase>
                                 <goals>
                                     <goal>ipad-sim</goal>
-                                </goals>
-                            </execution>
-                        </executions>
-                    </plugin>
-                    -->
-                    <plugin>
-                        <groupId>org.apache.maven.plugins</groupId>
-                        <artifactId>maven-shade-plugin</artifactId>
-                        <version>3.0.0</version>
-                        <configuration>
-                            <!-- put your configurations here -->
-                        </configuration>
-                        <executions>
-                            <execution>
-                                <phase>package</phase>
-                                <goals>
-                                    <goal>shade</goal>
                                 </goals>
                             </execution>
                         </executions>

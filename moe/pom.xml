@@ -7,8 +7,8 @@
         <version>2.0-SNAPSHOT</version>
     </parent>
     
-    <name>DukeScript Presenter for iOS</name>
-    <artifactId>ios</artifactId>
+    <name>DukeScript Presenter for Multi OS Engine</name>
+    <artifactId>moe</artifactId>
     <packaging>jar</packaging>
     <build>
         <plugins>
@@ -50,9 +50,10 @@
     </build>
     <dependencies>
         <dependency>
-            <groupId>com.mobidevelop.robovm</groupId>
-            <artifactId>robovm-cocoatouch</artifactId>
-            <version>${robovm.version}</version>
+            <groupId>com.dukescript.presenters</groupId>
+            <artifactId>fakeiosemul</artifactId>
+            <version>${project.version}</version>
+            <scope>provided</scope>
         </dependency>
         <dependency>
             <groupId>org.netbeans.html</groupId>
@@ -67,18 +68,12 @@
         <dependency>
             <groupId>org.netbeans.api</groupId>
             <artifactId>org-openide-util-lookup</artifactId>
-            <version>RELEASE80</version>
             <type>jar</type>
         </dependency>
         <dependency>
             <groupId>org.netbeans.html</groupId>
             <artifactId>net.java.html.geo</artifactId>
             <version>${net.java.html.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>com.mobidevelop.robovm</groupId>
-            <artifactId>robovm-rt</artifactId>
-            <version>${robovm.version}</version>
         </dependency>
     </dependencies>
 </project>
