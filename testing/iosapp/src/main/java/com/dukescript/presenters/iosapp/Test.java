@@ -38,7 +38,6 @@ import org.netbeans.html.json.tck.KOTest;
 
 public final class Test extends JavaScriptTCK {
     static final Logger LOG = Logger.getLogger(Test.class.getName());
-    private static final CountDownLatch CDL = new CountDownLatch(1);
     static BrwsrCtx CTX;
     
     public static void main(final String... args) throws Exception {
@@ -49,10 +48,12 @@ public final class Test extends JavaScriptTCK {
         l.addHandler(ch);
         l.setUseParentHandlers(false);
         
+        final CountDownLatch CDL = new CountDownLatch(1);
         Thread t = new Thread("Testing harness") {
             @Override
             public void run() {
                 try {
+                    CDL.await();
                     processTests();
                 } catch (Exception ex) {
                     LOG.log(Level.SEVERE, null, ex);
@@ -61,14 +62,21 @@ public final class Test extends JavaScriptTCK {
         };
         t.start();
         
+        class Loaded implements Runnable {
+            @Override
+            public void run() {
+                CTX = BrwsrCtx.findDefault(Test.class);
+                CDL.countDown();
+            }
+        }
+        
         BrowserBuilder.newBrowser().loadPage("pages/test.html").
-                loadClass(Test.class).invoke("onLoad", args).
+                loadClass(Test.class).
+                loadFinished(new Loaded()).
                 showAndWait();
     }
     
     private static void processTests() throws Exception {
-        CDL.await();
-        
         int[] cnt = { 0 };
         List<String> failed = new ArrayList<String>();
         for (Class<?> c : Test.testClasses()) {
@@ -99,11 +107,6 @@ public final class Test extends JavaScriptTCK {
         System.exit(0);
     }
     
-    public static void onLoad(String... args) {
-        CTX = BrwsrCtx.findDefault(Test.class);
-        CDL.countDown();
-    }
-
     private static void runTestsIn(final Class<?> c, int[] cnt, List<String> failed) {
         if (c.getSimpleName().equals("GCBodyTest")) {
             LOG.log(Level.INFO, "Skipping {0}", c.getName());

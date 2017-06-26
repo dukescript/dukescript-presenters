@@ -10,6 +10,7 @@
     <artifactId>testing</artifactId>
     <packaging>pom</packaging>
     <modules>
+        <module>iosapp</module>
         <module>iostest</module>
         <module>moetest</module>
     </modules>

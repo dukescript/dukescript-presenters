@@ -68,7 +68,6 @@
             <groupId>com.mobidevelop.robovm</groupId>
             <artifactId>robovm-cocoatouch</artifactId>
             <version>${robovm.version}</version>
-            <scope>provided</scope>
         </dependency>
         <dependency>
             <groupId>org.netbeans.html</groupId>
@@ -95,7 +94,6 @@
             <groupId>com.mobidevelop.robovm</groupId>
             <artifactId>robovm-rt</artifactId>
             <version>${robovm.version}</version>
-            <scope>provided</scope>
         </dependency>
     </dependencies>
 </project>
