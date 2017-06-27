@@ -7,8 +7,8 @@
         <version>2.0-SNAPSHOT</version>
     </parent>
     
-    <name>DukeScript Presenter for iOS</name>
-    <artifactId>ios</artifactId>
+    <name>DukeScript Presenter for Multi OS Engine</name>
+    <artifactId>moe</artifactId>
     <packaging>jar</packaging>
     <build>
         <plugins>
@@ -52,22 +52,32 @@
                 <version>1.0</version>
                 <executions>
                     <execution>
+                        <phase>verify</phase>
                         <goals>
-                            <goal>generate</goal>
+                            <goal>check</goal>
                         </goals>
                     </execution>
                 </executions>
                 <configuration>
+                    <action>strictcheck</action>
                     <packages>com.dukescript.presenters</packages>
+                    <sigfile>${basedir}/../ios/target/ios-${project.version}.sigfile</sigfile>
                 </configuration>
             </plugin>
         </plugins>
     </build>
     <dependencies>
         <dependency>
-            <groupId>com.mobidevelop.robovm</groupId>
-            <artifactId>robovm-cocoatouch</artifactId>
-            <version>${robovm.version}</version>
+            <groupId>com.dukescript.presenters</groupId>
+            <artifactId>fakeiosemul</artifactId>
+            <version>${project.version}</version>
+            <scope>provided</scope>
+        </dependency>
+        <dependency>
+            <groupId>com.dukescript.presenters</groupId>
+            <artifactId>ios</artifactId>
+            <version>${project.version}</version>
+            <scope>provided</scope>
         </dependency>
         <dependency>
             <groupId>org.netbeans.html</groupId>
@@ -83,17 +93,11 @@
             <groupId>org.netbeans.api</groupId>
             <artifactId>org-openide-util-lookup</artifactId>
             <type>jar</type>
-            <scope>provided</scope>
         </dependency>
         <dependency>
             <groupId>org.netbeans.html</groupId>
             <artifactId>net.java.html.geo</artifactId>
             <version>${net.java.html.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>com.mobidevelop.robovm</groupId>
-            <artifactId>robovm-rt</artifactId>
-            <version>${robovm.version}</version>
         </dependency>
     </dependencies>
 </project>

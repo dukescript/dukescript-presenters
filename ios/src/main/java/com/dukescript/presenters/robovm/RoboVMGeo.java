@@ -1,5 +1,5 @@
 
-package com.dukescript.presenters;
+package com.dukescript.presenters.robovm;
 
 /*
  * #%L
@@ -24,6 +24,7 @@ package com.dukescript.presenters;
  * #L%
  */
 
+import net.java.html.geo.OnLocation;
 import org.netbeans.html.geo.spi.GLProvider;
 import org.openide.util.lookup.ServiceProvider;
 import org.robovm.apple.corelocation.CLAuthorizationStatus;
@@ -37,9 +38,11 @@ import org.robovm.apple.corelocation.CLRegionState;
 import org.robovm.apple.foundation.NSArray;
 import org.robovm.apple.foundation.NSError;
 
-@Deprecated
+/** Implements geolocation services for RoboVM. Use {@link OnLocation} annotation
+ * to access this implementation.
+ */
 @ServiceProvider(service = GLProvider.class)
-public final class iOSGeo extends GLProvider<CLLocation,iOSGeo.Adapter> {
+public final class RoboVMGeo extends GLProvider<CLLocation,RoboVMGeo.Adapter> {
     @Override
     protected Adapter start(Query query) {
         if (
@@ -122,7 +125,7 @@ public final class iOSGeo extends GLProvider<CLLocation,iOSGeo.Adapter> {
         @Override
         public void didUpdateToLocation(CLLocationManager manager, CLLocation newLocation, CLLocation oldLocation) {
             long time = (long)newLocation.getTimestamp().getTimeIntervalSince1970();
-            iOSGeo.super.callback(q, time, newLocation, null);
+            RoboVMGeo.super.callback(q, time, newLocation, null);
             if (q.isOneTime()) {
                 m.stopUpdatingLocation();
             }

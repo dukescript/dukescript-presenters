@@ -83,7 +83,9 @@
         <module>generic</module>
         <module>android</module>
         <module>ios</module>
+        <module>moe</module>
         <module>fakeandroidemul</module>
+        <module>fakeiosemul</module>
         <module>webkit</module>
         <module>renderer</module>
     </modules>
@@ -96,6 +98,7 @@
         <grizzly.version>2.3.8</grizzly.version>
         <netbeans.compile.on.save>none</netbeans.compile.on.save>
         <robovm.version>2.3.0</robovm.version>
+        <moe.version>1.3.1</moe.version>
     </properties>
     
     <distributionManagement>

@@ -23,37 +23,29 @@ package com.dukescript.presenters;
  * #L%
  */
 import java.io.Closeable;
-import java.io.Flushable;
 import java.io.IOException;
-import java.io.InterruptedIOException;
 import java.net.URL;
 import java.net.URLDecoder;
-import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.Executor;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+
 import org.netbeans.html.boot.spi.Fn;
 import org.openide.util.lookup.ServiceProvider;
-import org.robovm.apple.coregraphics.CGRect;
-import org.robovm.apple.foundation.NSAutoreleasePool;
-import org.robovm.apple.foundation.NSBundle;
-import org.robovm.apple.foundation.NSError;
-import org.robovm.apple.foundation.NSOperationQueue;
-import org.robovm.apple.foundation.NSURL;
-import org.robovm.apple.foundation.NSURLRequest;
-import org.robovm.apple.uikit.UIApplication;
-import org.robovm.apple.uikit.UIApplicationDelegateAdapter;
-import org.robovm.apple.uikit.UIApplicationLaunchOptions;
-import org.robovm.apple.uikit.UIColor;
-import org.robovm.apple.uikit.UIInterfaceOrientation;
-import org.robovm.apple.uikit.UIScreen;
-import org.robovm.apple.uikit.UIViewAutoresizing;
-import org.robovm.apple.uikit.UIViewController;
-import org.robovm.apple.uikit.UIWebView;
-import org.robovm.apple.uikit.UIWebViewDelegate;
-import org.robovm.apple.uikit.UIWebViewDelegateAdapter;
-import org.robovm.apple.uikit.UIWebViewNavigationType;
-import org.robovm.apple.uikit.UIWindow;
+
+import apple.foundation.NSBundle;
+import apple.foundation.NSError;
+import apple.foundation.NSOperation;
+import apple.foundation.NSOperationQueue;
+import apple.foundation.NSURL;
+import apple.foundation.NSURLRequest;
+import apple.uikit.UIApplication;
+import apple.uikit.UIWebView;
+import apple.uikit.protocol.UIWebViewDelegate;
+import com.dukescript.presenters.moe.MoeApplication;
+import java.io.Flushable;
+import org.moe.natj.general.Pointer;
+import org.moe.natj.objc.ann.Selector;
 
 /** Ultimate <a href="http://dukescript.com">DukeScript</a>
  * <a href="https://github.com/dukescript/dukescript-presenters">Presenter</a>
@@ -78,7 +70,7 @@ public final class iOS extends Generic
     private Thread dispatchThread;
 
     public iOS() throws Exception {
-        super(true, false, "iOS", NSBundle.getMainBundle().getBundleIdentifier(), null);
+        super(true, false, "iOS", NSBundle.mainBundle().bundleIdentifier(), null);
     }
 
     @Override
@@ -108,6 +100,12 @@ public final class iOS extends Generic
                 Closeable c = Fn.activate(iOS.this);
                 try {
                     command.run();
+                } catch (Error ex) {
+                    iOS.this.log(Level.SEVERE, "Error executing " + command.getClass().getName(), ex);
+                    throw ex;
+                } catch (RuntimeException ex) {
+                    iOS.this.log(Level.SEVERE, "Error executing " + command.getClass().getName(), ex);
+                    throw ex;
                 } finally {
                     try {
                         c.close();
@@ -121,8 +119,33 @@ public final class iOS extends Generic
     }
 
     static void runOnUiThread(Runnable w) {
-        NSOperationQueue mq = NSOperationQueue.getMainQueue();
-        mq.addOperation(w);
+        NSOperationQueue mq = NSOperationQueue.mainQueue();
+        RunNsOp run = RunNsOp.alloc().initWithRunnable(w);
+        mq.addOperation(run);
+    }
+
+    static final class RunNsOp extends NSOperation {
+        Runnable run;
+
+        protected RunNsOp(Pointer peer) {
+            super(peer);
+        }
+
+        @Selector("alloc")
+        public static native RunNsOp alloc();
+
+        @Override
+        public void main() {
+            run.run();
+        }
+
+        final RunNsOp initWithRunnable(Runnable w) {
+            init();
+            run = w;
+            return this;
+        }
+
+
     }
 
     @Override
@@ -155,96 +178,24 @@ public final class iOS extends Generic
 
     @Override
     void loadJS(String js) {
-        String res = webView.evaluateJavaScript(js);
+        String res = webView.stringByEvaluatingJavaScriptFromString(js);
         LOG.log(Level.FINE, "loadJS done: {0}", res);
     }
 
     @Override
     public void displayPage(URL page, Runnable onPageLoad) {
-        NSAutoreleasePool pool = new NSAutoreleasePool();
+//        NSAutoreleasePool pool = new NSAutoreleasePool();
         try {
-            App.mainView(page.toExternalForm(), new WebViewDelegate(onPageLoad));
+            MoeApplication.mainView(page.toExternalForm(), new WebViewDelegate(onPageLoad));
         } catch (RuntimeException ex) {
             throw ex;
         } catch (Exception ex) {
             throw new IllegalStateException(ex);
         }
-        pool.close();
+//        pool.close();
     }
 
-    static final class App extends UIApplicationDelegateAdapter {
-
-        private static UIWindow window;
-        private static UIWebView webView;
-        private static UIWebViewDelegate delegate;
-        private static String page;
-        private static CountDownLatch waitFor;
-
-        @Override
-        public boolean didFinishLaunching(UIApplication application, UIApplicationLaunchOptions launchOptions) {
-            application.setStatusBarHidden(false);
-
-            final CGRect bounds = UIScreen.getMainScreen().getBounds();
-            webView = new UIWebView(bounds);
-            webView.setDelegate(delegate);
-            webView.setAutoresizingMask(UIViewAutoresizing.with(
-                    UIViewAutoresizing.FlexibleBottomMargin,
-                    UIViewAutoresizing.FlexibleHeight,
-                    UIViewAutoresizing.FlexibleLeftMargin,
-                    UIViewAutoresizing.FlexibleRightMargin,
-                    UIViewAutoresizing.FlexibleTopMargin,
-                    UIViewAutoresizing.FlexibleWidth
-            ));
-            CGRect whole = UIScreen.getMainScreen().getBounds();
-            window = new UIWindow(whole);
-            window.setRootViewController(new UIViewController() {
-                @Override
-                public boolean prefersStatusBarHidden() {
-                    return true;
-                }
-
-                @Override
-                public boolean shouldAutorotate() {
-                    return true;
-                }
-
-                @Override
-                public boolean shouldAutomaticallyForwardRotationMethods() {
-                    return false;
-                }
-
-                @Override
-                public void didRotate(UIInterfaceOrientation uiio) {
-                }
-
-            });
-            window.getRootViewController().setView(webView);
-            window.setBackgroundColor(UIColor.white());
-            window.addSubview(webView);
-            window.makeKeyAndVisible();
-
-            NSURLRequest req = new NSURLRequest(new NSURL(page));
-            webView.loadRequest(req);
-
-            waitFor.countDown();
-            return true;
-        }
-
-        static UIWebView mainView(String p, UIWebViewDelegate d) throws IOException {
-            page = p;
-            waitFor = new CountDownLatch(1);
-            delegate = d;
-            UIApplication.main(new String[]{p}, null, App.class);
-            try {
-                waitFor.await();
-            } catch (InterruptedException ex) {
-                throw new InterruptedIOException();
-            }
-            return webView;
-        }
-    }
-
-    private final class WebViewDelegate extends UIWebViewDelegateAdapter {
+    private final class WebViewDelegate implements UIWebViewDelegate {
 
         private final Runnable onPageLoad;
 
@@ -253,8 +204,8 @@ public final class iOS extends Generic
         }
 
         @Override
-        public boolean shouldStartLoad(UIWebView webView, NSURLRequest request, UIWebViewNavigationType navigationType) {
-            final String url = request.getURL().getAbsoluteString();
+        public boolean webViewShouldStartLoadWithRequestNavigationType(UIWebView webView, NSURLRequest request, long navigationType) {
+            final String url = request.URL().absoluteString();
             final String pref = "presenter://";
             if (url.startsWith(pref)) {
                 int[] q = {url.indexOf('?')};
@@ -288,7 +239,7 @@ public final class iOS extends Generic
                         } else {
                             exec.append(ret);
                         }
-                        String check = webView.evaluateJavaScript(exec.toString());
+                        String check = webView.stringByEvaluatingJavaScriptFromString(exec.toString());
                         LOG.log(Level.FINE, "evaluating {0} with return {1}", new Object[]{exec, check});
                     }
                 } catch (Exception ex) {
@@ -296,9 +247,9 @@ public final class iOS extends Generic
                 }
                 return false;
             }
-            final NSURL openURL = request.getURL();
+            final NSURL openURL = request.URL();
             if (!openURL.isFileURL()) {
-                UIApplication.getSharedApplication().openURL(openURL);
+                UIApplication.sharedApplication().openURL(openURL);
                 return false;
             }
             return true;
@@ -315,17 +266,17 @@ public final class iOS extends Generic
         }
 
         @Override
-        public void didStartLoad(UIWebView webView) {
+        public void webViewDidStartLoad(UIWebView webView) {
             iOS.this.webView = webView;
         }
 
         @Override
-        public void didFailLoad(UIWebView webView, NSError error) {
+        public void webViewDidFailLoadWithError(UIWebView webView, NSError error) {
             iOS.this.webView = webView;
         }
 
         @Override
-        public void didFinishLoad(UIWebView webView) {
+        public void webViewDidFinishLoad(UIWebView webView) {
             if (dispatchThread == null) {
                 execute(onPageLoad);
                 dispatchThread = Thread.currentThread();

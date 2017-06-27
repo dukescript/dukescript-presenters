@@ -2,3 +2,8 @@
 /target/
 /*/*/target/
 /*/dependency-reduced-pom.xml
+/*/*/dependency-reduced-pom.xml
+/*/.gradle/
+/*/build/
+/testing/*/.gradle/
+/testing/*/build/
