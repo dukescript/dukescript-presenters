@@ -221,6 +221,11 @@ public final class Android extends Activity {
         String aPkg = view.getContext().getApplicationInfo().packageName;
         final Presenter p = new Presenter(view, aPkg, page, null, null, licenseKey, runOnUiThread);
         androidLog(Level.FINE, "Creating presenter for {0}", view);
+        doInit(p, view);
+        return p;
+    }
+
+    private static void doInit(final Presenter p, final WebView view) {
         p.dispatch(new Runnable() {
             @Override
             public void run() {
@@ -229,7 +234,6 @@ public final class Android extends Activity {
                 androidLog(Level.FINE, "Init done for {0}", view);
             }
         }, false);
-        return p;
     }
 
     /**
@@ -340,6 +344,7 @@ public final class Android extends Activity {
         }
         Presenter presenter = new Presenter(webView, aPkg, loadPage, loadClass, invoke, null, runOnUiThread);
         presenter.execute(presenter);
+        doInit(presenter, webView);
     }
 
     static void androidLog(Level severity, String msg, Object... args) {
@@ -409,13 +414,20 @@ public final class Android extends Activity {
                 @Override
                 public void onPageFinished(WebView view, String url) {
                     onPageLoad.run();
+                    androidLog(Level.FINE, "onPageFinished {0}", url);
                 }
 
                 @Override
                 public void onPageStarted(WebView view, String url, Bitmap favicon) {
-                    super.onPageStarted(view, url, favicon);
+                    androidLog(Level.FINE, "onPageStarted {0}", url);
+                }
+
+                @Override
+                public void onLoadResource(WebView view, String url) {
+                    androidLog(Level.FINE, "onLoadResource {0}", url);
                 }
             });
+            androidLog(Level.FINE, "displayPage {0}", page.toExternalForm());
             view.loadUrl(page.toExternalForm());
         }
 
@@ -485,8 +497,10 @@ public final class Android extends Activity {
                 @Override
                 public void run() {
                     if (page != null) {
+                        androidLog(Level.FINE, "loading page {0}", page);
                         view.loadUrl(page);
                     } else {
+                        androidLog(Level.FINE, "loading empty page");
                         view.loadDataWithBaseURL("file:///", "<html><body><script></script></body></html>", "text/html", null, null);
                     }
                     dispatch(initialize, false);
@@ -501,6 +515,7 @@ public final class Android extends Activity {
 
                 @Override
                 public void run() {
+                    androidLog(Level.FINE, "calling jvm.ready()");
                     loadScript("javascript:jvm.ready();\n");
                     Thread thread = new Thread(initialize, "Initialize JS Bridge");
                     thread.start();
@@ -509,6 +524,7 @@ public final class Android extends Activity {
             class Ready implements Runnable {
                 @Override
                 public void run() {
+                    androidLog(Level.FINE, "awaiting jvm.ready()");
                     try {
                         jvm.ready.await();
                     } catch (InterruptedException ex) {
