@@ -487,7 +487,7 @@ public final class Android extends Activity {
 
         @Override
         void callbackFn(final String welcome, final OnReady onReady) {
-            class LoadPage implements Runnable {
+            class LoadPage extends WebViewClient implements Runnable {
                 private final Runnable initialize;
 
                 LoadPage(Runnable initialize) {
@@ -496,6 +496,7 @@ public final class Android extends Activity {
 
                 @Override
                 public void run() {
+                    view.setWebViewClient(this);
                     if (page != null) {
                         androidLog(Level.FINE, "loading page {0}", page);
                         view.loadUrl(page);
@@ -503,6 +504,10 @@ public final class Android extends Activity {
                         androidLog(Level.FINE, "loading empty page");
                         view.loadDataWithBaseURL("file:///", "<html><body><script></script></body></html>", "text/html", null, null);
                     }
+                }
+
+                @Override
+                public void onPageFinished(WebView view, String url) {
                     dispatch(initialize, false);
                 }
             }
