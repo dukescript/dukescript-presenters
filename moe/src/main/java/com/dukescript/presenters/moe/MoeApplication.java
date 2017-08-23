@@ -40,7 +40,6 @@ import apple.uikit.c.UIKit;
 import apple.uikit.enums.UIViewAutoresizing;
 import apple.uikit.protocol.UIApplicationDelegate;
 import apple.uikit.protocol.UIWebViewDelegate;
-import com.dukescript.presenters.iOS;
 import java.util.concurrent.CountDownLatch;
 import org.moe.natj.general.NatJ;
 import org.moe.natj.general.Pointer;
@@ -85,7 +84,7 @@ public class MoeApplication extends NSObject implements UIApplicationDelegate {
         return true;
     }
 
-    public static void runOnUiThread(Runnable w) {
+    static void runOnUiThread(Runnable w) {
         NSOperationQueue mq = NSOperationQueue.mainQueue();
         RunNsOp run = RunNsOp.alloc().initWithRunnable(w);
         mq.addOperation(run);

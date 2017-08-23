@@ -22,7 +22,8 @@ package com.dukescript.presenters;
  * <http://www.gnu.org/licenses/gpl-3.0.html>.
  * #L%
  */
-import com.dukescript.presenters.robovm.RoboVMApplication;
+
+import com.dukescript.presenters.ios.UI;
 import java.io.Closeable;
 import java.io.Flushable;
 import java.io.IOException;
@@ -33,14 +34,6 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import org.netbeans.html.boot.spi.Fn;
 import org.openide.util.lookup.ServiceProvider;
-import org.robovm.apple.foundation.NSBundle;
-import org.robovm.apple.foundation.NSError;
-import org.robovm.apple.foundation.NSURL;
-import org.robovm.apple.foundation.NSURLRequest;
-import org.robovm.apple.uikit.UIApplication;
-import org.robovm.apple.uikit.UIWebView;
-import org.robovm.apple.uikit.UIWebViewDelegateAdapter;
-import org.robovm.apple.uikit.UIWebViewNavigationType;
 
 /** Ultimate <a href="http://dukescript.com">DukeScript</a>
  * <a href="https://github.com/dukescript/dukescript-presenters">Presenter</a>
@@ -61,11 +54,11 @@ public final class iOS extends Generic
         implements Executor, Fn.Presenter, Fn.KeepAlive, Flushable {
 
     static final Logger LOG = Logger.getLogger(iOS.class.getName());
-    private UIWebView webView;
+    private Object webView;
     private Thread dispatchThread;
 
     public iOS() throws Exception {
-        super(true, false, "iOS", NSBundle.getMainBundle().getBundleIdentifier(), null);
+        super(true, false, "iOS", UI.getDefault().identifier(), null);
     }
 
     @Override
@@ -82,7 +75,7 @@ public final class iOS extends Generic
         if (dispatchThread == Thread.currentThread()) {
             r.run();
         } else {
-            RoboVMApplication.runOnUiThread(r);
+            UI.getDefault().runOnUiThread(r);
         }
     }
 
@@ -143,16 +136,16 @@ public final class iOS extends Generic
 
     @Override
     void loadJS(String js) {
-        String res = webView.evaluateJavaScript(js);
+        String res = UI.getDefault().evaluateJavaScript(webView, js);
         LOG.log(Level.FINE, "loadJS done: {0}", res);
     }
 
     @Override
     public void displayPage(URL page, Runnable onPageLoad) {
-        RoboVMApplication.displayPage(page.toExternalForm(), new WebViewDelegate(onPageLoad));
+        UI.getDefault().displayPage(page.toExternalForm(), new WebViewDelegate(onPageLoad));
     }
 
-    private final class WebViewDelegate extends UIWebViewDelegateAdapter {
+    private final class WebViewDelegate implements UI.WebViewAdapter {
 
         private final Runnable onPageLoad;
 
@@ -161,8 +154,7 @@ public final class iOS extends Generic
         }
 
         @Override
-        public boolean shouldStartLoad(UIWebView webView, NSURLRequest request, UIWebViewNavigationType navigationType) {
-            final String url = request.getURL().getAbsoluteString();
+        public boolean shouldStartLoad(Object webView, String url) {
             final String pref = "presenter://";
             if (url.startsWith(pref)) {
                 int[] q = {url.indexOf('?')};
@@ -196,7 +188,7 @@ public final class iOS extends Generic
                         } else {
                             exec.append(ret);
                         }
-                        String check = webView.evaluateJavaScript(exec.toString());
+                        String check = UI.getDefault().evaluateJavaScript(webView, exec.toString());
                         LOG.log(Level.FINE, "evaluating {0} with return {1}", new Object[]{exec, check});
                     }
                 } catch (Exception ex) {
@@ -204,12 +196,7 @@ public final class iOS extends Generic
                 }
                 return false;
             }
-            final NSURL openURL = request.getURL();
-            if (!openURL.isFileURL()) {
-                UIApplication.getSharedApplication().openURL(openURL);
-                return false;
-            }
-            return true;
+            return UI.getDefault().openFileURL(url);
         }
 
         private String nextParam(String text, int[] from) throws Exception {
@@ -223,17 +210,17 @@ public final class iOS extends Generic
         }
 
         @Override
-        public void didStartLoad(UIWebView webView) {
+        public void didStartLoad(Object webView) {
             iOS.this.webView = webView;
         }
 
         @Override
-        public void didFailLoad(UIWebView webView, NSError error) {
+        public void didFailLoad(Object webView, String error) {
             iOS.this.webView = webView;
         }
 
         @Override
-        public void didFinishLoad(UIWebView webView) {
+        public void didFinishLoad(Object webView) {
             if (dispatchThread == null) {
                 execute(onPageLoad);
                 dispatchThread = Thread.currentThread();

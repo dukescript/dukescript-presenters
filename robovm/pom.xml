@@ -6,9 +6,9 @@
         <artifactId>pom</artifactId>
         <version>2.0-SNAPSHOT</version>
     </parent>
-    
-    <name>DukeScript Presenter for Any iOS</name>
-    <artifactId>iosgeneric</artifactId>
+
+    <name>DukeScript Presenter for RoboVM</name>
+    <artifactId>ios</artifactId>
     <packaging>jar</packaging>
     <build>
         <plugins>
@@ -25,7 +25,27 @@
                         </goals>
                     </execution>
                 </executions>
-            </plugin>            
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-shade-plugin</artifactId>
+                <version>3.0.0</version>
+                <configuration>
+                    <artifactSet>
+                        <includes>
+                            <include>com.dukescript.presenters:*</include>
+                        </includes>
+                    </artifactSet>
+                </configuration>
+                <executions>
+                    <execution>
+                        <phase>package</phase>
+                        <goals>
+                            <goal>shade</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
             <plugin>
                 <groupId>org.netbeans.tools</groupId>
                 <artifactId>sigtest-maven-plugin</artifactId>
@@ -45,13 +65,18 @@
     </build>
     <dependencies>
         <dependency>
+            <groupId>com.mobidevelop.robovm</groupId>
+            <artifactId>robovm-cocoatouch</artifactId>
+            <version>${robovm.version}</version>
+        </dependency>
+        <dependency>
             <groupId>org.netbeans.html</groupId>
             <artifactId>net.java.html.boot</artifactId>
             <version>${net.java.html.version}</version>
         </dependency>
         <dependency>
             <groupId>${project.groupId}</groupId>
-            <artifactId>generic</artifactId>
+            <artifactId>iosgeneric</artifactId>
             <version>${project.version}</version>
         </dependency>
         <dependency>
@@ -64,6 +89,11 @@
             <groupId>org.netbeans.html</groupId>
             <artifactId>net.java.html.geo</artifactId>
             <version>${net.java.html.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>com.mobidevelop.robovm</groupId>
+            <artifactId>robovm-rt</artifactId>
+            <version>${robovm.version}</version>
         </dependency>
     </dependencies>
 </project>

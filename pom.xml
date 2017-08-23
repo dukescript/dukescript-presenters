@@ -83,6 +83,7 @@
         <module>generic</module>
         <module>android</module>
         <module>ios</module>
+        <module>robovm</module>
         <module>moe</module>
         <module>fakeandroidemul</module>
         <module>fakeiosemul</module>

@@ -61,7 +61,7 @@
                 <configuration>
                     <action>strictcheck</action>
                     <packages>com.dukescript.presenters</packages>
-                    <sigfile>${basedir}/../ios/target/ios-${project.version}.sigfile</sigfile>
+                    <sigfile>${basedir}/../robovm/target/ios-${project.version}.sigfile</sigfile>
                 </configuration>
             </plugin>
         </plugins>
@@ -80,14 +80,14 @@
             <scope>provided</scope>
         </dependency>
         <dependency>
+            <groupId>com.dukescript.presenters</groupId>
+            <artifactId>iosgeneric</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        <dependency>
             <groupId>org.netbeans.html</groupId>
             <artifactId>net.java.html.boot</artifactId>
             <version>${net.java.html.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>${project.groupId}</groupId>
-            <artifactId>generic</artifactId>
-            <version>${project.version}</version>
         </dependency>
         <dependency>
             <groupId>org.netbeans.api</groupId>
