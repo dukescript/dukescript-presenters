@@ -35,8 +35,6 @@ import org.openide.util.lookup.ServiceProvider;
 
 import apple.foundation.NSBundle;
 import apple.foundation.NSError;
-import apple.foundation.NSOperation;
-import apple.foundation.NSOperationQueue;
 import apple.foundation.NSURL;
 import apple.foundation.NSURLRequest;
 import apple.uikit.UIApplication;
@@ -44,8 +42,6 @@ import apple.uikit.UIWebView;
 import apple.uikit.protocol.UIWebViewDelegate;
 import com.dukescript.presenters.moe.MoeApplication;
 import java.io.Flushable;
-import org.moe.natj.general.Pointer;
-import org.moe.natj.objc.ann.Selector;
 
 /** Ultimate <a href="http://dukescript.com">DukeScript</a>
  * <a href="https://github.com/dukescript/dukescript-presenters">Presenter</a>
@@ -87,7 +83,7 @@ public final class iOS extends Generic
         if (dispatchThread == Thread.currentThread()) {
             r.run();
         } else {
-            runOnUiThread(r);
+            MoeApplication.runOnUiThread(r);
         }
     }
 
@@ -116,36 +112,6 @@ public final class iOS extends Generic
             }
         }
         dispatch(new CtxRun());
-    }
-
-    static void runOnUiThread(Runnable w) {
-        NSOperationQueue mq = NSOperationQueue.mainQueue();
-        RunNsOp run = RunNsOp.alloc().initWithRunnable(w);
-        mq.addOperation(run);
-    }
-
-    static final class RunNsOp extends NSOperation {
-        Runnable run;
-
-        protected RunNsOp(Pointer peer) {
-            super(peer);
-        }
-
-        @Selector("alloc")
-        public static native RunNsOp alloc();
-
-        @Override
-        public void main() {
-            run.run();
-        }
-
-        final RunNsOp initWithRunnable(Runnable w) {
-            init();
-            run = w;
-            return this;
-        }
-
-
     }
 
     @Override

@@ -28,6 +28,7 @@ import java.io.InterruptedIOException;
 import java.util.concurrent.CountDownLatch;
 import org.robovm.apple.coregraphics.CGRect;
 import org.robovm.apple.foundation.NSAutoreleasePool;
+import org.robovm.apple.foundation.NSOperationQueue;
 import org.robovm.apple.foundation.NSURL;
 import org.robovm.apple.foundation.NSURLRequest;
 import org.robovm.apple.uikit.UIApplication;
@@ -87,6 +88,11 @@ public final class RoboVMApplication extends UIApplicationDelegateAdapter {
         webView.loadRequest(req);
         waitFor.countDown();
         return true;
+    }
+
+    public static void runOnUiThread(Runnable w) {
+        NSOperationQueue mq = NSOperationQueue.getMainQueue();
+        mq.addOperation(w);
     }
 
     public static void displayPage(String p, UIWebViewDelegate d) {

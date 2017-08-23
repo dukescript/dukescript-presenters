@@ -26,6 +26,8 @@ package com.dukescript.presenters.moe;
 import apple.NSObject;
 import apple.coregraphics.struct.CGRect;
 import apple.foundation.NSDictionary;
+import apple.foundation.NSOperation;
+import apple.foundation.NSOperationQueue;
 import apple.foundation.NSURL;
 import apple.foundation.NSURLRequest;
 import apple.uikit.UIApplication;
@@ -38,6 +40,7 @@ import apple.uikit.c.UIKit;
 import apple.uikit.enums.UIViewAutoresizing;
 import apple.uikit.protocol.UIApplicationDelegate;
 import apple.uikit.protocol.UIWebViewDelegate;
+import com.dukescript.presenters.iOS;
 import java.util.concurrent.CountDownLatch;
 import org.moe.natj.general.NatJ;
 import org.moe.natj.general.Pointer;
@@ -80,6 +83,34 @@ public class MoeApplication extends NSObject implements UIApplicationDelegate {
         webView.loadRequest(req);
         waitFor.countDown();
         return true;
+    }
+
+    public static void runOnUiThread(Runnable w) {
+        NSOperationQueue mq = NSOperationQueue.mainQueue();
+        RunNsOp run = RunNsOp.alloc().initWithRunnable(w);
+        mq.addOperation(run);
+    }
+
+    static final class RunNsOp extends NSOperation {
+        Runnable run;
+
+        protected RunNsOp(Pointer peer) {
+            super(peer);
+        }
+
+        @Selector("alloc")
+        public static native RunNsOp alloc();
+
+        @Override
+        public void main() {
+            run.run();
+        }
+
+        final RunNsOp initWithRunnable(Runnable w) {
+            init();
+            run = w;
+            return this;
+        }
     }
 
     public static void displayPage(String toExternalForm, UIWebViewDelegate webViewDelegate) {

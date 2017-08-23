@@ -35,7 +35,6 @@ import org.netbeans.html.boot.spi.Fn;
 import org.openide.util.lookup.ServiceProvider;
 import org.robovm.apple.foundation.NSBundle;
 import org.robovm.apple.foundation.NSError;
-import org.robovm.apple.foundation.NSOperationQueue;
 import org.robovm.apple.foundation.NSURL;
 import org.robovm.apple.foundation.NSURLRequest;
 import org.robovm.apple.uikit.UIApplication;
@@ -83,7 +82,7 @@ public final class iOS extends Generic
         if (dispatchThread == Thread.currentThread()) {
             r.run();
         } else {
-            runOnUiThread(r);
+            RoboVMApplication.runOnUiThread(r);
         }
     }
 
@@ -112,11 +111,6 @@ public final class iOS extends Generic
             }
         }
         dispatch(new CtxRun());
-    }
-
-    static void runOnUiThread(Runnable w) {
-        NSOperationQueue mq = NSOperationQueue.getMainQueue();
-        mq.addOperation(w);
     }
 
     @Override
