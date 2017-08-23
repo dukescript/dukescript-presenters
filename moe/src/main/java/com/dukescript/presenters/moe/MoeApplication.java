@@ -38,8 +38,6 @@ import apple.uikit.c.UIKit;
 import apple.uikit.enums.UIViewAutoresizing;
 import apple.uikit.protocol.UIApplicationDelegate;
 import apple.uikit.protocol.UIWebViewDelegate;
-import java.io.IOException;
-import java.io.InterruptedIOException;
 import java.util.concurrent.CountDownLatch;
 import org.moe.natj.general.NatJ;
 import org.moe.natj.general.Pointer;
@@ -84,7 +82,11 @@ public class MoeApplication extends NSObject implements UIApplicationDelegate {
         return true;
     }
 
-    public static UIWebView mainView(String p, UIWebViewDelegate d) throws IOException {
+    public static void displayPage(String toExternalForm, UIWebViewDelegate webViewDelegate) {
+        mainView(page, delegate);
+    }
+
+    private static UIWebView mainView(String p, UIWebViewDelegate d) {
         page = p;
         waitFor = new CountDownLatch(1);
         delegate = d;
@@ -92,7 +94,7 @@ public class MoeApplication extends NSObject implements UIApplicationDelegate {
         try {
             waitFor.await();
         } catch (InterruptedException ex) {
-            throw new InterruptedIOException();
+            throw new IllegalStateException(ex);
         }
         return webView;
     }

@@ -184,15 +184,7 @@ public final class iOS extends Generic
 
     @Override
     public void displayPage(URL page, Runnable onPageLoad) {
-//        NSAutoreleasePool pool = new NSAutoreleasePool();
-        try {
-            MoeApplication.mainView(page.toExternalForm(), new WebViewDelegate(onPageLoad));
-        } catch (RuntimeException ex) {
-            throw ex;
-        } catch (Exception ex) {
-            throw new IllegalStateException(ex);
-        }
-//        pool.close();
+        MoeApplication.displayPage(page.toExternalForm(), new WebViewDelegate(onPageLoad));
     }
 
     private final class WebViewDelegate implements UIWebViewDelegate {

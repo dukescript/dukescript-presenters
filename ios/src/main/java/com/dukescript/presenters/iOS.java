@@ -22,38 +22,26 @@ package com.dukescript.presenters;
  * <http://www.gnu.org/licenses/gpl-3.0.html>.
  * #L%
  */
+import com.dukescript.presenters.robovm.RoboVMApplication;
 import java.io.Closeable;
 import java.io.Flushable;
 import java.io.IOException;
-import java.io.InterruptedIOException;
 import java.net.URL;
 import java.net.URLDecoder;
-import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.Executor;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import org.netbeans.html.boot.spi.Fn;
 import org.openide.util.lookup.ServiceProvider;
-import org.robovm.apple.coregraphics.CGRect;
-import org.robovm.apple.foundation.NSAutoreleasePool;
 import org.robovm.apple.foundation.NSBundle;
 import org.robovm.apple.foundation.NSError;
 import org.robovm.apple.foundation.NSOperationQueue;
 import org.robovm.apple.foundation.NSURL;
 import org.robovm.apple.foundation.NSURLRequest;
 import org.robovm.apple.uikit.UIApplication;
-import org.robovm.apple.uikit.UIApplicationDelegateAdapter;
-import org.robovm.apple.uikit.UIApplicationLaunchOptions;
-import org.robovm.apple.uikit.UIColor;
-import org.robovm.apple.uikit.UIInterfaceOrientation;
-import org.robovm.apple.uikit.UIScreen;
-import org.robovm.apple.uikit.UIViewAutoresizing;
-import org.robovm.apple.uikit.UIViewController;
 import org.robovm.apple.uikit.UIWebView;
-import org.robovm.apple.uikit.UIWebViewDelegate;
 import org.robovm.apple.uikit.UIWebViewDelegateAdapter;
 import org.robovm.apple.uikit.UIWebViewNavigationType;
-import org.robovm.apple.uikit.UIWindow;
 
 /** Ultimate <a href="http://dukescript.com">DukeScript</a>
  * <a href="https://github.com/dukescript/dukescript-presenters">Presenter</a>
@@ -167,87 +155,7 @@ public final class iOS extends Generic
 
     @Override
     public void displayPage(URL page, Runnable onPageLoad) {
-        NSAutoreleasePool pool = new NSAutoreleasePool();
-        try {
-            App.mainView(page.toExternalForm(), new WebViewDelegate(onPageLoad));
-        } catch (RuntimeException ex) {
-            throw ex;
-        } catch (Exception ex) {
-            throw new IllegalStateException(ex);
-        }
-        pool.close();
-    }
-
-    static final class App extends UIApplicationDelegateAdapter {
-
-        private static UIWindow window;
-        private static UIWebView webView;
-        private static UIWebViewDelegate delegate;
-        private static String page;
-        private static CountDownLatch waitFor;
-
-        @Override
-        public boolean didFinishLaunching(UIApplication application, UIApplicationLaunchOptions launchOptions) {
-            application.setStatusBarHidden(false);
-
-            final CGRect bounds = UIScreen.getMainScreen().getBounds();
-            webView = new UIWebView(bounds);
-            webView.setDelegate(delegate);
-            webView.setAutoresizingMask(UIViewAutoresizing.with(
-                    UIViewAutoresizing.FlexibleBottomMargin,
-                    UIViewAutoresizing.FlexibleHeight,
-                    UIViewAutoresizing.FlexibleLeftMargin,
-                    UIViewAutoresizing.FlexibleRightMargin,
-                    UIViewAutoresizing.FlexibleTopMargin,
-                    UIViewAutoresizing.FlexibleWidth
-            ));
-            CGRect whole = UIScreen.getMainScreen().getBounds();
-            window = new UIWindow(whole);
-            window.setRootViewController(new UIViewController() {
-                @Override
-                public boolean prefersStatusBarHidden() {
-                    return true;
-                }
-
-                @Override
-                public boolean shouldAutorotate() {
-                    return true;
-                }
-
-                @Override
-                public boolean shouldAutomaticallyForwardRotationMethods() {
-                    return false;
-                }
-
-                @Override
-                public void didRotate(UIInterfaceOrientation uiio) {
-                }
-
-            });
-            window.getRootViewController().setView(webView);
-            window.setBackgroundColor(UIColor.white());
-            window.addSubview(webView);
-            window.makeKeyAndVisible();
-
-            NSURLRequest req = new NSURLRequest(new NSURL(page));
-            webView.loadRequest(req);
-
-            waitFor.countDown();
-            return true;
-        }
-
-        static UIWebView mainView(String p, UIWebViewDelegate d) throws IOException {
-            page = p;
-            waitFor = new CountDownLatch(1);
-            delegate = d;
-            UIApplication.main(new String[]{p}, null, App.class);
-            try {
-                waitFor.await();
-            } catch (InterruptedException ex) {
-                throw new InterruptedIOException();
-            }
-            return webView;
-        }
+        RoboVMApplication.displayPage(page.toExternalForm(), new WebViewDelegate(onPageLoad));
     }
 
     private final class WebViewDelegate extends UIWebViewDelegateAdapter {
