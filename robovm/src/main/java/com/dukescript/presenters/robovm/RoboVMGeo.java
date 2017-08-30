@@ -28,6 +28,7 @@ import net.java.html.geo.OnLocation;
 import org.netbeans.html.geo.spi.GLProvider;
 import org.openide.util.lookup.ServiceProvider;
 import org.robovm.apple.corelocation.CLAuthorizationStatus;
+import org.robovm.apple.corelocation.CLBeacon;
 import org.robovm.apple.corelocation.CLBeaconRegion;
 import org.robovm.apple.corelocation.CLHeading;
 import org.robovm.apple.corelocation.CLLocation;
@@ -121,9 +122,7 @@ public final class RoboVMGeo extends GLProvider<CLLocation,RoboVMGeo.Adapter> {
             this.m = m;
         }
 
-        
-        @Override
-        public void didUpdateToLocation(CLLocationManager manager, CLLocation newLocation, CLLocation oldLocation) {
+        private void didUpdateToLocation(CLLocationManager manager, CLLocation newLocation) {
             long time = (long)newLocation.getTimestamp().getTimeIntervalSince1970();
             RoboVMGeo.super.callback(q, time, newLocation, null);
             if (q.isOneTime()) {
@@ -133,7 +132,7 @@ public final class RoboVMGeo extends GLProvider<CLLocation,RoboVMGeo.Adapter> {
 
         @Override
         public void didUpdateLocations(CLLocationManager manager, NSArray<CLLocation> locations) {
-            didUpdateToLocation(manager, locations.get(0), null);
+            didUpdateToLocation(manager, locations.get(0));
         }
 
         @Override
@@ -150,7 +149,7 @@ public final class RoboVMGeo extends GLProvider<CLLocation,RoboVMGeo.Adapter> {
         }
 
         @Override
-        public void didRangeBeacons(CLLocationManager manager, NSArray<?> beacons, CLBeaconRegion region) {
+        public void didRangeBeacons(CLLocationManager manager, NSArray<CLBeacon> beacons, CLBeaconRegion region) {
         }
 
         @Override
