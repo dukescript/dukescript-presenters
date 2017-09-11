@@ -31,10 +31,18 @@ import apple.uikit.UIApplication;
 import apple.uikit.UIWebView;
 import apple.uikit.protocol.UIWebViewDelegate;
 import com.dukescript.presenters.ios.UI;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import org.openide.util.lookup.ServiceProvider;
 
 @ServiceProvider(service = UI.class)
 public final class MoeUI extends UI {
+    static final Logger LOG = Logger.getLogger(MoeUI.class.getName());
+
+    public MoeUI() {
+        LOG.fine("MoeUI created");
+    }
+
     @Override
     public String identifier() {
         return NSBundle.mainBundle().bundleIdentifier();
@@ -75,7 +83,9 @@ public final class MoeUI extends UI {
 
         @Override
         public boolean webViewShouldStartLoadWithRequestNavigationType(UIWebView webView, NSURLRequest request, long navigationType) {
-            final String url = request.URL().absoluteString();
+            final NSURL reqURL = request.URL();
+            final String url = reqURL == null ? "" : reqURL.toString();
+            LOG.log(Level.FINE, "request {0} with url {1}", new Object[] { request, url });
             return delegate.shouldStartLoad(webView, url);
         }
 

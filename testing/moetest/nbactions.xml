@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<actions>
+    <action>
+        <actionName>run</actionName>
+        <goals>
+            <goal>clean</goal>
+            <goal>package</goal>
+            <goal>moe:launch</goal>
+        </goals>
+        <properties>
+            <skipTests>true</skipTests>
+        </properties>
+    </action>
+    <action>
+        <actionName>debug</actionName>
+        <goals>
+            <goal>clean</goal>
+            <goal>package</goal>
+            <goal>moe:launch</goal>
+        </goals>
+        <properties>
+            <skipTests>true</skipTests>
+            <moe.options>debug:${jpda.attach.port}</moe.options>
+            <jpda.attach>true</jpda.attach>
+        </properties>
+    </action>
+</actions>

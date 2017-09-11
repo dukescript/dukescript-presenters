@@ -41,7 +41,7 @@ public final class Test extends JavaScriptTCK {
     static BrwsrCtx CTX;
     
     public static void main(final String... args) throws Exception {
-        Logger l = Logger.getLogger("com.dukescript");
+        final Logger l = Logger.getLogger("com.dukescript");
         l.setLevel(Level.FINE);
         ConsoleHandler ch = new ConsoleHandler();
         ch.setLevel(Level.FINE);
@@ -49,11 +49,14 @@ public final class Test extends JavaScriptTCK {
         l.setUseParentHandlers(false);
         
         final CountDownLatch CDL = new CountDownLatch(1);
+        l.info("Launching Testing harness thread");
         Thread t = new Thread("Testing harness") {
             @Override
             public void run() {
                 try {
+                    l.info("awaiting presenter initialization");
                     CDL.await();
+                    l.info("initialization done, running tests");
                     processTests();
                 } catch (Exception ex) {
                     LOG.log(Level.SEVERE, null, ex);
@@ -65,11 +68,12 @@ public final class Test extends JavaScriptTCK {
         class Loaded implements Runnable {
             @Override
             public void run() {
+                l.info("browser thread loaded");
                 CTX = BrwsrCtx.findDefault(Test.class);
                 CDL.countDown();
             }
         }
-        
+        l.info("Launching the Presenter");
         BrowserBuilder.newBrowser().loadPage("pages/test.html").
                 loadClass(Test.class).
                 loadFinished(new Loaded()).

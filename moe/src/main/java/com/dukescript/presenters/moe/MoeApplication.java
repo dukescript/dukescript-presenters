@@ -112,8 +112,8 @@ public class MoeApplication extends NSObject implements UIApplicationDelegate {
         }
     }
 
-    public static void displayPage(String toExternalForm, UIWebViewDelegate webViewDelegate) {
-        mainView(page, delegate);
+    public static void displayPage(String pageToDisplay, UIWebViewDelegate webViewDelegate) {
+        mainView(pageToDisplay, webViewDelegate);
     }
 
     private static UIWebView mainView(String p, UIWebViewDelegate d) {
