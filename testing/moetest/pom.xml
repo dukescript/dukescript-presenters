@@ -64,9 +64,9 @@
     <profiles>
         <profile>
             <activation>
-                <os>
-                    <family>Mac OS X</family>
-                </os>
+                <property>
+                    <name>moe.launcher.simulators</name>
+                </property>
             </activation>
             <id>ios</id>
             <build>
@@ -86,7 +86,7 @@
                         </executions>
                         <configuration>
 				<simulatorIds>
-				  <id>03F9E98B-C95C-4A8F-84A0-DFEAA77D48EE</id>
+				  <id>${moe.launcher.simulators}</id>
                                 </simulatorIds>
                         </configuration>
                     </plugin>
