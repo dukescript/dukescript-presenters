@@ -11,12 +11,12 @@ package com.dukescript.presenters;
  * it under the terms of the GNU General Public License as
  * published by the Free Software Foundation, either version 3 of the
  * License, or (at your option) any later version.
- * 
+ *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU General Public
  * License along with this program.  If not, see
  * <http://www.gnu.org/licenses/gpl-3.0.html>.
@@ -29,6 +29,8 @@ import java.io.Flushable;
 import java.io.IOException;
 import java.net.URL;
 import java.net.URLDecoder;
+import java.util.LinkedList;
+import java.util.List;
 import java.util.concurrent.Executor;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -56,9 +58,20 @@ public final class iOS extends Generic
     static final Logger LOG = Logger.getLogger(iOS.class.getName());
     private Object webView;
     private Thread dispatchThread;
+    private List<Runnable> pending;
 
-    public iOS() throws Exception {
-        super(true, false, "iOS", UI.getDefault().identifier(), null);
+    public iOS() {
+        this(null);
+    }
+
+    private iOS(String licenseKey) {
+        super(true, false, "iOS", UI.getDefault().identifier(), licenseKey);
+    }
+
+    public static <WebView> Executor configure(String licenseKey, WebView view, String page) {
+        iOS presenter = new iOS(licenseKey);
+        UI.getDefault().setViewUp(view, page, presenter.new WebViewDelegate(null));
+        return presenter;
     }
 
     @Override
@@ -70,8 +83,37 @@ public final class iOS extends Generic
         }
     }
 
+    final boolean assignThread(Thread t) {
+        boolean assigned = false;
+        List<Runnable> tmp = null;
+        synchronized (this) {
+            if (dispatchThread == null) {
+                dispatchThread = t;
+                assigned = true;
+                tmp = pending;
+                pending = null;
+            }
+        }
+        if (tmp != null) {
+            for (Runnable r : tmp) {
+                r.run();
+            }
+        }
+        return assigned;
+    }
+
     @Override
     final void dispatch(final Runnable r) {
+        synchronized (this) {
+            if (dispatchThread == null) {
+                if (pending == null) {
+                    pending = new LinkedList<Runnable>();
+                }
+                pending.add(r);
+                return;
+            }
+        }
+
         if (dispatchThread == Thread.currentThread()) {
             r.run();
         } else {
@@ -221,9 +263,8 @@ public final class iOS extends Generic
 
         @Override
         public void didFinishLoad(Object webView) {
-            if (dispatchThread == null) {
+            if (assignThread(Thread.currentThread()) && onPageLoad != null) {
                 execute(onPageLoad);
-                dispatchThread = Thread.currentThread();
             }
         }
 

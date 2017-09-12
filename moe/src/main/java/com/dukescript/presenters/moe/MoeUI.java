@@ -74,6 +74,17 @@ public final class MoeUI extends UI {
         MoeApplication.displayPage(page, new WebViewDelegate(webViewDelegate));
     }
 
+    @Override
+    public void setViewUp(Object view, String page, WebViewAdapter adapter) {
+        if (!(view instanceof UIWebView)) {
+            throw new ClassCastException("Expecting instance of apple.uikit.UIWebView, but got " + view);
+        }
+        UIWebView webView = (UIWebView) view;
+        webView.setDelegate(new WebViewDelegate(adapter));
+        NSURLRequest req = NSURLRequest.requestWithURL(NSURL.URLWithString(page));
+        webView.loadRequest(req);
+    }
+
     private static final class WebViewDelegate implements UIWebViewDelegate {
         private final WebViewAdapter delegate;
 

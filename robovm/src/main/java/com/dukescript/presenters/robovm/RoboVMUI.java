@@ -68,6 +68,17 @@ public final class RoboVMUI extends UI {
         RoboVMApplication.displayPage(page, new WebViewDelegate(webViewDelegate));
     }
 
+    @Override
+    public void setViewUp(Object view, String page, WebViewAdapter adapter) {
+        if (!(view instanceof UIWebView)) {
+            throw new ClassCastException("Expecting instance of org.robovm.apple.uikit.UIWebView, but got " + view);
+        }
+        UIWebView webView = (UIWebView) view;
+        webView.setDelegate(new WebViewDelegate(adapter));
+        NSURLRequest req = new NSURLRequest(new NSURL(page));
+        webView.loadRequest(req);
+    }
+
     private final class WebViewDelegate extends UIWebViewDelegateAdapter {
         private final WebViewAdapter delegate;
 

@@ -1,5 +1,6 @@
 package com.dukescript.presenters.ios;
 
+import com.dukescript.presenters.iOS;
 import java.util.Iterator;
 import java.util.ServiceLoader;
 
@@ -46,6 +47,7 @@ public abstract class UI {
     public abstract boolean openFileURL(String url);
     public abstract void runOnUiThread(Runnable r);
     public abstract void displayPage(String page, WebViewAdapter webViewDelegate);
+    public abstract void setViewUp(Object view, String page, WebViewAdapter webViewDelegate);
 
     public interface WebViewAdapter {
         public boolean shouldStartLoad(Object webView, String url);
