@@ -1039,7 +1039,7 @@ abstract class Generic implements Fn.Presenter, Fn.KeepAlive, Flushable {
             
             StringBuilder sb = new StringBuilder(256);
             sb.append(invokeImplFn(id, wait4js, key));
-            encodeObject(thiz, keepAlive != null, sb, null);
+            encodeObject(thiz, false, sb, null);
             for (int i = 0; i < args.length; i++) {
                 sb.append(", ");
                 boolean weak = keepAlive != null && !keepAlive[i];
