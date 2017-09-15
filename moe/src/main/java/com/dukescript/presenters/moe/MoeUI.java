@@ -90,8 +90,10 @@ public final class MoeUI extends UI {
         }
         UIWebView webView = (UIWebView) view;
         webView.setDelegate(new WebViewDelegate(adapter));
-        NSURLRequest req = NSURLRequest.requestWithURL(NSURL.URLWithString(page));
-        webView.loadRequest(req);
+        if (page != null) {
+            NSURLRequest req = NSURLRequest.requestWithURL(NSURL.URLWithString(page));
+            webView.loadRequest(req);
+        }
     }
 
     private static final class WebViewDelegate implements UIWebViewDelegate {

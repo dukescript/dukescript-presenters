@@ -84,8 +84,10 @@ public final class RoboVMUI extends UI {
         }
         UIWebView webView = (UIWebView) view;
         webView.setDelegate(new WebViewDelegate(adapter));
-        NSURLRequest req = new NSURLRequest(new NSURL(page));
-        webView.loadRequest(req);
+        if (page != null) {
+            NSURLRequest req = new NSURLRequest(new NSURL(page));
+            webView.loadRequest(req);
+        }
     }
 
     private final class WebViewDelegate extends UIWebViewDelegateAdapter {

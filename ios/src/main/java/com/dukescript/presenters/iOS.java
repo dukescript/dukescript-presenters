@@ -32,25 +32,71 @@ import java.net.URL;
 import java.net.URLDecoder;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.ServiceLoader;
 import java.util.concurrent.Executor;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import net.java.html.BrwsrCtx;
+import net.java.html.js.JavaScriptBody;
+import net.java.html.boot.BrowserBuilder;
 import org.netbeans.html.boot.spi.Fn;
 import org.openide.util.lookup.ServiceProvider;
 
-/** Ultimate <a href="http://dukescript.com">DukeScript</a>
+/** Versatile <a href="http://dukescript.com">DukeScript</a>
  * <a href="https://github.com/dukescript/dukescript-presenters">Presenter</a>
- * for all iOS devices. Builds upon
- * <a href="http://robovm.org">RoboVM</a> or its
- * <a href="https://dukescript.com/update/2017/03/06/robovm-fork.html">alternatives</a>.
- * To use this presenter specify following dependency:
+ * for all <b>iOS</b> devices. This presenter supports two <b>Java</b> virtual machines:
+ * <ul>
+ *   <li><a href="https://github.com/MobiVM/robovm">RoboVM</a> by com.mobidevelop guys</li>
+ *   <li><a href="https://multi-os-engine.org/">Multi OS Engine</a> by Intel</li>
+ * </ul>
+ * <p>
+ * To use this presenter in your <a href="https://github.com/MobiVM/robovm">RoboVM</a> based project,
+ * please specify following dependency:
+ * </p>
  * <pre>
  * &lt;dependency&gt;
  *   &lt;groupId&gt;com.dukescript.presenters&lt;/groupId&gt;
- *   &lt;artifactId&gt;ios&lt;/artifactId&gt;
+ *   &lt;artifactId&gt;<b>ios</b>&lt;/artifactId&gt; &lt;!-- gives you <em>RoboVM</em> version -->
  *   &lt;version&gt;<a target="blank" href="http://search.maven.org/#search%7Cgav%7C1%7Cg%3A%22com.dukescript.presenters%22%20AND%20a%3A%22ios%22">1.x</a>&lt;/version&gt;
  * &lt;/dependency&gt;
  * </pre>
+ * <p>
+ * If you are using <a href="https://multi-os-engine.org/">Multi OS Engine</a>,
+ * just change the dependency to refer to <b>moe</b> artifact:
+ * </p>
+ * <pre>
+ * &lt;dependency&gt;
+ *   &lt;groupId&gt;com.dukescript.presenters&lt;/groupId&gt;
+ *   &lt;artifactId&gt;<b>moe</b>&lt;/artifactId&gt; &lt;!-- gives you <em>Multi OS Engine</em> version -->
+ *   &lt;version&gt;<a target="blank" href="http://search.maven.org/#search%7Cgav%7C1%7Cg%3A%22com.dukescript.presenters%22%20AND%20a%3A%22moe%22">1.x</a>&lt;/version&gt; &lt;-- at least 1.4 --&gt;
+ * &lt;/dependency&gt;
+ * </pre>
+ * both of these versions use the same API and thus they are covered by the same
+ * Javadoc of this {@code iOS} class.
+ *
+ * <p>
+ * <b>Embedding</b>
+ * <p>
+ * Read more about embedding DukeScript technology into existing
+ * Multi OS Engine or RoboVM <b>iOS</b> application. Start by reading javadoc
+ * of the
+ * {@link #configure(java.lang.String, java.lang.Object, java.lang.String) configure}
+ * method.
+ *
+ * <p>
+ * <b>Cross-Platform</b>
+ * <p>
+ * Learn how to build fully portable (iOS, browser, desktop) Java applications
+ * in <a target="_blank" href="https://dukescript.com/getting_started.html">DukeScript getting
+ * started</a> tutorial. The great value of the tutorial is that it
+ * helps you set your project up correctly - getting the classpath right may be
+ * tough for the first time.
+ * Launching the presenter
+ * is a matter of a few {@link BrowserBuilder#newBrowser(java.lang.Object...) BrowserBuilder}
+ * calls and then running your initialization code when
+ * {@linkplain BrowserBuilder#loadFinished(java.lang.Runnable)
+ * page load is finished}.
+ *
  */
 @ServiceProvider(service = Fn.Presenter.class)
 public final class iOS extends Generic
@@ -61,6 +107,10 @@ public final class iOS extends Generic
     private Thread dispatchThread;
     private List<Runnable> pending;
 
+    /** Default constructor. Used by {@link ServiceLoader#load(java.lang.Class)}
+     * to lookup instance of presenter registered on the classpath of the
+     * application.
+     */
     public iOS() {
         this(null);
     }
@@ -69,24 +119,105 @@ public final class iOS extends Generic
         super(true, false, "iOS", UI.getDefault().identifier(), licenseKey);
     }
 
+    /**
+     * Configures an instance of {@code WebView} to give you easy access to
+     * HTML features from Java. Use this method to embed HTML components
+     * into your existing application. By configuring your {@code apple.uikit.UIWebView}
+     * (in case of <em>Multi OS Engine</em>) or {@code org.robovm.apple.uikit.UIWebView}
+     * (in case of <em>RoboVM</em> version of this library)
+     * you can use all the <a href="http://dukescript.com">DukeScript</a>
+     * goodies like:
+     * <p></p>
+     * <ul>
+     * <li><a target="_blank" href="https://dukescript.com/javadoc/charts/">charts</a></li>
+     * <li><a target="_blank" href="https://dukescript.com/javadoc/leaflet4j/">maps</a></li>
+     * <li><a target="_blank" href="https://dukescript.com/javadoc/canvas/">canvas</a></li>
+     * <li><a target="_blank" href="http://bits.netbeans.org/html+java/">UI bindings</a></li>
+     * </ul>
+     * <p>
+     * and still code in the same language that you use for the rest
+     * of your application - e.g. in <b>Java</b> or <a href="https://kotlinlang.org/">Kotlin</a>.
+     * </p>
+     *
+     * <p>
+     * <b>Accessing the HTML Content</b>
+     * <p>
+     *
+     * There can be multiple {@code WebView} components in your application
+     * and it is thus essential to always identify the one you are working with.
+     * As such the HTML content of your {@code WebView} needs to be accessed from
+     * a dedicated {@link Executor} provided to you as a return value of the
+     * {@link #configure(java.lang.String, java.lang.Object, java.lang.String) configure}
+     * method. Use {@link Executor#execute(java.lang.Runnable)} to switch
+     * into the context of the {@code WebView} and perform an action.
+     * <p>
+     * Here is an example to display an alert in your {@link WebView view} and
+     * its associated {@link Executor executor} created as a result of
+     *
+     * <pre>
+     * {@link Executor} executor = {@link #configure(java.lang.String, java.lang.Object, java.lang.String)  iOS.configure}(null, view, null);
+     * {@link Executor executor}.execute(<b>new</b> {@link Runnable} {
+     *     <b>public void</b> run() {
+     *        alert("Hello World!");
+     *     }
+     *     {@link JavaScriptBody @JavaScriptBody}(args = { "msg" }, body = "alert(msg);")
+     *     <b>native void</b> alert(String msg);
+     * });
+     * </pre>
+     * The example is using {@link JavaScriptBody} annotation (you can read
+     * more about this building block of DukeScript system {@link net.java.html.js here}),
+     * but in most cases you are likely to use one of the predefined Java wrappers. For example there
+     * are <a target="_blank" href="https://dukescript.com/javadoc/libs/net/java/html/lib/jquery/JQuery.html">
+     * JQuery bindings</a> which you may consider to use instead.
+     *
+     * <p>
+     * <b>Threading</b>
+     * <p>
+     *
+     * The HTML content of your {@code WebView} needs to be accessed from a single
+     * UI thread. The same UI thread is {@link net.java.html.js also making callbacks}
+     * to your Java code. To post a task into such thread use the returned
+     * {@link Executor}'s {@link iOS#execute(java.lang.Runnable)} method. When
+     * inside of the executor you can access the HTML as well as native components
+     * of your <b>iOS</b> application.
+     * <p>
+     * This presenter is licensed under <em>GPLv3</em> license - visit
+     * <a target="top" href="https://dukescript.com/index.html#pricing">DukeScript website</a>
+     * for commercial licenses and support.
+     *
+     * @param <WebView> either {@code apple.uikit.UIWebView}
+     *   or {@code org.robovm.apple.uikit.UIWebView} depending on
+     *   {@linkplain iOS the version of the JVM} you are using
+     * @param licenseKey the license key obtained from
+     *   <a target="_blank" href="https://dukescript.com/index.html#pricing">DukeScript support</a>
+     *   or <b>GPLv3</b> when using the open source version
+     * @param view the {@code WebView} to configure and make ready for access from Java code
+     * @param page the initial page to load - usually read from assets - e.g. the URL looks like: <code>file:///android_asset/mypage.html</code>
+     * @return the executor to use to safely execute code inside of the HTML content of your view
+     * @since 1.4
+     */
     public static <WebView> Executor configure(String licenseKey, WebView view, String page) {
         iOS presenter = new iOS(licenseKey);
-        final File pageFile = new File(page);
         String foundPage;
-        if (pageFile.exists()) {
-            foundPage = page;
-        } else {
-            int lastSlash = page.lastIndexOf('/');
-            String subdir = lastSlash < 0 ? null : page.substring(0, lastSlash);
-            String rest = page.substring(lastSlash + 1);
-            int lastDot = rest.lastIndexOf('.');
-            String name = lastDot < 0 ? rest : rest.substring(0, lastDot);
-            String ext = lastDot < 0 ? "" : rest.substring(lastDot + 1);
-            foundPage = UI.getDefault().pathForResouce(name, ext, subdir);
-            File foundFile = foundPage == null ? null : new File(foundPage);
-            if (foundFile == null || !foundFile.exists()) {
-                throw new IllegalStateException("Cannot find page " + page + " neither as file " + pageFile + " or file " + foundPage);
+        if (page != null) {
+            final File pageFile = new File(page);
+            if (pageFile.exists()) {
+                foundPage = page;
+            } else {
+                int lastSlash = page.lastIndexOf('/');
+                String subdir = lastSlash < 0 ? null : page.substring(0, lastSlash);
+                String rest = page.substring(lastSlash + 1);
+                int lastDot = rest.lastIndexOf('.');
+                String name = lastDot < 0 ? rest : rest.substring(0, lastDot);
+                String ext = lastDot < 0 ? "" : rest.substring(lastDot + 1);
+                foundPage = UI.getDefault().pathForResouce(name, ext, subdir);
+                File foundFile = foundPage == null ? null : new File(foundPage);
+                if (foundFile == null || !foundFile.exists()) {
+                    throw new IllegalStateException("Cannot find page " + page + " neither as file " + pageFile + " or file " + foundPage);
+                }
             }
+        } else {
+            foundPage = null;
         }
         UI.getDefault().setViewUp(view, foundPage, presenter.new WebViewDelegate(null));
         return presenter;
@@ -139,6 +270,14 @@ public final class iOS extends Generic
         }
     }
 
+    /** Executes the command in the {@link BrwsrCtx context} of this presenter.
+     * The behavior is specified by {@link BrwsrCtx#execute(java.lang.Runnable)}
+     * method - e.g. if we are on the right thread, let's execute the
+     * {@code command} synchronously, otherwise pass the command to the queue
+     * in the right UI thread and execute it asynchronously later.
+     *
+     * @param command the runnable to execute
+     */
     @Override
     public final void execute(final Runnable command) {
         class CtxRun implements Runnable {

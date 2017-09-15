@@ -128,7 +128,7 @@ public final class Android extends Activity {
      * <li><a target="_blank" href="http://bits.netbeans.org/html+java/">UI bindings</a></li>
      * </ul>
      * and still code in the same language that you use for the rest
-     * of your application.
+     * of your application - e.g. in <b>Java</b> or <a href="https://kotlinlang.org/">Kotlin</a>.
      *
      * <p>
      * <b>Accessing the HTML Content</b>
