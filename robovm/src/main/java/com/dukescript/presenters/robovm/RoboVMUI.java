@@ -43,6 +43,15 @@ public final class RoboVMUI extends UI {
     }
 
     @Override
+    public String pathForResouce(String name, String ext, String subdir) {
+        if (subdir == null) {
+            return NSBundle.getMainBundle().findResourcePath(name, ext);
+        } else {
+            return NSBundle.getMainBundle().findResourcePath(name, ext, subdir);
+        }
+    }
+
+    @Override
     public String evaluateJavaScript(Object webView, String js) {
         UIWebView v = (UIWebView) webView;
         return v.evaluateJavaScript(js);

@@ -25,6 +25,7 @@ package com.dukescript.presenters;
 
 import com.dukescript.presenters.ios.UI;
 import java.io.Closeable;
+import java.io.File;
 import java.io.Flushable;
 import java.io.IOException;
 import java.net.URL;
@@ -70,7 +71,24 @@ public final class iOS extends Generic
 
     public static <WebView> Executor configure(String licenseKey, WebView view, String page) {
         iOS presenter = new iOS(licenseKey);
-        UI.getDefault().setViewUp(view, page, presenter.new WebViewDelegate(null));
+        final File pageFile = new File(page);
+        String foundPage;
+        if (pageFile.exists()) {
+            foundPage = page;
+        } else {
+            int lastSlash = page.lastIndexOf('/');
+            String subdir = lastSlash < 0 ? null : page.substring(0, lastSlash);
+            String rest = page.substring(lastSlash + 1);
+            int lastDot = rest.lastIndexOf('.');
+            String name = lastDot < 0 ? rest : rest.substring(0, lastDot);
+            String ext = lastDot < 0 ? "" : rest.substring(lastDot + 1);
+            foundPage = UI.getDefault().pathForResouce(name, ext, subdir);
+            File foundFile = foundPage == null ? null : new File(foundPage);
+            if (foundFile == null || !foundFile.exists()) {
+                throw new IllegalStateException("Cannot find page " + page + " neither as file " + pageFile + " or file " + foundPage);
+            }
+        }
+        UI.getDefault().setViewUp(view, foundPage, presenter.new WebViewDelegate(null));
         return presenter;
     }
 

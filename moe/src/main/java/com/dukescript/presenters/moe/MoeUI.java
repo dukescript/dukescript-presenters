@@ -49,6 +49,15 @@ public final class MoeUI extends UI {
     }
 
     @Override
+    public String pathForResouce(String name, String ext, String subdir) {
+        if (subdir == null) {
+            return NSBundle.mainBundle().pathForResourceOfType(name, ext);
+        } else {
+            return NSBundle.mainBundle().pathForResourceOfTypeInDirectory(name, ext, subdir);
+        }
+    }
+
+    @Override
     public String evaluateJavaScript(Object webView, String js) {
         UIWebView v = (UIWebView) webView;
         return v.stringByEvaluatingJavaScriptFromString(js);

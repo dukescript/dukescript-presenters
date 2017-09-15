@@ -1,6 +1,5 @@
 package com.dukescript.presenters.ios;
 
-import com.dukescript.presenters.iOS;
 import java.util.Iterator;
 import java.util.ServiceLoader;
 
@@ -43,6 +42,7 @@ public abstract class UI {
     }
 
     public abstract String identifier();
+    public abstract String pathForResouce(String name, String ext, String subdir);
     public abstract String evaluateJavaScript(Object webView, String js);
     public abstract boolean openFileURL(String url);
     public abstract void runOnUiThread(Runnable r);
