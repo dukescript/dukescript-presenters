@@ -223,6 +223,7 @@ public final class Browser implements Fn.Presenter, Fn.KeepAlive, Flushable, Exe
         @Override
         public void service(Request rqst, Response rspns) throws Exception {
             String path = rqst.getRequestURI();
+            rspns.setCharacterEncoding("UTF-8");
             if ("/".equals(path) || "index.html".equals(path)) {
                 Reader is;
                 Writer w = rspns.getWriter();
