@@ -1,4 +1,4 @@
-package com.dukescript.presenters;
+package com.dukescript.presenters.internal;
 
 /*
  * #%L
