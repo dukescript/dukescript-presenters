@@ -42,12 +42,12 @@ import net.java.html.boot.BrowserBuilder;
 import org.netbeans.html.boot.spi.Fn;
 import org.openide.util.lookup.ServiceProvider;
 
-/** Versatile <a href="http://dukescript.com">DukeScript</a>
- * <a href="https://github.com/dukescript/dukescript-presenters">Presenter</a>
+/** Versatile <a target="_blank" href="http://dukescript.com">DukeScript</a>
+ * <a target="_blank" href="https://github.com/dukescript/dukescript-presenters">Presenter</a>
  * for all <b>iOS</b> devices. This presenter supports two <b>Java</b> virtual machines:
  * <ul>
- *   <li><a href="https://github.com/MobiVM/robovm">RoboVM</a> by com.mobidevelop guys</li>
- *   <li><a href="https://multi-os-engine.org/">Multi OS Engine</a> by Intel</li>
+ *   <li><a target="_blank" href="https://github.com/MobiVM/robovm">RoboVM</a> by com.mobidevelop guys</li>
+ *   <li><a target="_blank" href="https://multi-os-engine.org/">Multi OS Engine</a> by Intel</li>
  * </ul>
  * <p>
  * To use this presenter in your <a href="https://github.com/MobiVM/robovm">RoboVM</a> based project,
@@ -57,18 +57,18 @@ import org.openide.util.lookup.ServiceProvider;
  * &lt;dependency&gt;
  *   &lt;groupId&gt;com.dukescript.presenters&lt;/groupId&gt;
  *   &lt;artifactId&gt;<b>ios</b>&lt;/artifactId&gt; &lt;!-- gives you <em>RoboVM</em> version --&gt;
- *   &lt;version&gt;<a target="blank" href="http://search.maven.org/#search%7Cgav%7C1%7Cg%3A%22com.dukescript.presenters%22%20AND%20a%3A%22ios%22">1.x</a>&lt;/version&gt;
+ *   &lt;version&gt;<a target="_blank" href="http://search.maven.org/#search%7Cgav%7C1%7Cg%3A%22com.dukescript.presenters%22%20AND%20a%3A%22ios%22">1.x</a>&lt;/version&gt;
  * &lt;/dependency&gt;
  * </pre>
  * <p>
- * If you are using <a href="https://multi-os-engine.org/">Multi OS Engine</a>,
+ * If you are using <a target="_blank" href="https://multi-os-engine.org/">Multi OS Engine</a>,
  * just change the dependency to refer to <b>moe</b> artifact:
  * </p>
  * <pre>
  * &lt;dependency&gt;
  *   &lt;groupId&gt;com.dukescript.presenters&lt;/groupId&gt;
  *   &lt;artifactId&gt;<b>moe</b>&lt;/artifactId&gt; &lt;!-- gives you <em>Multi OS Engine</em> version --&gt;
- *   &lt;version&gt;<a target="blank" href="http://search.maven.org/#search%7Cgav%7C1%7Cg%3A%22com.dukescript.presenters%22%20AND%20a%3A%22moe%22">1.x</a>&lt;/version&gt; &lt;-- at least 1.4 --&gt;
+ *   &lt;version&gt;<a target="_blank" href="http://search.maven.org/#search%7Cgav%7C1%7Cg%3A%22com.dukescript.presenters%22%20AND%20a%3A%22moe%22">1.x</a>&lt;/version&gt; &lt;-- at least 1.4 --&gt;
  * &lt;/dependency&gt;
  * </pre>
  * both of these versions use the same API and thus they are covered by the same
