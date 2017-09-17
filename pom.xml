@@ -53,8 +53,8 @@
         </repository>
         <repository>
             <id>snapshots</id>
-            <name>Java.net Snapshots</name>
-            <url>https://maven.java.net/content/repositories/snapshots/</url>
+            <name>OSS Snapshots</name>
+            <url>https://oss.sonatype.org/content/repositories/snapshots/</url>
             <snapshots>
                 <enabled>true</enabled>
             </snapshots>
@@ -66,8 +66,8 @@
     <pluginRepositories>
         <pluginRepository>
             <id>snapshots</id>
-            <name>Java.net Snapshots</name>
-            <url>https://maven.java.net/content/repositories/snapshots/</url>
+            <name>OSS Snapshots</name>
+            <url>https://oss.sonatype.org/content/repositories/snapshots/</url>
             <snapshots>
                 <enabled>true</enabled>
             </snapshots>
