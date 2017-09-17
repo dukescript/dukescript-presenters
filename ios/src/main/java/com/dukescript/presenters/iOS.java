@@ -56,7 +56,7 @@ import org.openide.util.lookup.ServiceProvider;
  * <pre>
  * &lt;dependency&gt;
  *   &lt;groupId&gt;com.dukescript.presenters&lt;/groupId&gt;
- *   &lt;artifactId&gt;<b>ios</b>&lt;/artifactId&gt; &lt;!-- gives you <em>RoboVM</em> version -->
+ *   &lt;artifactId&gt;<b>ios</b>&lt;/artifactId&gt; &lt;!-- gives you <em>RoboVM</em> version --&gt;
  *   &lt;version&gt;<a target="blank" href="http://search.maven.org/#search%7Cgav%7C1%7Cg%3A%22com.dukescript.presenters%22%20AND%20a%3A%22ios%22">1.x</a>&lt;/version&gt;
  * &lt;/dependency&gt;
  * </pre>
@@ -67,7 +67,7 @@ import org.openide.util.lookup.ServiceProvider;
  * <pre>
  * &lt;dependency&gt;
  *   &lt;groupId&gt;com.dukescript.presenters&lt;/groupId&gt;
- *   &lt;artifactId&gt;<b>moe</b>&lt;/artifactId&gt; &lt;!-- gives you <em>Multi OS Engine</em> version -->
+ *   &lt;artifactId&gt;<b>moe</b>&lt;/artifactId&gt; &lt;!-- gives you <em>Multi OS Engine</em> version --&gt;
  *   &lt;version&gt;<a target="blank" href="http://search.maven.org/#search%7Cgav%7C1%7Cg%3A%22com.dukescript.presenters%22%20AND%20a%3A%22moe%22">1.x</a>&lt;/version&gt; &lt;-- at least 1.4 --&gt;
  * &lt;/dependency&gt;
  * </pre>
@@ -120,6 +120,7 @@ public final class iOS extends Generic
     }
 
     /**
+     * <p>
      * Configures an instance of {@code WebView} to give you easy access to
      * HTML features from Java. Use this method to embed HTML components
      * into your existing application. By configuring your {@code apple.uikit.UIWebView}
@@ -127,7 +128,7 @@ public final class iOS extends Generic
      * (in case of <em>RoboVM</em> version of this library)
      * you can use all the <a href="http://dukescript.com">DukeScript</a>
      * goodies like:
-     * <p></p>
+     * </p>
      * <ul>
      * <li><a target="_blank" href="https://dukescript.com/javadoc/charts/">charts</a></li>
      * <li><a target="_blank" href="https://dukescript.com/javadoc/leaflet4j/">maps</a></li>
