@@ -11,12 +11,12 @@ package com.dukescript.presenters.androidapp;
  * it under the terms of the GNU General Public License as
  * published by the Free Software Foundation, either version 3 of the
  * License, or (at your option) any later version.
- * 
+ *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU General Public
  * License along with this program.  If not, see
  * <http://www.gnu.org/licenses/gpl-3.0.html>.
@@ -65,19 +65,22 @@ public class JUnitTestMethodsProcessor extends AbstractProcessor {
                 } catch (MirroredTypeException ex) {
                     sn = ex.getTypeMirror();
                 }
-                
+
                 JavaFileObject sf = processingEnv.getFiler().createSourceFile(pkg.toString() + "." + ju.name(), e);
                 Writer w = sf.openWriter();
                 w.append("package ").append(pkg.toString()).append(";\n");
                 w.append("abstract class ").append(ju.name()).append(" extends ").append(sn.toString()).append(ju.generics()).append(" {\n");
-                
+                w.append("  private final java.io.StringWriter output = new java.io.StringWriter();\n");
+                w.append("  private final java.io.PrintWriter printer= new java.io.PrintWriter(output);\n");
+                w.append("\n");
+
                 Element esn = processingEnv.getTypeUtils().asElement(sn);
                 for (Element ee : esn.getEnclosedElements()) {
                     if (ee.getKind() != ElementKind.CONSTRUCTOR) {
                         continue;
                     }
                     ExecutableElement constructor = (ExecutableElement) ee;
-                    
+
                     w.append("  ").append(ju.name()).append("(");
                     String sep = "";
                     for (VariableElement ve : constructor.getParameters()) {
@@ -95,7 +98,7 @@ public class JUnitTestMethodsProcessor extends AbstractProcessor {
                     w.append(");\n");
                     w.append("  }\n");
                 }
-                
+
                 final TypeMirror ko;
                 try {
                     ju.annotatedBy().getName();
@@ -111,7 +114,10 @@ public class JUnitTestMethodsProcessor extends AbstractProcessor {
                 } catch (MirroredTypesException ex) {
                     tests = ex.getTypeMirrors();
                 }
-                
+
+                StringBuilder testAll = new StringBuilder();
+                testAll.append("  public void test").append(ju.name()).append("() {\n");
+
                 for (TypeMirror test : tests) {
                     Element et = processingEnv.getTypeUtils().asElement(test);
                     for (Element ee : et.getEnclosedElements()) {
@@ -131,14 +137,25 @@ public class JUnitTestMethodsProcessor extends AbstractProcessor {
                         String name = ee.getSimpleName().toString();;
                         if (!name.startsWith("test")) {
                             name = "test" + Character.toUpperCase(name.charAt(0)) + name.substring(1);
-                        }                        
-                        w.append("  public void " + name + "() {\n");
-                        w.append("    throw new IllegalStateException(\"" + name + "\");\n");
+                        }
+                        w.append("  public void run" + name + "() {\n");
+                        w.append("    setName(\"" + name + "\");\n");
+                        w.append("    try {\n");
+                        w.append("      runTest();\n");
+                        w.append("    } catch (Throwable t) {\n");
+                        w.append("      t.printStackTrace(printer);\n");
+                        w.append("    } finally {\n");
+                        w.append("      printer.flush();\n");
+                        w.append("    }\n");
                         w.append("  }\n");
+
+                        testAll.append("    run").append(name).append("();\n");
                     }
                 }
-                
-                
+
+                testAll.append("  }\n");
+
+                w.append(testAll.toString());
                 w.append("}\n");
                 w.close();
             } catch (IOException ex) {
@@ -147,5 +164,5 @@ public class JUnitTestMethodsProcessor extends AbstractProcessor {
         }
         return true;
     }
-    
+
 }
