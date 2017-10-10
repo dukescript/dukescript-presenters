@@ -88,6 +88,7 @@ public class AndroidKnockoutTest extends AndroidKnockoutBase {
         final String logName = activity.getClass().getSimpleName();
         final Object inst = m.getDeclaringClass().newInstance();
         Executor e = obtainExecutor(activity);
+        final boolean[] calledRepeatedly = { false };
         for (int cnt = 0;; cnt++) {
             if (cnt == 100) {
                 throw new InterruptedException("Too many repetitions");
@@ -98,11 +99,15 @@ public class AndroidKnockoutTest extends AndroidKnockoutBase {
                 @Override
                 public void run() {
                     try {
-                        Log.v(logName, "Running " + m.getDeclaringClass().getName() + "::" + m.getName());
-                        Object ret = m.invoke(inst);
-                        Log.v(logName, "Success " + m.getDeclaringClass().getName() + "::" + m.getName() + " = " + ret);
+                        if (!calledRepeatedly[0]) {
+                            Log.v(logName, "Running " + m.getDeclaringClass().getName() + "::" + m.getName());
+                            knockout.cleanPage(m.getName());
+                            calledRepeatedly[0] = true;
+                        } else {
+                            Log.v(logName, "Re-run: " + m.getDeclaringClass().getName() + "::" + m.getName());
+                        }
+                        m.invoke(inst);
                     } catch (Throwable ex) {
-                        Log.e(logName, "Error", ex);
                         res[0] = ex;
                     } finally {
                         cdl.countDown();
@@ -117,11 +122,13 @@ public class AndroidKnockoutTest extends AndroidKnockoutBase {
                         Thread.sleep(100);
                         continue;
                     }
+                    Log.e(logName, "Error", te.getTargetException());
                     throw te.getTargetException();
                 }
             }
             break;
         }
+        Log.v(logName, "Success " + m.getDeclaringClass().getName() + "::" + m.getName());
     }
 
     private static Executor obtainExecutor(final ActivityInstrumentationTestCase2<com.dukescript.presenters.androidapp.TestActivity> test) throws InterruptedException {

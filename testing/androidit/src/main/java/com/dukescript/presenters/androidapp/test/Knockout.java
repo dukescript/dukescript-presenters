@@ -80,7 +80,7 @@ public final class Knockout extends KnockoutTCK {
     }
 
     @Override
-    public Object executeScript(String script, Object[] arguments) {
+    public Object executeScript(String script, Object... arguments) {
         Fn.Presenter p = Fn.activePresenter();
         Fn fn = p.defineFn(
             "var f = new Function(s);\n" +
@@ -99,4 +99,7 @@ public final class Knockout extends KnockoutTCK {
         return ContentURLHandler.register(content, mimeType, parameters);
     }
 
+    void cleanPage(String name) {
+        executeScript("window.document.body.innerHTML = '<h1>" + name + "</h1>';");
+    }
 }
