@@ -83,11 +83,12 @@ public final class Knockout extends KnockoutTCK {
     public Object executeScript(String script, Object[] arguments) {
         Fn.Presenter p = Fn.activePresenter();
         Fn fn = p.defineFn(
-            "var f = new Function(s); " + "return f.apply(null, args);",
+            "var f = new Function(s);\n" +
+            "return f.apply(null, args);\n",
             "s", "args"
         );
         try {
-            return fn.invoke(null, arguments);
+            return fn.invoke(null, script, arguments);
         } catch (Exception ex) {
             throw new IllegalStateException(ex);
         }
