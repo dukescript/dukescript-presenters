@@ -56,6 +56,7 @@ import org.netbeans.html.json.tck.KOTest;
 )
 public class AndroidKnockoutTest extends AndroidKnockoutBase {
     private static Map<String,Method> toRun;
+    private static Knockout knockout;
 
     public AndroidKnockoutTest() {
         super(TestActivity.class);
@@ -65,17 +66,18 @@ public class AndroidKnockoutTest extends AndroidKnockoutBase {
     protected void setUp() throws Exception {
         if (toRun == null) {
             toRun = ScriptTest.assertMethods(AndroidKnockoutTest.class);
+            knockout = new Knockout();
         }
         super.setUp();
     }
 
     @Override
-    protected void runTest() throws Throwable {
-        final Method m = toRun.get(getName());
+    protected void runMethod(String name) throws Throwable {
+        final Method m = toRun.get(name);
         if (m != null) {
             runMethod(this, m);
         } else {
-            super.runTest();
+            throw new IllegalStateException("Cannot find method " + name);
         }
     }
 
@@ -83,7 +85,7 @@ public class AndroidKnockoutTest extends AndroidKnockoutBase {
         ActivityInstrumentationTestCase2<com.dukescript.presenters.androidapp.TestActivity> activity,
         final Method m
     ) throws InstantiationException, Throwable, IllegalAccessException {
-        Log.v(activity.getClass().getSimpleName(), "Running " + m.getDeclaringClass().getName() + "::" + m.getName());
+        final String logName = activity.getClass().getSimpleName();
         final Object inst = m.getDeclaringClass().newInstance();
         Executor e = obtainExecutor(activity);
         for (int cnt = 0;; cnt++) {
@@ -96,15 +98,18 @@ public class AndroidKnockoutTest extends AndroidKnockoutBase {
                 @Override
                 public void run() {
                     try {
-                        m.invoke(inst);
+                        Log.v(logName, "Running " + m.getDeclaringClass().getName() + "::" + m.getName());
+                        Object ret = m.invoke(inst);
+                        Log.v(logName, "Success " + m.getDeclaringClass().getName() + "::" + m.getName() + " = " + ret);
                     } catch (Throwable ex) {
+                        Log.e(logName, "Error", ex);
                         res[0] = ex;
                     } finally {
                         cdl.countDown();
                     }
                 }
             });
-            cdl.countDown();
+            cdl.await();
             if (res[0] != null) {
                 if (res[0] instanceof InvocationTargetException) {
                     InvocationTargetException te = (InvocationTargetException) res[0];

@@ -70,7 +70,9 @@ public class JUnitTestMethodsProcessor extends AbstractProcessor {
                 Writer w = sf.openWriter();
                 w.append("package ").append(pkg.toString()).append(";\n");
                 w.append("abstract class ").append(ju.name()).append(" extends ").append(sn.toString()).append(ju.generics()).append(" {\n");
-                w.append("  private final java.io.StringWriter output = new java.io.StringWriter();\n");
+                w.append("  int success;\n");
+                w.append("  int failure;\n");
+                w.append("  final java.io.StringWriter output = new java.io.StringWriter();\n");
                 w.append("  private final java.io.PrintWriter printer= new java.io.PrintWriter(output);\n");
                 w.append("\n");
 
@@ -115,6 +117,8 @@ public class JUnitTestMethodsProcessor extends AbstractProcessor {
                     tests = ex.getTypeMirrors();
                 }
 
+                w.append("  protected abstract void runMethod(String name) throws Throwable;\n");
+
                 StringBuilder testAll = new StringBuilder();
                 testAll.append("  public void test").append(ju.name()).append("() {\n");
 
@@ -139,11 +143,12 @@ public class JUnitTestMethodsProcessor extends AbstractProcessor {
                             name = "test" + Character.toUpperCase(name.charAt(0)) + name.substring(1);
                         }
                         w.append("  public void run" + name + "() {\n");
-                        w.append("    setName(\"" + name + "\");\n");
                         w.append("    try {\n");
-                        w.append("      runTest();\n");
+                        w.append("      runMethod(\"" + name + "\");\n");
+                        w.append("      success++;\n");
                         w.append("    } catch (Throwable t) {\n");
                         w.append("      t.printStackTrace(printer);\n");
+                        w.append("      failure++;\n");
                         w.append("    } finally {\n");
                         w.append("      printer.flush();\n");
                         w.append("    }\n");
@@ -153,6 +158,10 @@ public class JUnitTestMethodsProcessor extends AbstractProcessor {
                     }
                 }
 
+                testAll.append("    if (failure > 0) {\n");
+                testAll.append("      output.append(\"Success: \" + success + \" Failure: \" + failure + \"\\n\");\n");
+                testAll.append("      throw new AssertionError(output.toString());\n");
+                testAll.append("    }\n");
                 testAll.append("  }\n");
 
                 w.append(testAll.toString());
