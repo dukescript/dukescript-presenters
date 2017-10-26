@@ -3,8 +3,7 @@
     <action>
         <actionName>debug</actionName>
         <goals>
-            <goal>clean</goal>
-            <goal>install</goal>
+            <goal>android:internal-integration-test</goal>
         </goals>
         <properties>
             <debug>true</debug>
