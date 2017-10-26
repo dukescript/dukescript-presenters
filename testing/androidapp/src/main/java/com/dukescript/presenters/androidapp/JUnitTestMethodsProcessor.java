@@ -147,6 +147,8 @@ public class JUnitTestMethodsProcessor extends AbstractProcessor {
                         w.append("      runMethod(\"" + name + "\");\n");
                         w.append("      success++;\n");
                         w.append("    } catch (Throwable t) {\n");
+                        w.append("      printer.println();\n");
+                        w.append("      printer.println(\"===== " + name + " =====\");\n");
                         w.append("      t.printStackTrace(printer);\n");
                         w.append("      failure++;\n");
                         w.append("    } finally {\n");
