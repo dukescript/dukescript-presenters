@@ -163,7 +163,7 @@ abstract class Generic implements Fn.Presenter, Fn.KeepAlive, Flushable {
             + "\n  impl.toVM('r', 'OK', 'Initialized', null, null);"
             + "\n})(this);",
 
-        "error=Cannot initialize DukeScript!",
+        "error=Cannot initialize DukeScript: @1",
         "version=$version"
     })
     final void init() {
@@ -190,8 +190,9 @@ abstract class Generic implements Fn.Presenter, Fn.KeepAlive, Flushable {
                 loadJS(begin(clbk).toString());
                 log(Level.FINE, "checking OK state");
                 if (!assertOK()) {
-                    log(Level.WARNING, "no OK: {0}", error());
-                    throw new IllegalStateException(error());
+                    final CharSequence err = error(msg);
+                    log(Level.WARNING, "no OK: {0}", err);
+                    throw new IllegalStateException(err.toString());
                 }
                 log(Level.FINE, "assertOK");
 
@@ -925,7 +926,7 @@ abstract class Generic implements Fn.Presenter, Fn.KeepAlive, Flushable {
                     // OK, go on and check
                 }
             }
-            return "OK".equals(msg);
+            return "OK".equals(msg) || "Initialized".equals(msg);
         }
     }
     
