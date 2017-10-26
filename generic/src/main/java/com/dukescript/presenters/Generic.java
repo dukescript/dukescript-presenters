@@ -144,7 +144,7 @@ abstract class Generic implements Fn.Presenter, Fn.KeepAlive, Flushable {
             + "\n      if (n) toJava('r', r);"
             + "\n    } catch (err) {"
             + "\n      if (typeof console !== 'undefined') console.warn('Error ' + err);"
-            + "\n      if (n) toVM('r', 'error', '' + err, null, null);"
+            + "\n      if (n) toVM('r', 'error', '' + err + ' at:\\n' + err.stack, null, null);"
             + "\n    }"
             + "\n  };"
             + "\n  impl.o = function(i) {\nreturn js2j[i];\n};"
@@ -500,7 +500,7 @@ abstract class Generic implements Fn.Presenter, Fn.KeepAlive, Flushable {
             "    try {\n" +
             "      var r = eval.call(null, script);\n" +
 //            "    alert('r: ' + r +\n" +
-            "    } catch (e) {  alert('error: ' + e + ' executing: ' + script); }\n" +
+            "    } catch (e) {  alert('error: ' + e + ' executing: ' + script + ' at:\\n' + e.stack); }\n" +
             "    v = ds(@3).toVM('jr', null, null, null, null);" +
 //            "    alert('javaresult: ' + v +\n" +
             "  }\n" +
