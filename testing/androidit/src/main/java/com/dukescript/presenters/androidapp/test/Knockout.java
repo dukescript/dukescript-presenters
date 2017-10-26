@@ -100,6 +100,6 @@ public final class Knockout extends KnockoutTCK {
     }
 
     void cleanPage(String name) {
-        executeScript("window.document.body.innerHTML = '<h1>" + name + "</h1>';");
+        executeScript("window.document.body.innerHTML = '<h1>" + name + "</h1><script>var r = 81;</script>';");
     }
 }
