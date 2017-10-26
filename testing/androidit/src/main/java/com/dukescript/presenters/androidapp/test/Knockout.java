@@ -40,6 +40,7 @@ public final class Knockout extends KnockoutTCK {
     static Class[] allClasses() {
         return testClasses();
     }
+    private Fn fn;
 
     @Override
     public BrwsrCtx createContext() {
@@ -82,11 +83,13 @@ public final class Knockout extends KnockoutTCK {
     @Override
     public Object executeScript(String script, Object... arguments) {
         Fn.Presenter p = Fn.activePresenter();
-        Fn fn = p.defineFn(
-            "var f = new Function(s);\n" +
-            "return f.apply(null, args);\n",
-            "s", "args"
-        );
+        if (fn == null) {
+            fn = p.defineFn(
+                "var f = new Function(s);\n" +
+                "return f.apply(null, args);\n",
+                "s", "args"
+            );
+        }
         try {
             return fn.invoke(null, script, arguments);
         } catch (Exception ex) {
