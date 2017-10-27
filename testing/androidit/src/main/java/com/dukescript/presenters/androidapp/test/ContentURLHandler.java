@@ -113,7 +113,7 @@ final class ContentURLHandler extends URLStreamHandler {
             }
             return null;
         }
-        
+
         @Override
         public void connect() throws IOException {
             if (is == null) {
@@ -125,6 +125,9 @@ final class ContentURLHandler extends URLStreamHandler {
                         subst = this.method;
                     } else if ("http.requestBody".equals(parameters[i])) { // NOI18N
                         subst = new String(os.toByteArray(), "UTF-8"); // NOI18N
+                    } else if (parameters[i].startsWith("http.header.")) {
+                        String key = parameters[i].substring(12);
+                        subst = getRequestProperty(key);
                     } else if (q != null) {
                         String p = parameters[i] + "=";
                         int b = q.indexOf(p);
