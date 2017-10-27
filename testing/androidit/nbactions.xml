@@ -1,6 +1,15 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <actions>
     <action>
+        <actionName>run</actionName>
+        <goals>
+            <goal>android:internal-integration-test</goal>
+        </goals>
+        <properties>
+            <debug>false</debug>
+        </properties>
+    </action>
+    <action>
         <actionName>debug</actionName>
         <goals>
             <goal>android:internal-integration-test</goal>
