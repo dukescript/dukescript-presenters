@@ -67,6 +67,7 @@ public class TestActivity extends Activity {
                 } catch (IOException ex) {
                     Logger.getLogger(TestActivity.class.getName()).log(Level.SEVERE, null, ex);
                 }
+                b.setEnabled(false);
             }
         });
         ll.addView(b);
@@ -81,7 +82,7 @@ public class TestActivity extends Activity {
     }
     
     public void click(View v) throws IOException {
-        final Executor p = (Executor) getPresenter();
+        final Executor p = (Executor) getPresenter("file:///android_asset/pages/index.html");
         p.execute(new Runnable() {
             @Override
             public void run() {
@@ -92,8 +93,11 @@ public class TestActivity extends Activity {
     }
 
     public Executor getPresenter() {
+        return getPresenter("file:///android_asset/pages/test.html");
+    }
+
+    private Executor getPresenter(String page) {
         if (presenter == null) {
-            String page = "file:///android_asset/pages/index.html";
             presenter = Android.configure("GPLv3", view, page, null);
         }
         return presenter;
