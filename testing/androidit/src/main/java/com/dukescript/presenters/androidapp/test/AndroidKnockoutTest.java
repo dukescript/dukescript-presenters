@@ -101,7 +101,6 @@ public class AndroidKnockoutTest extends AndroidKnockoutBase {
                     try {
                         if (!calledRepeatedly[0]) {
                             Log.v(logName, "Running " + m.getDeclaringClass().getName() + "::" + m.getName());
-                            knockout.cleanPage(m.getName());
                             calledRepeatedly[0] = true;
                         } else {
                             Log.v(logName, "Re-run: " + m.getDeclaringClass().getName() + "::" + m.getName());

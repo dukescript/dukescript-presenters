@@ -101,8 +101,4 @@ public final class Knockout extends KnockoutTCK {
     public URI prepareURL(String content, String mimeType, String[] parameters) {
         return ContentURLHandler.register(content, mimeType, parameters);
     }
-
-    void cleanPage(String name) {
-        executeScript("window.document.body.innerHTML = '<h1>" + name + "</h1><script>var r = 81;</script>';");
-    }
 }
