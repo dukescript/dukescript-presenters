@@ -24,6 +24,7 @@ package com.dukescript.presenters.androidapp;
  */
 
 import android.app.Activity;
+import android.graphics.Color;
 import android.os.Bundle;
 import android.view.Menu;
 import android.view.View;
@@ -48,17 +49,18 @@ public class TestActivity extends Activity {
     private WebView view;
     private Executor presenter;
     private boolean clicked;
+    private Button button;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         view = new WebView(this);
         view.getSettings().setJavaScriptEnabled(true);
-        final android.widget.Button b = new Button(this);
-        b.setText("Run me");
+        button = new Button(this);
+        button.setText("Run me");
         final LinearLayout ll = new LinearLayout(this);
         ll.setOrientation(LinearLayout.VERTICAL);
-        b.setOnClickListener(new View.OnClickListener() {
+        button.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(final View view) {
                 clicked = true;
@@ -67,10 +69,10 @@ public class TestActivity extends Activity {
                 } catch (IOException ex) {
                     Logger.getLogger(TestActivity.class.getName()).log(Level.SEVERE, null, ex);
                 }
-                b.setEnabled(false);
+                button.setEnabled(false);
             }
         });
-        ll.addView(b);
+        ll.addView(button);
         ll.addView(view, new LinearLayout.LayoutParams(LinearLayout.LayoutParams.FILL_PARENT, LinearLayout.LayoutParams.FILL_PARENT));
         view.loadData("<h1 id='h1'>Press Run Button!</h1>", "text/html", "UTF-8");
         setContentView(ll);
@@ -101,6 +103,50 @@ public class TestActivity extends Activity {
             presenter = Android.configure("GPLv3", view, page, null);
         }
         return presenter;
+    }
+
+    public void changeName(final String name) {
+        runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                button.setEnabled(false);
+                button.setText(name);
+                button.setBackgroundColor(Color.BLACK);
+                button.setTextColor(Color.WHITE);
+            }
+        });
+    }
+
+    public void error(final String msg) {
+        final Thread toInterrupt[] = { Thread.currentThread() };
+        runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                button.setBackgroundColor(Color.YELLOW);
+                button.setTextColor(Color.RED);
+                button.setText(msg);
+                button.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View view) {
+                        Thread t = toInterrupt[0];
+                        if (t != null) {
+                            t.interrupt();
+                        }
+                    }
+                });
+                button.setEnabled(true);
+            }
+        });
+        try {
+            Thread.sleep(9000);
+            toInterrupt[0] = null;
+            Thread.sleep(1000);
+        } catch (InterruptedException ex) {
+            // go on
+        }
+        // clear the flag anyway
+        Thread.currentThread().isInterrupted();
+        changeName("");
     }
 
     @Model(className = "ToDoModel", properties = {

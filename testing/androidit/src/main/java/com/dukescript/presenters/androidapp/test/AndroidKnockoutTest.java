@@ -82,7 +82,7 @@ public class AndroidKnockoutTest extends AndroidKnockoutBase {
     }
 
     static void runMethod(
-        ActivityInstrumentationTestCase2<com.dukescript.presenters.androidapp.TestActivity> activity,
+        final ActivityInstrumentationTestCase2<com.dukescript.presenters.androidapp.TestActivity> activity,
         final Method m
     ) throws InstantiationException, Throwable, IllegalAccessException {
         final String logName = activity.getClass().getSimpleName();
@@ -101,6 +101,7 @@ public class AndroidKnockoutTest extends AndroidKnockoutBase {
                     try {
                         if (!calledRepeatedly[0]) {
                             Log.v(logName, "Running " + m.getDeclaringClass().getName() + "::" + m.getName());
+                            activity.getActivity().changeName(m.getName());
                             calledRepeatedly[0] = true;
                         } else {
                             Log.v(logName, "Re-run: " + m.getDeclaringClass().getName() + "::" + m.getName());
@@ -122,6 +123,7 @@ public class AndroidKnockoutTest extends AndroidKnockoutBase {
                         continue;
                     }
                     Log.e(logName, "Error", te.getTargetException());
+                    activity.getActivity().error(m.getName() + te.getTargetException());
                     throw te.getTargetException();
                 }
             }
