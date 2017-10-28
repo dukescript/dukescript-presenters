@@ -527,8 +527,13 @@ public final class Android extends Activity {
                 }
             }
             class Ready implements Runnable {
+                private boolean done;
+
                 @Override
                 public void run() {
+                    if (done) {
+                        return;
+                    }
                     androidLog(Level.FINE, "awaiting jvm.ready()");
                     try {
                         jvm.ready.await();
@@ -553,6 +558,7 @@ public final class Android extends Activity {
                             + "  };"
                             + "})(this);\n" + welcome
                     );
+                    done = true;
                     onReady.callbackReady("androidCB");
                     dispatch(jvm, true);
                 }
