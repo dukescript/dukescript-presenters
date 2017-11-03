@@ -46,17 +46,6 @@
         </dependency>
         <dependency>
             <groupId>org.glassfish.grizzly</groupId>
-            <artifactId>grizzly-http-server</artifactId>
-            <version>${grizzly.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>org.glassfish.grizzly</groupId>
-            <artifactId>grizzly-websockets-server</artifactId>
-            <version>${grizzly.version}</version>
-            <type>jar</type>
-        </dependency>
-        <dependency>
-            <groupId>org.glassfish.grizzly</groupId>
             <artifactId>grizzly-http-servlet</artifactId>
             <version>${grizzly.version}</version>
         </dependency>    
@@ -69,6 +58,41 @@
             <groupId>org.ow2.asm</groupId>
             <artifactId>asm</artifactId>
             <version>5.0</version>
+        </dependency>
+        <dependency>
+            <groupId>org.glassfish.grizzly</groupId>
+            <artifactId>grizzly-framework</artifactId>
+            <version>${grizzly.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.glassfish.grizzly</groupId>
+            <artifactId>grizzly-http</artifactId>
+            <version>${grizzly.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.glassfish.grizzly</groupId>
+            <artifactId>grizzly-http-ajp</artifactId>
+            <version>${grizzly.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.glassfish.grizzly</groupId>
+            <artifactId>grizzly-http-server-multipart</artifactId>
+            <version>${grizzly.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.glassfish.grizzly</groupId>
+            <artifactId>grizzly-portunif</artifactId>
+            <version>${grizzly.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.glassfish.grizzly</groupId>
+            <artifactId>grizzly-spdy</artifactId>
+            <version>${grizzly.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.glassfish.grizzly</groupId>
+            <artifactId>grizzly-websockets</artifactId>
+            <version>${grizzly.version}</version>
         </dependency>
     </dependencies>
     <build>
@@ -86,25 +110,32 @@
                 </executions>
             </plugin>
             <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-shade-plugin</artifactId>
-                <version>3.0.0</version>
-                <configuration>
-                    <artifactSet>
-                        <excludes>
-                            <exclude>org.netbeans.html:net.java.html</exclude>
-                            <exclude>org.netbeans.html:net.java.html.boot</exclude>
-                        </excludes>
-                    </artifactSet>
-                </configuration>
+                <artifactId>maven-enforcer-plugin</artifactId>
                 <executions>
                     <execution>
-                        <phase>package</phase>
+                        <id>no-duplicates</id>
                         <goals>
-                            <goal>shade</goal>
+                            <goal>enforce</goal>
                         </goals>
+                        <configuration>
+                            <rules>
+                                <banDuplicateClasses>
+                                    <ignoreClasses>
+                                    </ignoreClasses>
+                                    <findAllDuplicates>true</findAllDuplicates>
+                                </banDuplicateClasses>
+                            </rules>
+                            <skip>false</skip>
+                        </configuration>
                     </execution>
                 </executions>
+                <dependencies>
+                    <dependency>
+                        <groupId>org.codehaus.mojo</groupId>
+                        <artifactId>extra-enforcer-rules</artifactId>
+                        <version>1.0-beta-6</version>
+                    </dependency>
+                </dependencies>
             </plugin>
         </plugins>
     </build>
