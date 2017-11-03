@@ -106,12 +106,6 @@
         </dependency>
         <dependency>
             <groupId>com.dukescript.presenters</groupId>
-            <artifactId>ios</artifactId>
-            <version>${project.version}</version>
-            <scope>provided</scope>
-        </dependency>
-        <dependency>
-            <groupId>com.dukescript.presenters</groupId>
             <artifactId>iosgeneric</artifactId>
             <version>${project.version}</version>
         </dependency>
