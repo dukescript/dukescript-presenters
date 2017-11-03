@@ -376,6 +376,8 @@ public final class iOS extends Generic
                                     exec.append("\\n");
                                 } else if (ch == '\"') {
                                     exec.append("\\\"");
+                                } else if (ch == '\\') {
+                                    exec.append("\\\\");
                                 } else if (ch < 16) {
                                     exec.append("\\u000").append(Integer.toHexString(ch));
                                 } else if (ch < 32) {

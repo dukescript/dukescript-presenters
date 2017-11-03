@@ -49,7 +49,7 @@
 		583D44751E40A2AA0048FF77 /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/LaunchScreen.storyboard; sourceTree = "<group>"; };
 		583D447A1E40A3F70048FF77 /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/MainUI.storyboard; sourceTree = "<group>"; };
 		97C28044C97859F629849D47 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; name = Info.plist; path = "ios-Test/Info.plist"; sourceTree = SOURCE_ROOT; };
-		CCE645E31EFC4BD200B8886B /* pages */ = {isa = PBXFileReference; lastKnownFileType = folder; name = pages; path = ../../iostest/src/main/webapp/pages; sourceTree = "<group>"; };
+		CCE645E31EFC4BD200B8886B /* pages */ = {isa = PBXFileReference; lastKnownFileType = folder; name = pages; path = ../../iosapp/src/main/webapp/pages; sourceTree = "<group>"; };
 		D3B9E4DCC81BF744B71BFE76 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; name = Info.plist; path = ios/Info.plist; sourceTree = SOURCE_ROOT; };
 /* End PBXFileReference section */
 

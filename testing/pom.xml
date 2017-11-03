@@ -11,7 +11,7 @@
     <packaging>pom</packaging>
     <modules>
         <module>iosapp</module>
-        <module>iostest</module>
+        <module>robovmtest</module>
         <module>moetest</module>
     </modules>
     <build>
