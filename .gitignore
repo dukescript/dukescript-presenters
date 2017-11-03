@@ -7,3 +7,5 @@
 /*/build/
 /testing/*/.gradle/
 /testing/*/build/
+/testing/moetest/xcode/ios.xcodeproj/project.xcworkspace/
+
