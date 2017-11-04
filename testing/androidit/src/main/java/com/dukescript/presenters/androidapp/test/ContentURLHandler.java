@@ -143,7 +143,9 @@ final class ContentURLHandler extends URLStreamHandler {
                     } else {
                         continue;
                     }
-                    s = s.replace("$" + i, subst);
+                    if (subst != null) {
+                        s = s.replace("$" + i, subst);
+                    }
                 }
                 is = new ByteArrayInputStream(s.getBytes("UTF-8"));
             }
