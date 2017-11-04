@@ -12,7 +12,6 @@
     
     <properties>
         <grizzly.version>2.3.8</grizzly.version>
-        <moe.version>1.3.1</moe.version>
     </properties>
     <pluginRepositories>
         <pluginRepository>
