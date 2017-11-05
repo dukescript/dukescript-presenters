@@ -35,8 +35,11 @@ import java.net.URL;
 import java.net.URLConnection;
 import java.net.URLStreamHandler;
 import java.net.URLStreamHandlerFactory;
+import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
+import net.java.html.json.Models;
 
 final class ContentURLHandler extends URLStreamHandler {
     static {
@@ -54,7 +57,7 @@ final class ContentURLHandler extends URLStreamHandler {
     public static synchronized URI register(
         String content, String mimeType, String... parameters
     ) {
-        ContentConn c = new ContentConn(null, content, mimeType, parameters);
+        ContentConn c = new ContentConn(null, content, mimeType, parameters, new HashMap<String, List<String>>());
         final int s = MAP.size();
         MAP.put(s, c);
         try {
@@ -81,15 +84,21 @@ final class ContentURLHandler extends URLStreamHandler {
         private String[] parameters;
         private String mimeType;
         private String content;
-        ContentConn(URL u, String content, String mimeType, String[] parameters) {
+        private Map<String, List<String>> props;
+
+        ContentConn(
+                URL u, String content, String mimeType, String[] parameters,
+                Map<String, List<String>> props
+        ) {
             super(u);
             this.content = content;
             this.mimeType = mimeType;
             this.parameters = parameters;
+            this.props = props;
         }
 
         URLConnection clone(URL u) {
-            return new ContentConn(u, content, mimeType, parameters);
+            return new ContentConn(u, content, mimeType, parameters, props);
         }
 
         @Override
@@ -113,6 +122,33 @@ final class ContentURLHandler extends URLStreamHandler {
             }
             return null;
         }
+
+        @Override
+        public void setRequestProperty(String key, String value) {
+            List<String> list = props.get(key);
+            if (list == null) {
+                list = Models.asList(value);
+                props.put(key, list);
+            } else {
+                list.add(value);
+            }
+        }
+
+        @Override
+        public Map<String, List<String>> getRequestProperties() {
+            return this.props;
+        }
+
+        @Override
+        public String getRequestProperty(String key) {
+            List<String> list = props.get(key);
+            if (list == null || list.isEmpty()) {
+                return null;
+            } else {
+                return list.get(0);
+            }
+        }
+
 
         @Override
         public void connect() throws IOException {
