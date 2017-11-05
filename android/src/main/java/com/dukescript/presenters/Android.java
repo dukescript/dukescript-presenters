@@ -596,7 +596,7 @@ public final class Android extends Activity {
                 if (DISPATCH == null) {
                     DISPATCH = Executors.newSingleThreadExecutor(jvm);
                 }
-                if (!delayed && Thread.currentThread() == DISPATCH) {
+                if (!delayed && jvm.isBrowserDispatchThread()) {
                     runnable.run();
                 } else {
                     DISPATCH.execute(runnable);
@@ -850,6 +850,7 @@ public final class Android extends Activity {
         private final CountDownLatch ready;
         private final Presenter presenter;
         private final LinkedBlockingQueue<Runnable> queue = new LinkedBlockingQueue<Runnable>();
+        private Thread thread;
 
         JVM(Presenter p) {
             this.presenter = p;
@@ -941,7 +942,13 @@ public final class Android extends Activity {
 
         @Override
         public Thread newThread(Runnable r) {
-            return new Thread(r, "Browser Dispatch Thread");
+            assert thread == null;
+            thread = new Thread(r, "Browser Dispatch Thread");
+            return thread;
+        }
+
+        boolean isBrowserDispatchThread() {
+            return Thread.currentThread() == thread;
         }
     }
 }
