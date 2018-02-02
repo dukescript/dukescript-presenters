@@ -79,4 +79,4 @@ The *browser presenter* has been successfully used to deploy [DukeScript](http:/
 
 ## License
 
-The DukeScript Presenters are licensed under **GPLv3** license, but the [DukeScript Support](https://dukescript.com/index.html#support) is ready to offer your more business friendly license.
+The DukeScript Presenters are licensed under **GPLv3** license, but the [DukeScript Support](https://dukescript.com/index.html#support) is ready to offer you more business friendly license.
