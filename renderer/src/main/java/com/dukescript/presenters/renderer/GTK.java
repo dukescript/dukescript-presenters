@@ -291,9 +291,11 @@ final class GTK extends Show implements InvokeLater {
             int status = webKit.webkit_web_view_get_load_status(webView);
             if (status == 2) {
                 final Pointer frame = webKit.webkit_web_view_get_main_frame(webView);
-                title = new Title(frame);
-                title.updateTitle();
-                g.g_signal_connect_data(frame, "notify::title", title, null);
+                if (title == null) {
+                    title = new Title(frame);
+                    title.updateTitle();
+                    g.g_signal_connect_data(frame, "notify::title", title, null);
+                }
                 if (onPageLoad != null) {
                     onPageLoad.run();
                 }
