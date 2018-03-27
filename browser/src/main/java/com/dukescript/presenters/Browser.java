@@ -252,13 +252,13 @@ public final class Browser implements Fn.Presenter, Fn.KeepAlive, Flushable, Exe
                         case 1000: break;
                         case 0: if (lower == '<') state = 1; break;
                         case 1: if (lower == 'b') state = 2;
-                            else if (lower != ' ' && lower != '\n') state = 0; 
+                            else if (lower != ' ' && lower != '\n') state = 0;
                             break;
                         case 2: if (lower == 'o') state = 3; else state = 0; break;
                         case 3: if (lower == 'd') state = 4; else state = 0; break;
                         case 4: if (lower == 'y') state = 5; else state = 0; break;
                         case 5: if (lower == '>') state = 500;
-                            else if (lower != ' ' && lower != '\n') state = 0; 
+                            else if (lower != ' ' && lower != '\n') state = 0;
                             break;
                     }
                     w.write((char)ch);
@@ -306,25 +306,33 @@ public final class Browser implements Fn.Presenter, Fn.KeepAlive, Flushable, Exe
 
         private void emitScript(Writer w, String id) throws IOException {
             w.write("  <script id='exec' type='text/javascript'>");
-            w.write("function waitForCommand() {\n"
-                    + "var request = new XMLHttpRequest();\n"
-                    + "request.open('GET', 'command.js?id=" + id + "', true);\n"
-                    + "request.setRequestHeader('Content-Type', 'text/plain; charset=utf-8');\n"
-                    + "request.onreadystatechange = function() {\n"
-                    + "  if (this.readyState!==4) return;\n"
-                    + " try {\n"
-                    + "  var cmd = document.getElementById('cmd');\n"
-                    + "  if (cmd) cmd.innerHTML = this.responseText.substring(0,80);\n"
-                    + "  (0 || eval)(this.responseText);\n"
-                    + " } catch (e) {\n"
-                    + "  alert(e); \n"
-                    + " } finally { waitForCommand(); }\n"
-                    + "};\n"
-                    + "request.send();\n"
+            w.write("\n"
+                    + "function waitForCommand() {\n"
+                    + "  try {\n"
+                    + "    var request = new XMLHttpRequest();\n"
+                    + "    request.open('GET', 'command.js?id=" + id + "', true);\n"
+                    + "    request.setRequestHeader('Content-Type', 'text/plain; charset=utf-8');\n"
+                    + "    request.onreadystatechange = function() {\n"
+                    + "      if (this.readyState!==4) return;\n"
+                    + "      try {\n"
+                    + "        var cmd = document.getElementById('cmd');\n"
+                    + "        if (cmd) cmd.innerHTML = this.responseText.substring(0,80);\n"
+                    + "        (0 || eval)(this.responseText);\n"
+                    + "      } catch (e) {\n"
+                    + "        alert(e); \n"
+                    + "      } finally {\n"
+                    + "        waitForCommand();\n"
+                    + "      }\n"
+                    + "    };\n"
+                    + "    request.send();\n"
+                    + "  } catch (e) {\n"
+                    + "    alert(e);\n"
+                    + "    waitForCommand();\n"
+                    + "  }\n"
                     + "}\n"
                     + "waitForCommand();\n"
             );
-            w.write("  </script>");
+            w.write("  </script>\n");
         }
     }
 
