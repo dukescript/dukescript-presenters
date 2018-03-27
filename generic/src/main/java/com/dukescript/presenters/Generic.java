@@ -360,8 +360,16 @@ abstract class Generic implements Fn.Presenter, Fn.KeepAlive, Flushable {
 "       } else {\n" + 
 "         window.setTimeout(showLogo, 100);\n" +
 "       }\n" +
+"       if (typeof prevOnload === 'function') {\n" +
+"         prevOnload();\n" +
+"         prevOnload = null;\n" +
+"       }\n" +
 "     }\n" +
-"     showLogo();\n" +
+"     var prevOnload;\n" +
+"     if (typeof window !== 'undefined') {\n" +
+"       prevOnload = window.onload;\n" +
+"       window.onload = showLogo;\n" +
+"     }\n" +
 "})();"
     })
     /** @return the name of the callback function */
