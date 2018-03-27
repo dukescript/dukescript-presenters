@@ -59,6 +59,7 @@ final class GTK extends Show implements InvokeLater {
     private Pending pending;
     private String page;
     private Pointer jsContext;
+    private NewWebView newWebView;
 
     GTK() {
         this(null, null, null, false);
@@ -263,6 +264,9 @@ final class GTK extends Show implements InvokeLater {
         onLoad = new OnLoad(webView, gtk, window);
         g.g_signal_connect_data(webView, "notify::load-status", onLoad, null);
 
+        newWebView = new NewWebView();
+        g.g_signal_connect_data(webView, "create-web-view", newWebView, null);
+
         webKit.webkit_web_view_load_uri(webView, page);
 
         gtk.gtk_widget_grab_focus(webView);
@@ -272,6 +276,32 @@ final class GTK extends Show implements InvokeLater {
         pending = new Pending();
         if (!headless) {
             gtk.gtk_widget_show_all(window);
+        }
+    }
+
+    private class NewWebView implements Callback {
+        public Pointer createWebView(Pointer orig, Pointer frame, Pointer userData) {
+            final Gtk gtk = getInstance(null);
+
+            final Pointer window = gtk.gtk_window_new(0);
+            gtk.gtk_window_set_default_size(window, 300, 300);
+            gtk.gtk_window_set_gravity(window, 5);
+            gtk.gtk_window_move(window, 200, 100);
+
+            Pointer scroll = gtk.gtk_scrolled_window_new(null, null);
+            gtk.gtk_container_add(window, scroll);
+
+            final Pointer webView = webKit.webkit_web_view_new();
+            gtk.gtk_container_add(scroll, webView);
+
+            gtk.gtk_widget_grab_focus(webView);
+
+            g.g_signal_connect_data(window, "destroy", onDestroy, null);
+            if (!headless) {
+                gtk.gtk_widget_show_all(window);
+            }
+
+            return webView;
         }
     }
 
