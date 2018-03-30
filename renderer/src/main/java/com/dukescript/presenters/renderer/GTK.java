@@ -179,6 +179,7 @@ final class GTK extends Show implements InvokeLater {
         void gtk_container_add(Pointer container, Pointer child);
         void gtk_widget_grab_focus(Pointer window);
         void gtk_widget_destroy(Pointer window);
+        void gtk_window_present(Pointer window);
         void gtk_main();
         void gtk_main_quit();
     }
@@ -312,6 +313,7 @@ final class GTK extends Show implements InvokeLater {
             g.g_signal_connect_data(window, "destroy", onDestroy, null);
             if (!headless) {
                 gtk.gtk_widget_show_all(window);
+                gtk.gtk_window_present(window);
             }
 
             return webView;
