@@ -28,6 +28,7 @@ import com.sun.jna.Library;
 import com.sun.jna.Native;
 import com.sun.jna.Pointer;
 import com.sun.jna.Structure;
+import com.sun.jna.ptr.IntByReference;
 import java.io.Closeable;
 import java.io.File;
 import java.io.PrintWriter;
@@ -168,6 +169,8 @@ final class GTK extends Show implements InvokeLater {
 
         Pointer gtk_window_new(int windowType);
         Pointer gtk_scrolled_window_new(Pointer ignore, Pointer ignore2);
+        void gtk_window_get_position(Pointer window, IntByReference x, IntByReference y);
+        void gtk_window_get_size(Pointer window, IntByReference width, IntByReference height);
         void gtk_window_set_default_size(Pointer window, int width, int height);
         void gtk_window_set_title(Pointer window, String title);
         void gtk_widget_show_all(Pointer window);
@@ -265,7 +268,7 @@ final class GTK extends Show implements InvokeLater {
         g.g_signal_connect_data(webView, "notify::load-status", onLoad, null);
 
         newWebView = new NewWebView();
-        g.g_signal_connect_data(webView, "create-web-view", newWebView, null);
+        g.g_signal_connect_data(webView, "create-web-view", newWebView, window);
 
         webKit.webkit_web_view_load_uri(webView, page);
 
@@ -280,13 +283,23 @@ final class GTK extends Show implements InvokeLater {
     }
 
     private class NewWebView implements Callback {
-        public Pointer createWebView(Pointer orig, Pointer frame, Pointer userData) {
+        public Pointer createWebView(Pointer orig, Pointer frame, Pointer origWindow) {
             final Gtk gtk = getInstance(null);
 
+            IntByReference x = new IntByReference(0);
+            IntByReference y = new IntByReference(0);
+            IntByReference width = new IntByReference(0);
+            IntByReference height = new IntByReference(0);
+            gtk.gtk_window_get_position(origWindow, x, y);
+            gtk.gtk_window_get_size(origWindow, width, height);
+
+            int tenthWidth = width.getValue() / 10;
+            int tenthHeight = height.getValue() / 10;
+
             final Pointer window = gtk.gtk_window_new(0);
-            gtk.gtk_window_set_default_size(window, 300, 300);
+            gtk.gtk_window_set_default_size(window, width.getValue() - 2 * tenthWidth, height.getValue() - 2 * tenthHeight);
             gtk.gtk_window_set_gravity(window, 5);
-            gtk.gtk_window_move(window, 200, 100);
+            gtk.gtk_window_move(window, x.getValue() + tenthWidth, y.getValue() + tenthHeight);
 
             Pointer scroll = gtk.gtk_scrolled_window_new(null, null);
             gtk.gtk_container_add(window, scroll);
