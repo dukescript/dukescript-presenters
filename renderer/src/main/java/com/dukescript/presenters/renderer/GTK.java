@@ -268,7 +268,7 @@ final class GTK extends Show implements InvokeLater {
         onLoad = new OnLoad(webView, gtk, window);
         g.g_signal_connect_data(webView, "notify::load-status", onLoad, null);
 
-        newWebView = new NewWebView();
+        newWebView = new NewWebView(gtk, webKit, g, headless);
         g.g_signal_connect_data(webView, "create-web-view", newWebView, window);
 
         webKit.webkit_web_view_load_uri(webView, page);
@@ -283,10 +283,20 @@ final class GTK extends Show implements InvokeLater {
         }
     }
 
-    private class NewWebView implements Callback {
-        public Pointer createWebView(Pointer orig, Pointer frame, Pointer origWindow) {
-            final Gtk gtk = getInstance(null);
+    private static class NewWebView implements Callback {
+        private final Gtk gtk;
+        private final WebKit webKit;
+        private final G g;
+        private final boolean headless;
 
+        NewWebView(Gtk gtk, WebKit webKit, G g, boolean headless) {
+            this.gtk = gtk;
+            this.webKit = webKit;
+            this.g = g;
+            this.headless = headless;
+        }
+
+        public Pointer createWebView(Pointer orig, Pointer frame, Pointer origWindow) {
             IntByReference x = new IntByReference(0);
             IntByReference y = new IntByReference(0);
             IntByReference width = new IntByReference(0);
@@ -310,7 +320,6 @@ final class GTK extends Show implements InvokeLater {
 
             gtk.gtk_widget_grab_focus(webView);
 
-            g.g_signal_connect_data(window, "destroy", onDestroy, null);
             if (!headless) {
                 gtk.gtk_widget_show_all(window);
                 gtk.gtk_window_present(window);
