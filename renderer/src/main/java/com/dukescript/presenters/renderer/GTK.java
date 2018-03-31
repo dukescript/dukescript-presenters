@@ -38,6 +38,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Queue;
 import java.util.concurrent.ConcurrentLinkedQueue;
@@ -265,7 +266,7 @@ final class GTK extends Show implements InvokeLater {
         if (onContext != null) {
             onContext.run();
         }
-        onLoad = new OnLoad(webView, gtk, window);
+        onLoad = new OnLoad(webView, gtk, g, webKit, window, onPageLoad);
         g.g_signal_connect_data(webView, "notify::load-status", onLoad, null);
 
         newWebView = new NewWebView(gtk, webKit, g, headless);
@@ -288,6 +289,7 @@ final class GTK extends Show implements InvokeLater {
         private final WebKit webKit;
         private final G g;
         private final boolean headless;
+        private final Collection<OnLoad> onLoads = new HashSet<OnLoad>();
 
         NewWebView(Gtk gtk, WebKit webKit, G g, boolean headless) {
             this.gtk = gtk;
@@ -320,6 +322,10 @@ final class GTK extends Show implements InvokeLater {
 
             gtk.gtk_widget_grab_focus(webView);
 
+            OnLoad onLoad = new OnLoad(webView, gtk, g, webKit, window, null);
+            onLoads.add(onLoad);
+            g.g_signal_connect_data(webView, "notify::load-status", onLoad, null);
+
             if (!headless) {
                 gtk.gtk_widget_show_all(window);
                 gtk.gtk_window_present(window);
@@ -329,16 +335,22 @@ final class GTK extends Show implements InvokeLater {
         }
     }
 
-    private class OnLoad implements Callback {
-        private final Pointer webView;
+    private static class OnLoad implements Callback {
+        private final G g;
         private final Gtk gtk;
+        private final WebKit webKit;
+        private final Pointer webView;
         private final Pointer window;
+        private final Runnable onPageLoad;
         private Title title;
 
-        public OnLoad(Pointer webView, Gtk gtk, Pointer window) {
+        public OnLoad(Pointer webView, Gtk gtk, G g, WebKit webKit, Pointer window, Runnable onPageLoad) {
             this.webView = webView;
-            this.gtk = gtk;
             this.window = window;
+            this.gtk = gtk;
+            this.webKit = webKit;
+            this.g = g;
+            this.onPageLoad = onPageLoad;
         }
 
         public void loadStatus() {
