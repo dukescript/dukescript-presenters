@@ -174,6 +174,8 @@ final class Cocoa extends Show implements Callback {
 
         public long objc_msgSend(Pointer theReceiver, Pointer theSelector, Object... arguments);
 
+        public Rct objc_msgSend_stret(Pointer theReceiver, Pointer theSelector, Object... arguments);
+
         public void objc_registerClassPair(Pointer cls);
 
         public Pointer sel_getUid(String name);
@@ -217,7 +219,18 @@ final class Cocoa extends Show implements Callback {
             ObjC objC = ObjC.INSTANCE;
             window = new Pointer(send(objC.objc_getClass("NSWindow"), "alloc"));
 
-            Rct r = new Rct(10, 10, 1500, 900);
+            Pointer screen = new Pointer(send(objC.objc_getClass("NSScreen"), "mainScreen"));
+
+            Pointer uid = ObjC.INSTANCE.sel_getUid("frame");
+            Rct size = ObjC.INSTANCE.objc_msgSend_stret(screen, uid);
+
+            double height = size.height.doubleValue() * 0.9;
+            double width = size.width.doubleValue() * 0.9;
+            double x = size.width.doubleValue() * 0.05 + size.x.doubleValue();
+            double y = size.height.doubleValue() * 0.05 + size.y.doubleValue();
+
+            Rct r = new Rct(x, y, width, height);
+
             int mode = 15;
             int backingstoreBuffered = 2;
 
@@ -382,6 +395,10 @@ final class Cocoa extends Show implements Callback {
         public Class<?> nativeType() {
             return SMALL ? Float.class : Double.class;
         }
-    }
 
+        @Override
+        public String toString() {
+            return Double.toString(number);
+        }
+    }
 }
