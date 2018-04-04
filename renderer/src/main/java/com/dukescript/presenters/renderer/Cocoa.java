@@ -11,12 +11,12 @@ package com.dukescript.presenters.renderer;
  * it under the terms of the GNU General Public License as
  * published by the Free Software Foundation, either version 3 of the
  * License, or (at your option) any later version.
- * 
+ *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU General Public
  * License along with this program.  If not, see
  * <http://www.gnu.org/licenses/gpl-3.0.html>.
@@ -31,6 +31,7 @@ import com.sun.jna.Native;
 import com.sun.jna.NativeMapped;
 import com.sun.jna.Pointer;
 import com.sun.jna.Structure;
+import com.sun.jna.ptr.IntByReference;
 import java.io.Closeable;
 import java.net.URI;
 import java.util.Arrays;
@@ -46,16 +47,17 @@ final class Cocoa extends Show implements Callback {
     private final Runnable onPageLoad;
     private final Runnable onContext;
     private final JSC jsc;
-    
+
     private static final Queue<Runnable> queue = new ConcurrentLinkedQueue<Runnable>();
     private static Pointer NSApp;
     private static Pointer appDelPtr;
     private static Pointer doMainSelector;
     private static Thread dispatchThread;
-    
+
     private AppDidStart appDidStart;
     private Ready ready;
     private ContextCreated contextCreated;
+    private UIDelegate ui;
     private Pointer jsContext;
     private String page;
     private Pointer webView;
@@ -84,13 +86,14 @@ final class Cocoa extends Show implements Callback {
     @Override
     public void show(URI page) {
         this.page = page.toASCIIString();
-        
+
         Native.loadLibrary("WebKit", WebKit.class);
-        
+
         appDidStart = new AppDidStart();
         contextCreated = new ContextCreated();
         ready = new Ready();
-        
+        ui = new UIDelegate();
+
         if (appDelPtr == null) {
             ObjC objC = ObjC.INSTANCE;
             Pointer appDelClass = objC.objc_allocateClassPair(objC.objc_getClass("NSObject"), "AppDelegate", 0);
@@ -100,14 +103,15 @@ final class Cocoa extends Show implements Callback {
             objC.class_addMethod(appDelClass, doMainSelector, this, "i@");
             objC.class_addMethod(appDelClass, objC.sel_getUid("webView:didCreateJavaScriptContext:forFrame:"), contextCreated, "v@:@:@");
             objC.class_addMethod(appDelClass, objC.sel_getUid("webView:didFinishLoadForFrame:"), ready, "v@:@");
+            objC.class_addMethod(appDelClass, objC.sel_getUid("webView:createWebViewWithRequest:"), ui, "v@:@");
             objC.objc_registerClassPair(appDelClass);
 
             long appDelObj = send(objC.objc_getClass("AppDelegate"), "alloc");
             appDelPtr = new Pointer(appDelObj);
             send(appDelPtr, "init");
 
-            send(appDelPtr, 
-                "performSelectorOnMainThread:withObject:waitUntilDone:", 
+            send(appDelPtr,
+                "performSelectorOnMainThread:withObject:waitUntilDone:",
                 doMainSelector, null, 1
             );
         } else {
@@ -136,7 +140,7 @@ final class Cocoa extends Show implements Callback {
             );
         }
     }
-    
+
     private void process() throws Exception {
         Closeable c = Fn.activate(presenter);
         try {
@@ -157,13 +161,19 @@ final class Cocoa extends Show implements Callback {
         public static ObjC INSTANCE = (ObjC) Native.loadLibrary("objc.A", ObjC.class);
 
         public boolean class_addMethod(Pointer cls, Pointer name, Callback imp, String types);
-        
+
+        public String class_getName(Pointer cls);
+
+        public String object_getClassName(Pointer cls);
+
+        public Pointer class_copyMethodList(Class cls, IntByReference outCount);
+
         public Pointer objc_allocateClassPair(Pointer cls, String name, int additionalBytes);
-        
+
         public Pointer objc_getClass(String name);
 
         public long objc_msgSend(Pointer theReceiver, Pointer theSelector, Object... arguments);
-        
+
         public void objc_registerClassPair(Pointer cls);
 
         public Pointer sel_getUid(String name);
@@ -173,16 +183,16 @@ final class Cocoa extends Show implements Callback {
         Pointer uid = ObjC.INSTANCE.sel_getUid(selector);
         return ObjC.INSTANCE.objc_msgSend(obj, uid, args);
     }
-    
+
     public static interface WebKit extends Library {
     }
-    
+
     public void callback(Pointer self) throws Exception {
         if (NSApp != null) {
             process();
             return;
         }
-        
+
         ObjC objC = ObjC.INSTANCE;
 	long res = send(objC.objc_getClass("NSApplication"), "sharedApplication");
 	if (res == 0) {
@@ -193,16 +203,16 @@ final class Cocoa extends Show implements Callback {
         NSApp = new Pointer(res);
 	send(NSApp, "setActivationPolicy:", 0);
 	send(NSApp, "setDelegate:", self);
-	res = send(NSApp, "run");   
+	res = send(NSApp, "run");
         System.err.println("end res: " + res);
     }
-    
+
     public final class AppDidStart implements Callback {
         Pointer window;
-        
+
         AppDidStart() {
         }
-        
+
         public long callback(Pointer self) {
             ObjC objC = ObjC.INSTANCE;
             window = new Pointer(send(objC.objc_getClass("NSWindow"), "alloc"));
@@ -210,9 +220,9 @@ final class Cocoa extends Show implements Callback {
             Rct r = new Rct(10, 10, 1500, 900);
             int mode = 15;
             int backingstoreBuffered = 2;
-            
-	    send(window, 
-                "initWithContentRect:styleMask:backing:defer:", 
+
+	    send(window,
+                "initWithContentRect:styleMask:backing:defer:",
                 r, mode, backingstoreBuffered, false
             );
             send(window, "setTitle:", nsString("Browser demo"));
@@ -220,17 +230,18 @@ final class Cocoa extends Show implements Callback {
             long webViewId = send(webViewClass, "alloc");
             webView = new Pointer(webViewId);
             send(webView, "init");
-            
+
             send(webView, "setFrameLoadDelegate:", self);
-            
+            send(webView, "setUIDelegate:", self);
+
             Pointer frame = new Pointer(send(webView, "mainFrame"));
-            
+
             Pointer urlClass = objC.objc_getClass("NSURL");
             Pointer url = new Pointer(send(urlClass, "URLWithString:", nsString(page)));
             Pointer requestClass = objC.objc_getClass("NSURLRequest");
             Pointer request = new Pointer(send(requestClass, "alloc"));
             send(request, "initWithURL:", url);
-            
+
             send(window, "setContentView:", webView);
             send(frame, "loadRequest:", request);
 
@@ -239,7 +250,7 @@ final class Cocoa extends Show implements Callback {
 	    return 1;
         }
     }
-    
+
     static Pointer nsString(String bd) {
         ObjC objC = ObjC.INSTANCE;
         Pointer stringClass = objC.objc_getClass("NSString");
@@ -250,22 +261,22 @@ final class Cocoa extends Show implements Callback {
     public final class ContextCreated implements Callback {
         ContextCreated() {
         }
-        
+
         public void callback(Pointer webView, Pointer ctx, Pointer frame) {
             frame = new Pointer(send(frame, "mainFrame"));
-            ctx = new Pointer(send(frame, "globalContext"));            
-            
+            ctx = new Pointer(send(frame, "globalContext"));
+
             jsContext = ctx;
             if (onContext != null) {
                 onContext.run();
             }
         }
     }
-    
+
     public final class Ready implements Callback {
         Ready() {
         }
-        
+
         public void callback(Pointer p1, Pointer frame) {
             send(webView, "stringByEvaluatingJavaScriptFromString:", nsString("1 + 1"));
             if (onPageLoad != null) {
@@ -273,7 +284,35 @@ final class Cocoa extends Show implements Callback {
             }
         }
     }
-    
+
+    public static final class UIDelegate implements Callback {
+        UIDelegate() {
+        }
+
+        public Pointer callback(Pointer appDelegate) {
+            ObjC objC = ObjC.INSTANCE;
+            Pointer window = new Pointer(send(objC.objc_getClass("NSWindow"), "alloc"));
+
+            Rct r = new Rct(10, 10, 1500, 900);
+            int mode = 15;
+            int backingstoreBuffered = 2;
+
+	    send(window,
+                "initWithContentRect:styleMask:backing:defer:",
+                r, mode, backingstoreBuffered, false
+            );
+            send(window, "setTitle:", nsString("Browser demo"));
+            Pointer webViewClass = objC.objc_getClass("WebView");
+            long webViewId = send(webViewClass, "alloc");
+            Pointer webView = new Pointer(webViewId);
+            send(webView, "init");
+
+            send(window, "setContentView:", webView);
+            send(window, "makeKeyAndOrderFront:", (Object) null);
+            return webView;
+        }
+    }
+
     public static final class Rct extends Structure implements Structure.ByValue {
         public Flt x;
         public Flt y;
@@ -294,8 +333,8 @@ final class Cocoa extends Show implements Callback {
         protected List getFieldOrder() {
             return Arrays.asList("x", "y", "width", "height");
         }
-    }    
-    
+    }
+
     public static final class Flt extends Number implements NativeMapped {
 
         private static final boolean SMALL = Native.LONG_SIZE == 4;
@@ -344,5 +383,5 @@ final class Cocoa extends Show implements Callback {
             return SMALL ? Float.class : Double.class;
         }
     }
-    
+
 }
