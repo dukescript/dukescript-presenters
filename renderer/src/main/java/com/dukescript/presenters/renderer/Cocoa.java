@@ -48,7 +48,7 @@ final class Cocoa extends Show implements Callback {
     private final Runnable onContext;
     private final JSC jsc;
 
-    private static final Queue<Runnable> queue = new ConcurrentLinkedQueue<Runnable>();
+    private static final Queue<Runnable> QUEUE = new ConcurrentLinkedQueue<Runnable>();
     private static Pointer NSApp;
     private static Pointer appDelPtr;
     private static Pointer doMainSelector;
@@ -126,7 +126,7 @@ final class Cocoa extends Show implements Callback {
 
     @Override
     public void execute(Runnable command) {
-        queue.add(command);
+        QUEUE.add(command);
         if (Thread.currentThread() == dispatchThread && Fn.activePresenter() == presenter) {
             try {
                 process();
@@ -145,7 +145,7 @@ final class Cocoa extends Show implements Callback {
         Closeable c = Fn.activate(presenter);
         try {
             for (;;) {
-                Runnable r = queue.poll();
+                Runnable r = QUEUE.poll();
                 if (r == null) {
                     break;
                 }
