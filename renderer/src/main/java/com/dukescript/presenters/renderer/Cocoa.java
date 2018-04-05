@@ -61,6 +61,7 @@ final class Cocoa extends Show implements Callback {
     private Pointer jsContext;
     private String page;
     private Pointer webView;
+    private Pointer mainWindow;
 
     Cocoa() {
         this(null, null, null, false);
@@ -210,14 +211,12 @@ final class Cocoa extends Show implements Callback {
     }
 
     public final class AppDidStart implements Callback {
-        Pointer window;
-
         AppDidStart() {
         }
 
         public long callback(Pointer self) {
             ObjC objC = ObjC.INSTANCE;
-            window = new Pointer(send(objC.objc_getClass("NSWindow"), "alloc"));
+            mainWindow = new Pointer(send(objC.objc_getClass("NSWindow"), "alloc"));
 
             Pointer screen = new Pointer(send(objC.objc_getClass("NSScreen"), "mainScreen"));
 
@@ -234,11 +233,11 @@ final class Cocoa extends Show implements Callback {
             int mode = 15;
             int backingstoreBuffered = 2;
 
-	    send(window,
+	    send(mainWindow,
                 "initWithContentRect:styleMask:backing:defer:",
                 r, mode, backingstoreBuffered, false
             );
-            send(window, "setTitle:", nsString("Browser demo"));
+            send(mainWindow, "setTitle:", nsString("Browser demo"));
             Pointer webViewClass = objC.objc_getClass("WebView");
             long webViewId = send(webViewClass, "alloc");
             webView = new Pointer(webViewId);
@@ -255,11 +254,11 @@ final class Cocoa extends Show implements Callback {
             Pointer request = new Pointer(send(requestClass, "alloc"));
             send(request, "initWithURL:", url);
 
-            send(window, "setContentView:", webView);
+            send(mainWindow, "setContentView:", webView);
             send(frame, "loadRequest:", request);
 
-            send(window, "becomeFirstResponder");
-            send(window, "makeKeyAndOrderFront:", NSApp);
+            send(mainWindow, "becomeFirstResponder");
+            send(mainWindow, "makeKeyAndOrderFront:", NSApp);
 	    return 1;
         }
     }
@@ -298,15 +297,24 @@ final class Cocoa extends Show implements Callback {
         }
     }
 
-    public static final class UIDelegate implements Callback {
+    public final class UIDelegate implements Callback {
         UIDelegate() {
         }
 
         public Pointer callback(Pointer appDelegate) {
             ObjC objC = ObjC.INSTANCE;
-            Pointer window = new Pointer(send(objC.objc_getClass("NSWindow"), "alloc"));
+            
+            Pointer uid = ObjC.INSTANCE.sel_getUid("frame");
+            Rct size = ObjC.INSTANCE.objc_msgSend_stret(mainWindow, uid);
 
-            Rct r = new Rct(10, 10, 1500, 900);
+            double height = size.height.doubleValue() * 0.9;
+            double width = size.width.doubleValue() * 0.9;
+            double x = size.width.doubleValue() * 0.05 + size.x.doubleValue();
+            double y = size.height.doubleValue() * 0.05 + size.y.doubleValue();
+            
+            Pointer window = new Pointer(send(objC.objc_getClass("NSWindow"), "alloc"));
+            
+            Rct r = new Rct(x, y, width, height);
             int mode = 15;
             int backingstoreBuffered = 2;
 
