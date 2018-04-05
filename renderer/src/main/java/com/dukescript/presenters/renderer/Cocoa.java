@@ -58,6 +58,7 @@ final class Cocoa extends Show implements Callback {
     private Ready ready;
     private ContextCreated contextCreated;
     private UIDelegate ui;
+    private DialogHandler[] dialogs;
     private Pointer jsContext;
     private String page;
     private Pointer webView;
@@ -94,6 +95,10 @@ final class Cocoa extends Show implements Callback {
         contextCreated = new ContextCreated();
         ready = new Ready();
         ui = new UIDelegate();
+        dialogs = new DialogHandler[3];
+        dialogs[0] = new DialogHandler(0);
+        dialogs[1] = new DialogHandler(1);
+        dialogs[2] = new DialogHandler(2);
 
         if (appDelPtr == null) {
             ObjC objC = ObjC.INSTANCE;
@@ -105,6 +110,9 @@ final class Cocoa extends Show implements Callback {
             objC.class_addMethod(appDelClass, objC.sel_getUid("webView:didCreateJavaScriptContext:forFrame:"), contextCreated, "v@:@:@");
             objC.class_addMethod(appDelClass, objC.sel_getUid("webView:didFinishLoadForFrame:"), ready, "v@:@");
             objC.class_addMethod(appDelClass, objC.sel_getUid("webView:createWebViewWithRequest:"), ui, "v@:@");
+            objC.class_addMethod(appDelClass, objC.sel_getUid("webView:runJavaScriptAlertPanelWithMessage:initiatedByFrame:"), dialogs[0], "v@:@:@");
+            objC.class_addMethod(appDelClass, objC.sel_getUid("webView:runJavaScriptConfirmPanelWithMessage:initiatedByFrame:"), dialogs[1], "v@:@:@");
+            objC.class_addMethod(appDelClass, objC.sel_getUid("webView:runJavaScriptTextInputPanelWithPrompt:defaultText:initiatedByFrame:"), dialogs[2], "v@:@:@");
             objC.objc_registerClassPair(appDelClass);
 
             long appDelObj = send(objC.objc_getClass("AppDelegate"), "alloc");
@@ -297,13 +305,44 @@ final class Cocoa extends Show implements Callback {
         }
     }
 
+    public final class DialogHandler implements Callback {
+        private final int type;
+
+        public DialogHandler(int type) {
+            this.type = type;
+        }
+
+        public boolean alertOrConfirm(Pointer appDelegate, Pointer selector, Pointer webView, Pointer msg, Pointer frame) {
+            ObjC objC = ObjC.INSTANCE;
+/*
+            System.err.println("webView: " + objC.object_getClassName(webView));
+            System.err.println("frame: " + objC.object_getClassName(frame));
+            System.err.println("msg: " + objC.object_getClassName(msg));
+
+            String text = new Pointer(send(msg, "UTF8String")).getString(0, "UTF-8");
+            System.err.println("msg: " + text);
+*/
+            Pointer alert = new Pointer(send(objC.objc_getClass("NSAlert"), "alloc"));
+            send(alert, "init");
+            send(alert, "setMessageText:", msg);
+            send(alert, "addButtonWithTitle:", nsString("OK"));
+            if (type == 1) {
+                send(alert, "addButtonWithTitle:", nsString("Cancel"));
+            }
+
+            int res = ((int) send(alert, "runModal")) & 1;
+
+            return res == 0;
+        }
+    }
+
     public final class UIDelegate implements Callback {
         UIDelegate() {
         }
 
         public Pointer callback(Pointer appDelegate) {
             ObjC objC = ObjC.INSTANCE;
-            
+
             Pointer uid = ObjC.INSTANCE.sel_getUid("frame");
             Rct size = ObjC.INSTANCE.objc_msgSend_stret(mainWindow, uid);
 
@@ -311,9 +350,9 @@ final class Cocoa extends Show implements Callback {
             double width = size.width.doubleValue() * 0.9;
             double x = size.width.doubleValue() * 0.05 + size.x.doubleValue();
             double y = size.height.doubleValue() * 0.05 + size.y.doubleValue();
-            
+
             Pointer window = new Pointer(send(objC.objc_getClass("NSWindow"), "alloc"));
-            
+
             Rct r = new Rct(x, y, width, height);
             int mode = 15;
             int backingstoreBuffered = 2;
