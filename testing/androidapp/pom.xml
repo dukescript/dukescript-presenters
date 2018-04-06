@@ -92,6 +92,9 @@
                             <metaInclude>services/org.netbeans.**</metaInclude>
                         </metaIncludes>
                     </apk>
+                    <sdk>
+                        <platform>19</platform>
+                    </sdk>
                     <assetsDirectory>assets</assetsDirectory>
                     <androidManifestFile>AndroidManifest.xml</androidManifestFile>
                     <extractDuplicates>true</extractDuplicates>
