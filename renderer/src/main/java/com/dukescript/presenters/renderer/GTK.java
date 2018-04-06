@@ -50,11 +50,6 @@ final class GTK extends Show implements InvokeLater {
     private final Runnable onPageLoad;
     private final Runnable onContext;
     private final boolean headless;
-    private final JSC jsc;
-    private final GLib glib;
-    private final G g;
-    private final Gdk gdk;
-    private final WebKit webKit;
 
     private OnDestroy onDestroy;
     private OnLoad onLoad;
@@ -72,85 +67,11 @@ final class GTK extends Show implements InvokeLater {
         this.presenter = p;
         this.headless = hl;
         this.onContext = onContext;
-
-        List<Throwable> errors = new ArrayList<Throwable>();
-        this.jsc = loadLibrary(JSC.class, true, errors);
-        this.g = loadLibrary(G.class, false, errors);
-        this.glib = loadLibrary(GLib.class, false, errors);
-        this.gdk = loadLibrary(Gdk.class, false, errors);
-        this.webKit = loadLibrary(WebKit.class, false, errors);
-
-        if (!errors.isEmpty()) {
-            throw linkageError(errors);
-        }
-    }
-
-    private LinkageError linkageError(List<Throwable> errors) {
-        StringWriter sw = new StringWriter();
-        String libraryPath = System.getProperty("java.library.path");
-        sw.append("Java Library Path:");
-        if (libraryPath != null) {
-            for (String pathElement : libraryPath.split(File.pathSeparator)) {
-                sw.append("\n  Path ").append(pathElement);
-                File pathFile = new File(pathElement);
-                String[] libraries = pathFile.list();
-                if (libraries != null) {
-                    for (String lib : libraries) {
-                        sw.append("\n    ").append(lib);
-                    }
-                }
-            }
-            sw.append("\n");
-        }
-        PrintWriter pw = new PrintWriter(sw);
-        for (Throwable t : errors) {
-            t.printStackTrace(pw);
-        }
-        sw.append("\nStatus:");
-        sw.append("\n  jsc: " + jsc);
-        sw.append("\n  g: " + g);
-        sw.append("\n  glib: " + glib);
-        sw.append("\n  gdk: " + gdk);
-        sw.append("\n  webKit: " + webKit);
-        return new LinkageError(sw.toString());
-    }
-
-    private <T> T loadLibrary(Class<T> type, boolean allowObjects, Collection<Throwable> errors) {
-        String libName = System.getProperty("com.dukescript.presenters.renderer." + type.getSimpleName());
-        if (libName == null) {
-            if (type == JSC.class) {
-                libName = "javascriptcoregtk-3.0";
-            } else if (type == GLib.class) {
-                libName = "glib-2.0";
-            } else if (type == G.class) {
-                libName = "gobject-2.0";
-            } else if (type == Gdk.class) {
-                libName = "gtk-3";
-            } else if (type == Gtk.class) {
-                libName = "gtk-3";
-            } else if (type == WebKit.class) {
-                libName = "webkitgtk-3.0";
-            }
-        }
-
-        try {
-            Object lib = Native.loadLibrary(libName, type,
-                Collections.singletonMap(Library.OPTION_ALLOW_OBJECTS, allowObjects)
-            );
-            return type.cast(lib);
-        } catch (LinkageError err) {
-            if (errors != null) {
-                errors.add(err);
-                return null;
-            } else {
-                throw err;
-            }
-        }
     }
 
     @Override
     public JSC jsc() {
-        return jsc;
+        return INSTANCE.jsc;
     }
     
     @Override
@@ -211,12 +132,12 @@ final class GTK extends Show implements InvokeLater {
         String webkit_web_frame_get_title(Pointer webFrame);
     }
 
-    private static Gtk INSTANCE;
+    private static Libs INSTANCE;
 
-    private Gtk getInstance(boolean[] initialized) {
+    private Libs getInstance(boolean[] initialized) {
         synchronized (GTK.class) {
             if (INSTANCE == null) {
-                INSTANCE = loadLibrary(Gtk.class, false, null);
+                INSTANCE = new Libs();
                 initialized[0] = true;
             }
         }
@@ -227,19 +148,23 @@ final class GTK extends Show implements InvokeLater {
     public void show(URI url) {
         this.page = url.toASCIIString();
         boolean[] justInitialized = {false};
-        final Gtk gtk = getInstance(justInitialized);
+        final Gtk gtk = getInstance(justInitialized).gtk;
         if (justInitialized[0]) {
             gtk.gtk_init(0, null);
             run();
             gtk.gtk_main();
         } else {
-            glib.g_idle_add(this, null);
+            INSTANCE.glib.g_idle_add(this, null);
         }
     }
 
     @Override
     public void run() {
-        final Gtk gtk = getInstance(null);
+        final Libs libs = getInstance(null);
+        final Gdk gdk = libs.gdk;
+        final Gtk gtk = libs.gtk;
+        final WebKit webKit = libs.webKit;
+        final G g = libs.g;
 
         final Pointer screen = gdk.gdk_screen_get_default();
         int primaryMonitor = gdk.gdk_screen_get_primary_monitor(screen);
@@ -266,10 +191,10 @@ final class GTK extends Show implements InvokeLater {
         if (onContext != null) {
             onContext.run();
         }
-        onLoad = new OnLoad(webView, gtk, g, webKit, window, onPageLoad);
+        onLoad = new OnLoad(webView, libs, window, onPageLoad);
         g.g_signal_connect_data(webView, "notify::load-status", onLoad, null);
 
-        newWebView = new NewWebView(gtk, webKit, g, headless);
+        newWebView = new NewWebView(libs, headless);
         g.g_signal_connect_data(webView, "create-web-view", newWebView, window);
 
         webKit.webkit_web_view_load_uri(webView, page);
@@ -285,16 +210,12 @@ final class GTK extends Show implements InvokeLater {
     }
 
     private static class NewWebView implements Callback {
-        private final Gtk gtk;
-        private final WebKit webKit;
-        private final G g;
+        private final Libs libs;
         private final boolean headless;
         private final Collection<OnLoad> onLoads = new HashSet<OnLoad>();
 
-        NewWebView(Gtk gtk, WebKit webKit, G g, boolean headless) {
-            this.gtk = gtk;
-            this.webKit = webKit;
-            this.g = g;
+        NewWebView(Libs libs, boolean headless) {
+            this.libs = libs;
             this.headless = headless;
         }
 
@@ -303,6 +224,9 @@ final class GTK extends Show implements InvokeLater {
             IntByReference y = new IntByReference(0);
             IntByReference width = new IntByReference(0);
             IntByReference height = new IntByReference(0);
+
+            Gtk gtk = libs.gtk;
+
             gtk.gtk_window_get_position(origWindow, x, y);
             gtk.gtk_window_get_size(origWindow, width, height);
 
@@ -317,14 +241,14 @@ final class GTK extends Show implements InvokeLater {
             Pointer scroll = gtk.gtk_scrolled_window_new(null, null);
             gtk.gtk_container_add(window, scroll);
 
-            final Pointer webView = webKit.webkit_web_view_new();
+            final Pointer webView = libs.webKit.webkit_web_view_new();
             gtk.gtk_container_add(scroll, webView);
 
             gtk.gtk_widget_grab_focus(webView);
 
-            OnLoad onLoad = new OnLoad(webView, gtk, g, webKit, window, null);
+            OnLoad onLoad = new OnLoad(webView, libs, window, null);
             onLoads.add(onLoad);
-            g.g_signal_connect_data(webView, "notify::load-status", onLoad, null);
+            libs.g.g_signal_connect_data(webView, "notify::load-status", onLoad, null);
 
             if (!headless) {
                 gtk.gtk_widget_show_all(window);
@@ -336,31 +260,27 @@ final class GTK extends Show implements InvokeLater {
     }
 
     private static class OnLoad implements Callback {
-        private final G g;
-        private final Gtk gtk;
-        private final WebKit webKit;
+        private final Libs libs;
         private final Pointer webView;
         private final Pointer window;
         private final Runnable onPageLoad;
         private Title title;
 
-        public OnLoad(Pointer webView, Gtk gtk, G g, WebKit webKit, Pointer window, Runnable onPageLoad) {
+        public OnLoad(Pointer webView, Libs libs, Pointer window, Runnable onPageLoad) {
             this.webView = webView;
             this.window = window;
-            this.gtk = gtk;
-            this.webKit = webKit;
-            this.g = g;
+            this.libs = libs;
             this.onPageLoad = onPageLoad;
         }
 
         public void loadStatus() {
-            int status = webKit.webkit_web_view_get_load_status(webView);
+            int status = libs.webKit.webkit_web_view_get_load_status(webView);
             if (status == 2) {
-                final Pointer frame = webKit.webkit_web_view_get_main_frame(webView);
+                final Pointer frame = libs.webKit.webkit_web_view_get_main_frame(webView);
                 if (title == null) {
                     title = new Title(frame);
                     title.updateTitle();
-                    g.g_signal_connect_data(frame, "notify::title", title, null);
+                    libs.g.g_signal_connect_data(frame, "notify::title", title, null);
                 }
                 if (onPageLoad != null) {
                     onPageLoad.run();
@@ -376,11 +296,11 @@ final class GTK extends Show implements InvokeLater {
             }
 
             public void updateTitle() {
-                String title = webKit.webkit_web_frame_get_title(frame);
+                String title = libs.webKit.webkit_web_frame_get_title(frame);
                 if (title == null) {
                     title = "DukeScript Application";
                 }
-                gtk.gtk_window_set_title(window, title);
+                libs.gtk.gtk_window_set_title(window, title);
             }
         }
     }
@@ -401,6 +321,7 @@ final class GTK extends Show implements InvokeLater {
                 LOG.log(Level.SEVERE, "Cannot process " + command, ex);
             }
         } else {
+            GLib glib = getInstance(null).glib;
             glib.g_idle_add(pending, null);
         }
     }
@@ -423,6 +344,89 @@ final class GTK extends Show implements InvokeLater {
             } finally {
                 c.close();
             }
+        }
+    }
+
+    private static final class Libs {
+        final Gtk gtk;
+        final JSC jsc;
+        final G g;
+        final GLib glib;
+        final Gdk gdk;
+        final WebKit webKit;
+
+        Libs() {
+            List<Throwable> errors = new ArrayList<Throwable>();
+            this.gtk = Libs.loadLibrary(Gtk.class, false, null);
+            this.jsc = Libs.loadLibrary(JSC.class, true, errors);
+            this.g = Libs.loadLibrary(G.class, false, errors);
+            this.glib = Libs.loadLibrary(GLib.class, false, errors);
+            this.gdk = Libs.loadLibrary(Gdk.class, false, errors);
+            this.webKit = Libs.loadLibrary(WebKit.class, false, errors);
+
+            if (!errors.isEmpty()) {
+                throw linkageError(errors);
+            }
+        }
+
+        static <T> T loadLibrary(Class<T> type, boolean allowObjects, Collection<Throwable> errors) {
+            String libName = System.getProperty("com.dukescript.presenters.renderer." + type.getSimpleName());
+            if (libName == null) {
+                if (type == JSC.class) {
+                    libName = "javascriptcoregtk-3.0";
+                } else if (type == GTK.GLib.class) {
+                    libName = "glib-2.0";
+                } else if (type == GTK.G.class) {
+                    libName = "gobject-2.0";
+                } else if (type == GTK.Gdk.class) {
+                    libName = "gtk-3";
+                } else if (type == GTK.Gtk.class) {
+                    libName = "gtk-3";
+                } else if (type == GTK.WebKit.class) {
+                    libName = "webkitgtk-3.0";
+                }
+            }
+            try {
+                Object lib = Native.loadLibrary(libName, type, Collections.singletonMap(Library.OPTION_ALLOW_OBJECTS, allowObjects));
+                return type.cast(lib);
+            } catch (LinkageError err) {
+                if (errors != null) {
+                    errors.add(err);
+                    return null;
+                } else {
+                    throw err;
+                }
+            }
+        }
+
+        private LinkageError linkageError(List<Throwable> errors) {
+            StringWriter sw = new StringWriter();
+            String libraryPath = System.getProperty("java.library.path");
+            sw.append("Java Library Path:");
+            if (libraryPath != null) {
+                for (String pathElement : libraryPath.split(File.pathSeparator)) {
+                    sw.append("\n  Path ").append(pathElement);
+                    File pathFile = new File(pathElement);
+                    String[] libraries = pathFile.list();
+                    if (libraries != null) {
+                        for (String lib : libraries) {
+                            sw.append("\n    ").append(lib);
+                        }
+                    }
+                }
+                sw.append("\n");
+            }
+            PrintWriter pw = new PrintWriter(sw);
+            for (Throwable t : errors) {
+                t.printStackTrace(pw);
+            }
+            sw.append("\nStatus:");
+            sw.append("\n  jsc: " + jsc);
+            sw.append("\n  g: " + g);
+            sw.append("\n  glib: " + glib);
+            sw.append("\n  gdk: " + gdk);
+            sw.append("\n  webKit: " + webKit);
+            return new LinkageError(sw.toString());
         }
     }
 }
