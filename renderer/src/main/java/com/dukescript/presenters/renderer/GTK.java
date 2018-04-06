@@ -83,7 +83,7 @@ final class GTK extends Show implements InvokeLater {
         void g_idle_add(Callback r, Pointer p);
     }
     public interface G extends Library {
-        void g_signal_connect_data(Pointer obj, String signal, Callback callback, Pointer data);
+        void g_signal_connect_data(Pointer obj, String signal, Callback callback, Pointer data, Void nul, int flags);
     }
 
     public interface Gtk extends Library {
@@ -104,6 +104,11 @@ final class GTK extends Show implements InvokeLater {
         void gtk_window_present(Pointer window);
         void gtk_main();
         void gtk_main_quit();
+
+        void gtk_widget_set_size_request(Pointer window, int width, int height);
+        void gtk_window_set_position(Pointer window, int type);
+        Pointer gtk_button_new_with_label(String label);
+        void gtk_container_set_border_width(Pointer window, int size);
     }
 
     public interface Gdk extends Library {
@@ -134,7 +139,7 @@ final class GTK extends Show implements InvokeLater {
 
     private static Libs INSTANCE;
 
-    private Libs getInstance(boolean[] initialized) {
+    final Libs getInstance(boolean[] initialized) {
         synchronized (GTK.class) {
             if (INSTANCE == null) {
                 INSTANCE = new Libs();
@@ -192,17 +197,17 @@ final class GTK extends Show implements InvokeLater {
             onContext.run();
         }
         onLoad = new OnLoad(webView, libs, window, onPageLoad);
-        g.g_signal_connect_data(webView, "notify::load-status", onLoad, null);
+        g.g_signal_connect_data(webView, "notify::load-status", onLoad, null, null, 0);
 
         newWebView = new NewWebView(libs, headless);
-        g.g_signal_connect_data(webView, "create-web-view", newWebView, window);
+        g.g_signal_connect_data(webView, "create-web-view", newWebView, window, null, 0);
 
         webKit.webkit_web_view_load_uri(webView, page);
 
         gtk.gtk_widget_grab_focus(webView);
 
         onDestroy = new OnDestroy();
-        g.g_signal_connect_data(window, "destroy", onDestroy, null);
+        g.g_signal_connect_data(window, "destroy", onDestroy, null, null, 0);
         pending = new Pending();
         if (!headless) {
             gtk.gtk_widget_show_all(window);
@@ -248,7 +253,7 @@ final class GTK extends Show implements InvokeLater {
 
             OnLoad onLoad = new OnLoad(webView, libs, window, null);
             onLoads.add(onLoad);
-            libs.g.g_signal_connect_data(webView, "notify::load-status", onLoad, null);
+            libs.g.g_signal_connect_data(webView, "notify::load-status", onLoad, null, null, 0);
 
             if (!headless) {
                 gtk.gtk_widget_show_all(window);
@@ -280,7 +285,7 @@ final class GTK extends Show implements InvokeLater {
                 if (title == null) {
                     title = new Title(frame);
                     title.updateTitle();
-                    libs.g.g_signal_connect_data(frame, "notify::title", title, null);
+                    libs.g.g_signal_connect_data(frame, "notify::title", title, null, null, 0);
                 }
                 if (onPageLoad != null) {
                     onPageLoad.run();
@@ -347,7 +352,7 @@ final class GTK extends Show implements InvokeLater {
         }
     }
 
-    private static final class Libs {
+    static final class Libs {
         final Gtk gtk;
         final JSC jsc;
         final G g;
