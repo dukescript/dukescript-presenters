@@ -575,6 +575,7 @@ public final class Android extends Activity {
             if (ctx == null) {
                 Contexts.Builder cb = Contexts.newBuilder();
                 Contexts.fillInByProviders(loadClass, cb);
+                cb.register(Context.class, view.getContext(), 100);
                 cb.register(Fn.Presenter.class, this, 100);
                 cb.register(Executor.class, (Executor) this, 100);
                 cb.register(AudioEnvironment.class, new Audio(view.getContext(), page), 100);
