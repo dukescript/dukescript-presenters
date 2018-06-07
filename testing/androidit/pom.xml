@@ -98,7 +98,7 @@
                         <platform>19</platform>
                     </sdk>
                     <emulator>
-                        <avd>16</avd>
+                        <avd>test</avd>
                         <wait>10000</wait>
                         <options>-no-skin</options>
                     </emulator>
