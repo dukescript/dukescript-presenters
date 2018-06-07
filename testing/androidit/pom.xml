@@ -122,6 +122,15 @@
                     <androidManifestFile>AndroidManifest.xml</androidManifestFile>
                     <testFailSafe>false</testFailSafe>
                 </configuration>
+                <executions>
+                    <execution>
+                        <id>startEmulator</id>
+                        <phase>initialize</phase>
+                        <goals>
+                            <goal>emulator-start</goal>
+                        </goals>
+                    </execution>
+                </executions>
                 <extensions>true</extensions>
             </plugin>
             <plugin>
