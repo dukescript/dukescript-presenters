@@ -97,11 +97,6 @@
                     <sdk>
                         <platform>19</platform>
                     </sdk>
-                    <emulator>
-                        <avd>test</avd>
-                        <wait>10000</wait>
-                        <options>-no-skin</options>
-                    </emulator>
                     <test>
                         <skip>${skipTests}</skip>
                         <!--<instrumentationPackage>packageName</instrumentationPackage> -->
@@ -122,15 +117,6 @@
                     <androidManifestFile>AndroidManifest.xml</androidManifestFile>
                     <testFailSafe>false</testFailSafe>
                 </configuration>
-                <executions>
-                    <execution>
-                        <id>startEmulator</id>
-                        <phase>initialize</phase>
-                        <goals>
-                            <goal>emulator-start</goal>
-                        </goals>
-                    </execution>
-                </executions>
                 <extensions>true</extensions>
             </plugin>
             <plugin>
