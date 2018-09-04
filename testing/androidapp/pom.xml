@@ -87,7 +87,7 @@
                 <version>2.9</version>
                 <executions>
                     <execution>
-                        <phase>process-classes</phase>
+                        <phase>process-sources</phase>
                         <goals>
                             <goal>unpack-dependencies</goal>
                         </goals>
