@@ -180,7 +180,6 @@ public final class MessagesProcessor extends AbstractProcessor {
                     PrintWriter pw = new PrintWriter(w);
                     pw.println("package " + pkg + ";");
                     pw.println("/** Localizable strings for {@link " + pkg + "}. */");
-                    pw.println("@javax.annotation.Generated(value=\"" + MessagesProcessor.class.getName() + "\")");
                     pw.println("class Strings {");
                     for (Method method : methods.values()) {
                         pw.print(method.toString(b));
