@@ -11,7 +11,7 @@ script:
   - mvn install -DskipTests
   - mvn test
 jdk:
- - oraclejdk8
+ - openjdk8
  - openjdk11
 os:
   - linux
