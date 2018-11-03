@@ -10,6 +10,9 @@
     <name>DukeScript Presenter for Multi OS Engine</name>
     <artifactId>moe</artifactId>
     <packaging>jar</packaging>
+    <properties>
+        <main.dir>${project.parent.basedir}</main.dir>
+    </properties>
     <build>
         <plugins>
             <plugin>

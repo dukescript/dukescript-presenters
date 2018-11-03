@@ -9,6 +9,9 @@
     <name>Integration Tests for DukeScript</name>
     <artifactId>testing</artifactId>
     <packaging>pom</packaging>
+    <properties>
+        <main.dir>${project.parent.basedir}</main.dir>
+    </properties>
     <modules>
         <module>iosapp</module>
         <module>robovmtest</module>

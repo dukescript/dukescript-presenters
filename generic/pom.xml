@@ -11,6 +11,9 @@
     <name>DukeScript Generic Presenter</name>
     <packaging>jar</packaging>
     <version>2.0-SNAPSHOT</version>
+    <properties>
+        <main.dir>${project.parent.basedir}</main.dir>
+    </properties>
 
     <dependencies>
         <dependency>

@@ -10,6 +10,9 @@
     <name>DukeScript Presenter for Any iOS</name>
     <artifactId>iosgeneric</artifactId>
     <packaging>jar</packaging>
+    <properties>
+        <main.dir>${project.parent.basedir}</main.dir>
+    </properties>
     <build>
         <plugins>
             <plugin>

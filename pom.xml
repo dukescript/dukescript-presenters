@@ -112,6 +112,7 @@
         <robovm.version>2.3.2</robovm.version>
         <moe.version>1.4.0</moe.version>
         <jna.version>4.1.0</jna.version>
+        <main.dir>${basedir}</main.dir>
     </properties>
     
     <distributionManagement>
@@ -137,7 +138,7 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-compiler-plugin</artifactId>
-                <version>3.1</version>
+                <version>3.8.0</version>
                 <configuration>
                     <source>1.6</source>
                     <target>1.6</target>
@@ -167,7 +168,7 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-javadoc-plugin</artifactId>
-                <version>2.10.1</version>
+                <version>3.0.1</version>
                 <configuration>
                     <excludePackageNames>android.*,com.dukescript.presenters.*</excludePackageNames>
                     <groups>
@@ -178,7 +179,7 @@
                     </groups>
                     <nodeprecated>true</nodeprecated>
                     <links>
-                        <link>http://bits.netbeans.org/html+java/${net.java.html.version}/</link>
+                        <link>https://dukescript.com/javadoc/html+java/${net.java.html.version}/</link>
                         <link>https://developer.android.com/reference/</link>
                     </links>
                 </configuration>
@@ -201,6 +202,29 @@
                     </execution>
                 </executions>              
             </plugin>
+            <plugin>
+                <groupId>org.codehaus.mojo</groupId>
+                <artifactId>license-maven-plugin</artifactId>
+                <version>1.7</version>
+                <configuration>
+                    <inceptionYear>2015</inceptionYear>
+                    <organizationName>Eppleton IT Consulting</organizationName>
+                    <licenseName>gpl_v3</licenseName>
+                    <failOnMissingHeader>true</failOnMissingHeader>
+                    <descriptionTemplate>${main.dir}/src/license/header.txt</descriptionTemplate>
+                    <roots>
+                        <root>src</root>
+                    </roots>  
+                </configuration>
+                <executions>
+                    <execution>
+                        <phase>verify</phase>
+                        <goals>
+                            <goal>check-file-header</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
         </plugins>
     </build>
     
@@ -219,41 +243,6 @@
                                 <phase>verify</phase>
                                 <goals>
                                     <goal>sign</goal>
-                                </goals>
-                            </execution>
-                        </executions>
-                    </plugin>
-                </plugins>
-            </build>
-        </profile>
-        <profile>
-            <id>license</id>
-            <activation>
-                <property>
-                    <name>!skipLicenses</name>
-                </property>
-            </activation>
-            <build>
-                <plugins>
-                    <plugin>
-                        <groupId>org.codehaus.mojo</groupId>
-                        <artifactId>license-maven-plugin</artifactId>
-                        <version>1.7</version>
-                        <configuration>
-                            <inceptionYear>2015</inceptionYear>
-                            <organizationName>Eppleton IT Consulting</organizationName>
-                            <licenseName>gpl_v3</licenseName>
-                            <failOnMissingHeader>true</failOnMissingHeader>
-                            <descriptionTemplate>src/license/header.txt</descriptionTemplate>
-                            <roots>
-                                <root>src</root>
-                            </roots>  
-                        </configuration>
-                        <executions>
-                            <execution>
-                                <phase>verify</phase>
-                                <goals>
-                                    <goal>check-file-header</goal>
                                 </goals>
                             </execution>
                         </executions>

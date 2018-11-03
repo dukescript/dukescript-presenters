@@ -12,6 +12,9 @@
     <artifactId>fakeiosemul</artifactId>
     <name>Multi OS Engine API</name>
     <packaging>jar</packaging>
+    <properties>
+        <main.dir>${project.parent.basedir}</main.dir>
+    </properties>
 
     <pluginRepositories>
         <pluginRepository>

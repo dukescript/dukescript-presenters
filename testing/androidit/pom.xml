@@ -15,6 +15,7 @@
     <properties>
         <debug>false</debug>
         <skipTests>true</skipTests>
+        <main.dir>${project.parent.parent.basedir}</main.dir>
     </properties>
 
     <dependencies>

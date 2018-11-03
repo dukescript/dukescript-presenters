@@ -12,6 +12,7 @@
     
     <properties>
         <grizzly.version>2.3.8</grizzly.version>
+        <main.dir>${project.parent.parent.basedir}</main.dir>
     </properties>
     <pluginRepositories>
         <pluginRepository>
