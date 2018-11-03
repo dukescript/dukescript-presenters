@@ -170,6 +170,18 @@
                 <artifactId>maven-javadoc-plugin</artifactId>
                 <version>3.0.1</version>
                 <configuration>
+                    <excludePackageNames>android.*</excludePackageNames>
+                    <groups>
+                        <group>
+                            <title>DukeScript Presenters</title>
+                            <packages>com.dukescript.presenters</packages>
+                        </group>
+                    </groups>
+                    <nodeprecated>true</nodeprecated>
+                    <links>
+                        <link>https://dukescript.com/javadoc/html+java/${net.java.html.version}/</link>
+                        <link>https://developer.android.com/reference/</link>
+                    </links>
                 </configuration>
             </plugin>
             <plugin>
