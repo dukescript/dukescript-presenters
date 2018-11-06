@@ -380,9 +380,9 @@ public final class Android extends Activity {
         final JVM jvm;
         final String page;
         final boolean runOnUiThread;
-        Class<?> loadClass;
+        final BrwsrCtx ctx;
+        final Class<?> loadClass;
         String invoke;
-        BrwsrCtx ctx;
 
         Presenter(final WebView view, String app, String page, Class<?> loadClass, String invoke, String licenseKey, Boolean runOnUiThread) {
             super(false, true, "Android", app, licenseKey);
@@ -393,6 +393,44 @@ public final class Android extends Activity {
             this.runOnUiThread = runOnUiThread == null ? Build.VERSION.SDK_INT >= 24 : runOnUiThread;
             this.chrome = new Chrome();
             this.jvm = new JVM(this);
+            final Class<? extends Object> ctxClass = loadClass != null ? loadClass : Android.class;
+            final Presenter p = Presenter.this;
+            final Executor e = new Executor() {
+                @Override
+                public void execute(final Runnable command) {
+                    class CtxRun implements Runnable {
+
+                        @Override
+                        public void run() {
+                            Closeable c = Fn.activate(Presenter.this);
+                            try {
+                                command.run();
+                            } finally {
+                                try {
+                                    c.close();
+                                } catch (IOException ex) {
+                                    Presenter.this.log(Level.SEVERE, null, ex);
+                                }
+                            }
+                        }
+
+                        @Override
+                        public String toString() {
+                            return "CtxRun:" + command.toString();
+                        }
+                    }
+                    p.dispatch(new CtxRun());
+                }
+            };
+            final Audio audio = new Audio(view.getContext(), page);
+
+            Contexts.Builder cb = Contexts.newBuilder();
+            Contexts.fillInByProviders(ctxClass, cb);
+            cb.register(Context.class, view.getContext(), 100);
+            cb.register(Fn.Presenter.class, p, 100);
+            cb.register(Executor.class, e, 100);
+            cb.register(AudioEnvironment.class, audio, 100);
+            this.ctx = cb.build();
             allowFileAccessFromFiles(view);
             allowUnversalAccessFromFiles(view);
             view.getSettings().setDomStorageEnabled(true);
@@ -462,27 +500,7 @@ public final class Android extends Activity {
 
         @Override
         public final void execute(final Runnable command) {
-            class CtxRun implements Runnable {
-                @Override
-                public void run() {
-                    Closeable c = Fn.activate(Presenter.this);
-                    try {
-                        command.run();
-                    } finally {
-                        try {
-                            c.close();
-                        } catch (IOException ex) {
-                            Presenter.this.log(Level.SEVERE, null, ex);
-                        }
-                    }
-                }
-
-                @Override
-                public String toString() {
-                    return "CtxRun:" + command.toString();
-                }
-            }
-            dispatch(new CtxRun());
+            ctx.execute(command);
         }
 
         @Override
@@ -572,22 +590,16 @@ public final class Android extends Activity {
             if (loadClass == null) {
                 return;
             }
-            if (ctx == null) {
-                Contexts.Builder cb = Contexts.newBuilder();
-                Contexts.fillInByProviders(loadClass, cb);
-                cb.register(Context.class, view.getContext(), 100);
-                cb.register(Fn.Presenter.class, this, 100);
-                cb.register(Executor.class, (Executor) this, 100);
-                cb.register(AudioEnvironment.class, new Audio(view.getContext(), page), 100);
-                ctx = cb.build();
-                ctx.execute(this);
-                return;
-            }
-            try {
-                invokeOnPageLoad(this, view.getContext(), loadClass, invoke);
-            } catch (Exception ex) {
-                androidLog(Level.SEVERE, null, ex);
-            }
+            ctx.execute(new Runnable() {
+                @Override
+                public void run() {
+                    try {
+                        invokeOnPageLoad(Presenter.this, view.getContext(), loadClass, invoke);
+                    } catch (Exception ex) {
+                        androidLog(Level.SEVERE, null, ex);
+                    }
+                }
+            });
         }
 
         private static Executor DISPATCH;
@@ -775,9 +787,6 @@ public final class Android extends Activity {
         private final Context ctx;
 
         public Audio(Context ctx, String baseUrl) {
-            if (Fn.activePresenter() == null) {
-                throw new IllegalStateException("Initialize providers in an active presenter!");
-            }
             this.ctx = ctx;
             this.baseUrl = baseUrl;
         }

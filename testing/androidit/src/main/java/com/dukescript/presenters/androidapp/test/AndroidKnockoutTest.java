@@ -34,6 +34,12 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.Executor;
+import static junit.framework.Assert.assertEquals;
+import static junit.framework.Assert.assertNotNull;
+import net.java.html.BrwsrCtx;
+import org.netbeans.html.context.spi.Contexts;
+import org.netbeans.html.json.spi.Technology;
+import org.netbeans.html.json.spi.Transfer;
 import org.netbeans.html.json.tck.JavaScriptTCK;
 import org.netbeans.html.json.tck.KOTest;
 
@@ -189,5 +195,42 @@ public class AndroidKnockoutTest extends AndroidKnockoutBase {
             return cnt;
         }
     }
+
+    public void testCheckContext() throws Exception {
+        Executor p = obtainExecutor(this);
+
+        final BrwsrCtx[] execOne = { null };
+        final CountDownLatch cdl = new CountDownLatch(2);
+
+        p.execute(new Runnable() {
+            @Override
+            public void run() {
+                execOne[0] = BrwsrCtx.findDefault(TestActivity.class);
+                cdl.countDown();
+            }
+        });
+
+        final BrwsrCtx[] execTwo = { null };
+
+        p.execute(new Runnable() {
+            @Override
+            public void run() {
+                execTwo[0] = BrwsrCtx.findDefault(TestActivity.class);
+                cdl.countDown();
+            }
+        });
+
+        cdl.await();
+
+        assertEquals("Same contexts", execOne[0], execTwo[0]);
+
+//      disabled for now:
+//        Technology t = Contexts.find(execOne[0], Technology.class);
+//        assertNotNull("Technology found", t);
+
+        Transfer r = Contexts.find(execOne[0], Transfer.class);
+        assertNotNull("Transfer found", r);
+    }
+
 }
 
