@@ -224,9 +224,8 @@ public class AndroidKnockoutTest extends AndroidKnockoutBase {
 
         assertEquals("Same contexts", execOne[0], execTwo[0]);
 
-//      disabled for now:
-//        Technology t = Contexts.find(execOne[0], Technology.class);
-//        assertNotNull("Technology found", t);
+        Technology t = Contexts.find(execOne[0], Technology.class);
+        assertNotNull("Technology found", t);
 
         Transfer r = Contexts.find(execOne[0], Transfer.class);
         assertNotNull("Transfer found", r);

@@ -1,0 +1,56 @@
+<?xml version="1.0"?>
+<!--
+  #%L
+  Android Integration Tests - a library from the "DukeScript Presenters" project.
+  Visit http://dukescript.com for support and commercial license.
+  %%
+  Copyright (C) 2015 - 2018 Eppleton IT Consulting
+  %%
+  This program is free software: you can redistribute it and/or modify
+  it under the terms of the GNU General Public License as
+  published by the Free Software Foundation, either version 3 of the
+  License, or (at your option) any later version.
+  
+  This program is distributed in the hope that it will be useful,
+  but WITHOUT ANY WARRANTY; without even the implied warranty of
+  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+  GNU General Public License for more details.
+  
+  You should have received a copy of the GNU General Public
+  License along with this program.  If not, see
+  <http://www.gnu.org/licenses/gpl-3.0.html>.
+  #L%
+  -->
+
+<assembly xmlns="http://maven.apache.org/ASSEMBLY/2.0.0"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://maven.apache.org/ASSEMBLY/2.0.0 http://maven.apache.org/xsd/assembly-2.0.0.xsd">
+  <id>apk</id>
+  <includeBaseDirectory>false</includeBaseDirectory>
+  <baseDirectory>${project.output.directory}/classes</baseDirectory>
+  <formats>
+      <format>dir</format>
+  </formats>
+  <containerDescriptorHandlers>
+      <containerDescriptorHandler>
+          <handlerName>metaInf-services</handlerName>
+      </containerDescriptorHandler>
+  </containerDescriptorHandlers>
+  <dependencySets>
+    <dependencySet>
+        <useProjectArtifact>false</useProjectArtifact>
+        <scope>compile</scope>
+        <includes>
+            <include>org.netbeans.html:*</include>
+            <include>com.dukescript.presenters:*</include>
+        </includes>
+        <excludes>
+            <exclude>*:*:apk</exclude>
+            <exclude>*android*:*android*</exclude>
+        </excludes>
+        <unpack>true</unpack>
+    </dependencySet>
+  </dependencySets>
+  <files>
+  </files>
+</assembly>
