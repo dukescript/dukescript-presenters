@@ -1,0 +1,68 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<actions>
+    <action>
+        <actionName>run</actionName>
+        <goals>
+            <goal>package</goal>
+            <goal>robovm:iphone-sim</goal>
+        </goals>
+        <properties>
+            <skipTests>true</skipTests>
+        </properties>
+    </action>
+    <action>
+        <actionName>debug</actionName>
+        <goals>
+            <goal>package</goal>
+            <goal>robovm:iphone-sim</goal>
+        </goals>
+        <properties>
+            <skipTests>true</skipTests>
+            <robovm.debug>clientmode</robovm.debug>
+            <robovm.debugPort>${jpda.address}</robovm.debugPort>
+            <jpda.listen>true</jpda.listen>
+        </properties>
+    </action>
+    <action>
+        <actionName>CUSTOM-ipad-sim</actionName>
+        <displayName>Run in iPad Simulator</displayName>
+        <goals>
+            <goal>package</goal>
+            <goal>robovm:ipad-sim</goal>
+        </goals>
+        <properties>
+            <skipTests>true</skipTests>
+        </properties>
+    </action>
+    <action>
+        <actionName>CUSTOM-iphone-sim</actionName>
+        <displayName>Run in iPhone Simulator</displayName>
+        <goals>
+            <goal>package</goal>
+            <goal>robovm:iphone-sim</goal>
+        </goals>
+        <properties>
+            <skipTests>true</skipTests>
+        </properties>
+    </action>
+    <action>
+        <actionName>CUSTOM-ios-device</actionName>
+        <displayName>Run on iOS Device</displayName>
+        <goals>
+            <goal>package</goal>
+            <goal>robovm:ios-device</goal>
+        </goals>
+        <properties>
+            <skipTests>true</skipTests>
+        </properties>
+    </action>
+    <action>
+        <actionName>CUSTOM-create-ipa</actionName>
+        <displayName>Create iOS Package Archive</displayName>
+        <goals>
+            <goal>clean</goal>
+            <goal>package</goal>
+            <goal>robovm:create-ipa</goal>
+        </goals>
+    </action>
+</actions>
