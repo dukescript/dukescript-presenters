@@ -117,7 +117,7 @@ public class TestActivity extends Activity {
         });
     }
 
-    public void error(final String msg) {
+    public boolean error(final String msg) {
         final Thread toInterrupt[] = { Thread.currentThread() };
         runOnUiThread(new Runnable() {
             @Override
@@ -142,11 +142,17 @@ public class TestActivity extends Activity {
             toInterrupt[0] = null;
             Thread.sleep(1000);
         } catch (InterruptedException ex) {
-            // go on
+            return true;
+        } finally {
+            // clear the flag anyway
+            Thread.currentThread().isInterrupted();
+            changeName("");
         }
-        // clear the flag anyway
-        Thread.currentThread().isInterrupted();
-        changeName("");
+        return false;
+    }
+
+    static <E extends Exception> E raise(Class<E> type, Throwable t) throws E {
+        throw (E)t;
     }
 
     @Model(className = "ToDoModel", properties = {

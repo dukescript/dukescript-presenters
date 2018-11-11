@@ -92,11 +92,20 @@ public class AndroidKnockoutTest extends AndroidKnockoutBase {
         final Method m
     ) throws InstantiationException, Throwable, IllegalAccessException {
         final String logName = activity.getClass().getSimpleName();
-        final Object inst = m.getDeclaringClass().newInstance();
+        final Object[] inst = { null };
         Executor e = obtainExecutor(activity);
         final boolean[] calledRepeatedly = { false };
         for (int cnt = 0;; cnt++) {
-            if (cnt == 100) {
+            if (inst[0] == null) {
+                inst[0] = m.getDeclaringClass().newInstance();
+            }
+            if (cnt >= 100) {
+                boolean retry = activity.getActivity().error(m.getName() + " too many repetitions");
+                if (retry) {
+                    inst[0] = null;
+                    cnt = 0;
+                    continue;
+                }
                 throw new InterruptedException("Too many repetitions");
             }
             final CountDownLatch cdl = new CountDownLatch(1);
@@ -112,7 +121,7 @@ public class AndroidKnockoutTest extends AndroidKnockoutBase {
                         } else {
                             Log.v(logName, "Re-run: " + m.getDeclaringClass().getName() + "::" + m.getName());
                         }
-                        m.invoke(inst);
+                        m.invoke(inst[0]);
                     } catch (Throwable ex) {
                         res[0] = ex;
                     } finally {
@@ -129,7 +138,10 @@ public class AndroidKnockoutTest extends AndroidKnockoutBase {
                         continue;
                     }
                     Log.e(logName, "Error", te.getTargetException());
-                    activity.getActivity().error(m.getName() + te.getTargetException());
+                    boolean retry = activity.getActivity().error(m.getName() + te.getTargetException());
+                    if (retry) {
+                        continue;
+                    }
                     throw te.getTargetException();
                 }
             }
