@@ -23,7 +23,6 @@ package com.dukescript.presenters;
  * #L%
  */
 
-import static com.dukescript.presenters.Strings.*;
 import com.dukescript.presenters.strings.Messages;
 import java.io.Flushable;
 import java.io.IOException;
@@ -195,10 +194,10 @@ abstract class Generic implements Fn.Presenter, Fn.KeepAlive, Flushable {
             @Override
             public void callbackReady(String clbk) {
                 log(Level.FINE, "callbackReady with {0}", clbk);
-                loadJS(begin(clbk).toString());
+                loadJS(Strings.begin(clbk).toString());
                 log(Level.FINE, "checking OK state");
                 if (!assertOK()) {
-                    final CharSequence err = error(msg);
+                    final CharSequence err = Strings.error(msg);
                     log(Level.WARNING, "no OK: {0}", err);
                     throw new IllegalStateException(err.toString());
                 }
@@ -529,7 +528,7 @@ abstract class Generic implements Fn.Presenter, Fn.KeepAlive, Flushable {
         int jNumber = registerObject(vm, false, null, null);
         int vmNumber = COUNTER.getAndIncrement();
         StringBuilder sb = new StringBuilder();
-        sb.append(fnHead());
+        sb.append(Strings.fnHead());
         for (Method m : vm.getClass().getMethods()) {
             if (m.getDeclaringClass() == Object.class) {
                 continue;
@@ -539,30 +538,30 @@ abstract class Generic implements Fn.Presenter, Fn.KeepAlive, Flushable {
                 types.length > 0 && 
                 m.getName().startsWith(types[0].getName().replace('.', '_') + "$");
             int params = instanceMethod ? types.length - 1 : types.length;
-            sb.append(fnName(m.getName()));
+            sb.append(Strings.fnName(m.getName()));
             String sep;
             if (instanceMethod) {
-                sb.append(fnThiz());
-                sep = fnSep();
+                sb.append(Strings.fnThiz());
+                sep = Strings.fnSep();
             } else {
                 sep = "";
             }
             for (int i = 0; i < params; i++) {
                 sb.append(sep);
-                sb.append(fnParam(i));
-                sep = fnSep();
+                sb.append(Strings.fnParam(i));
+                sep = Strings.fnSep();
             }
-            sb.append(fnClose());
+            sb.append(Strings.fnClose());
             if (!instanceMethod) {
-                sb.append(fnNoThiz());
+                sb.append(Strings.fnNoThiz());
             }
-            sb.append(fnBegin(key));
+            sb.append(Strings.fnBegin(key));
             for (int i = 0; i < params; i++) {
-                sb.append(fnPPar(i, i == 0 ? "" : ","));
+                sb.append(Strings.fnPPar(i, i == 0 ? "" : ","));
             }
-            sb.append(fnBody(jNumber, m.getName(), key, evalJS));
+            sb.append(Strings.fnBody(jNumber, m.getName(), key, evalJS));
         }
-        sb.append(fnFoot(vmNumber, key));
+        sb.append(Strings.fnFoot(vmNumber, key));
         deferExec(sb);
         return vmNumber;
     }
@@ -577,19 +576,19 @@ abstract class Generic implements Fn.Presenter, Fn.KeepAlive, Flushable {
         "v_error=error"
     })
     final Object valueOf(String typeof, String res) {
-        if (v_null().equals(typeof)) { // NOI18N
+        if (Strings.v_null().equals(typeof)) { // NOI18N
             return null;
         }
-        if (v_number().equals(typeof)) { // NOI18N
+        if (Strings.v_number().equals(typeof)) { // NOI18N
             return Double.valueOf(res);
         }
-        if (v_java().equals(typeof)) { // NOI18N
+        if (Strings.v_java().equals(typeof)) { // NOI18N
             return findObject(Integer.parseInt(res));
         }
-        if (v_object().equals(typeof)) { // NOI18N
+        if (Strings.v_object().equals(typeof)) { // NOI18N
             return new JSObject(Integer.parseInt(res));
         }
-        if (v_array().equals(typeof)) { // NOI18N
+        if (Strings.v_array().equals(typeof)) { // NOI18N
             int at = res.indexOf(':');
             int size = Integer.parseInt(res.substring(0, at));
             Object[] arr = new Object[size];
@@ -602,10 +601,10 @@ abstract class Generic implements Fn.Presenter, Fn.KeepAlive, Flushable {
             }
             return arr;
         }
-        if (v_boolean().equals(typeof)) { // NOI18N
+        if (Strings.v_boolean().equals(typeof)) { // NOI18N
             return Boolean.valueOf(res);
         }
-        if (v_error().equals(typeof)) { // NOI18N
+        if (Strings.v_error().equals(typeof)) { // NOI18N
             throw new IllegalStateException(res);
         }
         return res;
@@ -618,7 +617,7 @@ abstract class Generic implements Fn.Presenter, Fn.KeepAlive, Flushable {
 
     final void encodeObject(Object a, boolean weak, StringBuilder sb, int[] vmId) {
         if (a == null) {
-            sb.append(v_null());
+            sb.append(Strings.v_null());
         } else if (a.getClass().isArray()) {
             int len = Array.getLength(a);
             sb.append('[');
@@ -880,7 +879,7 @@ abstract class Generic implements Fn.Presenter, Fn.KeepAlive, Flushable {
         synchronized (lock()) {
             if (deferred != null) {
                 log(Level.FINE, "flush: {0}", deferred);
-                exec(flushExec(key).toString());
+                exec(Strings.flushExec(key).toString());
             }
         }
     }
@@ -1020,18 +1019,18 @@ abstract class Generic implements Fn.Presenter, Fn.KeepAlive, Flushable {
             this.keepAlive = ka;
             
             StringBuilder sb = new StringBuilder(1024);
-            sb.append(registerFn(id, key));
+            sb.append(Strings.registerFn(id, key));
             String sep = "";
             boolean isVm = false;
             for (String n : names) {
                 sb.append(sep).append(n);
                 sep = ",";
                 isVm = false;
-                if (v_vm().equals(n)) {
+                if (Strings.v_vm().equals(n)) {
                     isVm = true;
                 }
             }
-            sb.append(registerCode(code));
+            sb.append(Strings.registerCode(code));
             this.vmId = isVm ? new int[] { -1 } : null;
             deferExec(sb);
         }
@@ -1055,7 +1054,7 @@ abstract class Generic implements Fn.Presenter, Fn.KeepAlive, Flushable {
             }
             
             StringBuilder sb = new StringBuilder(256);
-            sb.append(invokeImplFn(id, wait4js, key));
+            sb.append(Strings.invokeImplFn(id, wait4js, key));
             encodeObject(thiz, false, sb, null);
             for (int i = 0; i < args.length; i++) {
                 sb.append(", ");

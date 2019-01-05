@@ -9,6 +9,9 @@
     <name>DukeScript Presenter for Android</name>
     <artifactId>android</artifactId>
     <packaging>jar</packaging>
+    <properties>
+        <main.dir>${project.parent.basedir}</main.dir>
+    </properties>
               
     <build>
         <plugins>

@@ -10,6 +10,9 @@
     <name>DukeScript Presenter for RoboVM</name>
     <artifactId>ios</artifactId>
     <packaging>jar</packaging>
+    <properties>
+        <main.dir>${project.parent.basedir}</main.dir>
+    </properties>
     <build>
         <plugins>
             <plugin>
@@ -94,7 +97,7 @@
             <plugin>
                 <groupId>org.netbeans.tools</groupId>
                 <artifactId>sigtest-maven-plugin</artifactId>
-                <version>1.0</version>
+                <version>1.1</version>
                 <executions>
                     <execution>
                         <goals>

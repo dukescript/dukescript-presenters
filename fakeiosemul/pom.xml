@@ -12,6 +12,9 @@
     <artifactId>fakeiosemul</artifactId>
     <name>Multi OS Engine API</name>
     <packaging>jar</packaging>
+    <properties>
+        <main.dir>${project.parent.basedir}</main.dir>
+    </properties>
 
     <pluginRepositories>
         <pluginRepository>
@@ -55,7 +58,6 @@
             <plugin>
                 <groupId>org.multi-os-engine</groupId>
                 <artifactId>moe-maven</artifactId>
-                <version>${moe.version}</version>
                 <executions>
                     <execution>
                         <phase>validate</phase>

@@ -8,9 +8,11 @@ before_script:
   - sh -e /etc/init.d/xvfb start || echo No X11
   - sleep 3
 script:
-  - jdk_switcher use oraclejdk8 || java -version
-  - mvn install -DskipTests
-  - mvn test
+  - if java -version 2>&1 | grep "1\.8\.0"; then mvn javadoc:javadoc; fi
+  - mvn verify -Dmaven.javadoc.skip=true
+jdk:
+ - openjdk8
+ - openjdk11
 os:
   - linux
   - osx 

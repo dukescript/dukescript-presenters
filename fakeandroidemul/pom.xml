@@ -9,6 +9,9 @@
     <artifactId>fakeandroidemul</artifactId>
     <name>Android Platform API</name>
     <packaging>jar</packaging>
+    <properties>
+        <main.dir>${project.parent.basedir}</main.dir>
+    </properties>
     <build>
         <plugins>
             <plugin>

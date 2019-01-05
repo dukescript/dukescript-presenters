@@ -9,6 +9,9 @@
     <artifactId>renderer</artifactId>
     <packaging>jar</packaging>
     <name>Desktop Browser Renderer</name>
+    <properties>
+        <main.dir>${project.parent.basedir}</main.dir>
+    </properties>
     <build>
         <plugins>
             <plugin>

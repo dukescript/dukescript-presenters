@@ -89,6 +89,8 @@ final class Cocoa extends Show implements Callback {
     public void show(URI page) {
         this.page = page.toASCIIString();
 
+        ensureHttpAccess(page);
+
         Native.loadLibrary("WebKit", WebKit.class);
 
         appDidStart = new AppDidStart();
@@ -446,6 +448,33 @@ final class Cocoa extends Show implements Callback {
         @Override
         public String toString() {
             return Double.toString(number);
+        }
+    }
+
+    private static void ensureHttpAccess(URI page) {
+        if (!"http".equals(page.getScheme())) {
+            return;
+        }
+        ObjC objC = ObjC.INSTANCE;
+
+        final Pointer nsBundle = objC.objc_getClass("NSBundle");
+        final Pointer nsNumber = objC.objc_getClass("NSNumber");
+        final Pointer nsDictionary = objC.objc_getClass("NSMutableDictionary");
+
+
+        final Pointer mainBundle = new Pointer(send(nsBundle, "mainBundle"));
+        final Pointer info = new Pointer(send(mainBundle, "infoDictionary"));
+
+        final Pointer nsAppTransportSecurity = nsString("NSAppTransportSecurity");
+        final Pointer nsAllowArbitraryLoads = nsString("NSAllowsArbitraryLoads");
+        final long nsTrue = send(nsNumber, "numberWithBool:", 1);
+
+        final long rawDict = send(info, "objectForKey:", nsAppTransportSecurity);
+        final Pointer dict;
+        if (rawDict == 0) {
+            dict = new Pointer(send(nsDictionary, "dictionaryWithCapacity:", 1));
+            send(info, "setValue:forKey:", dict, nsAppTransportSecurity);
+            send(dict, "setObject:forKey:", nsTrue, nsAllowArbitraryLoads);
         }
     }
 }
