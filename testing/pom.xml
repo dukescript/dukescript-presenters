@@ -42,6 +42,7 @@
                 <property>
                     <name>android.sdk.path</name>
                 </property>
+                <jdk>!11</jdk>
             </activation>
             <modules>
                 <module>androidapp</module>
@@ -54,6 +55,7 @@
                 <property>
                     <name>env.ANDROID_HOME</name>
                 </property>
+                <jdk>!11</jdk>
             </activation>
             <modules>
                 <module>androidapp</module>
