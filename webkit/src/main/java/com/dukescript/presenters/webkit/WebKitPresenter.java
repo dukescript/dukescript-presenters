@@ -211,7 +211,7 @@ public final class WebKitPresenter implements Fn.Presenter, Fn.KeepAlive, Execut
                 }
                 v = vm;
             } else {
-                Pointer p = jsc.JSObjectMake(ctx, javaClazz, v);
+                Pointer p = jsc.JSObjectMake(ctx, javaClazz, null);
                 if (keepAlive == null || keepAlive[i]) { 
                     toJava.put(p, v);
                 } else {
@@ -297,8 +297,6 @@ public final class WebKitPresenter implements Fn.Presenter, Fn.KeepAlive, Execut
                     ret = toJava.get(value);
                     if (ret instanceof WeakVal) {
                         ret = ((WeakVal)ret).get();
-                    } else if (ret == null) {
-                        ret = jsc.JSObjectGetPrivate(value);
                     }
                 } else {
                     PointerByReference ex = new PointerByReference();
@@ -649,11 +647,10 @@ public final class WebKitPresenter implements Fn.Presenter, Fn.KeepAlive, Execut
     
     private final class OnFinalize implements Callback {
         public void callback(Pointer obj) {
-            Object data = shell.jsc().JSObjectGetPrivate(obj);
             java.util.Iterator<Map.Entry<Object,Object>> it = toJava.entrySet().iterator();
             while (it.hasNext()) {
                 Map.Entry<Object,Object> entry = it.next();
-                if (entry.getValue() == data) {
+                if (entry.getValue() == obj) {
                     it.remove();
                     break;
                 }
