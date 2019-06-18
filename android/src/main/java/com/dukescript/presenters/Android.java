@@ -204,9 +204,7 @@ public final class Android extends Activity {
      * <a target="top" href="https://dukescript.com/index.html#pricing">DukeScript website</a>
      * for commercial licenses and support.
      *
-     * @param licenseKey the license key obtained from
-     *   <a target="_blank" href="https://dukescript.com/index.html#pricing">DukeScript support</a>
-     *   or <b>GPLv3</b> when using the open source version
+     * @param licenseKey ignored
      * @param view the {@link WebView} to configure and make ready for access from Java code
      * @param page the initial page to load - usually read from assets - e.g. the URL looks like: <code>file:///android_asset/mypage.html</code>
      * @param runOnUiThread <code>true</code> to run all the communication with the
@@ -219,7 +217,7 @@ public final class Android extends Activity {
      */
     public static Executor configure(String licenseKey, final WebView view, String page, Boolean runOnUiThread) {
         String aPkg = view.getContext().getApplicationInfo().packageName;
-        final Presenter p = new Presenter(view, aPkg, page, null, null, licenseKey, runOnUiThread);
+        final Presenter p = new Presenter(view, aPkg, page, null, null, runOnUiThread);
         androidLog(Level.FINE, "Creating presenter for {0}", view);
         doInit(p, view);
         return p;
@@ -342,7 +340,7 @@ public final class Android extends Activity {
         if (loadPage == null || loadClass == null || invoke == null) {
             throw new IllegalStateException("Cannot find meta-data ('loadPage', 'loadClass', 'invoke') in " + ai);
         }
-        Presenter presenter = new Presenter(webView, aPkg, loadPage, loadClass, invoke, null, runOnUiThread);
+        Presenter presenter = new Presenter(webView, aPkg, loadPage, loadClass, invoke, runOnUiThread);
         presenter.execute(presenter);
         doInit(presenter, webView);
     }
@@ -384,8 +382,8 @@ public final class Android extends Activity {
         final Class<?> loadClass;
         String invoke;
 
-        Presenter(final WebView view, String app, String page, Class<?> loadClass, String invoke, String licenseKey, Boolean runOnUiThread) {
-            super(false, true, "Android", app, licenseKey);
+        Presenter(final WebView view, String app, String page, Class<?> loadClass, String invoke, Boolean runOnUiThread) {
+            super(false, true, "Android", app);
             this.view = view;
             this.page = page;
             this.loadClass = loadClass;

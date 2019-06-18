@@ -112,11 +112,7 @@ public final class iOS extends Generic
      * application.
      */
     public iOS() {
-        this(null);
-    }
-
-    private iOS(String licenseKey) {
-        super(true, false, "iOS", UI.getDefault().identifier(), licenseKey);
+        super(true, false, "iOS", UI.getDefault().identifier());
     }
 
     /**
@@ -189,16 +185,14 @@ public final class iOS extends Generic
      * @param <WebView> either {@code apple.uikit.UIWebView}
      *   or {@code org.robovm.apple.uikit.UIWebView} depending on
      *   {@linkplain iOS the version of the JVM} you are using
-     * @param licenseKey the license key obtained from
-     *   <a target="_blank" href="https://dukescript.com/index.html#pricing">DukeScript support</a>
-     *   or <b>GPLv3</b> when using the open source version
+     * @param licenseKey ignored
      * @param view the {@code WebView} to configure and make ready for access from Java code
      * @param page the initial page to load - usually read from assets - e.g. the URL looks like: <code>file:///android_asset/mypage.html</code>
      * @return the executor to use to safely execute code inside of the HTML content of your view
      * @since 1.4
      */
     public static <WebView> Executor configure(String licenseKey, WebView view, String page) {
-        iOS presenter = new iOS(licenseKey);
+        iOS presenter = new iOS();
         String foundPage;
         if (page != null) {
             final File pageFile = new File(page);

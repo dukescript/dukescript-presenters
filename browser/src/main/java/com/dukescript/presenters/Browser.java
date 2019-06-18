@@ -374,7 +374,7 @@ public final class Browser implements Fn.Presenter, Fn.KeepAlive, Flushable, Exe
         private boolean initialized;
 
         Command(Browser browser) {
-            super(false, true, "Browser", browser.app, null);
+            super(false, true, "Browser", browser.app);
             this.RUN = Executors.newSingleThreadExecutor(this);
             this.id = UUID.randomUUID().toString();
             this.exec = new LinkedList<Object>();
