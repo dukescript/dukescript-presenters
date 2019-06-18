@@ -3,9 +3,11 @@ package com.dukescript.presenters.strings;
 /*
  * #%L
  * Strings Helpers - a library from the "DukeScript Presenters" project.
- * Visit http://dukescript.com for support and commercial license.
+ * 
+ * Dukehoff GmbH designates this particular file as subject to the "Classpath"
+ * exception as provided in the README.md file that accompanies this code.
  * %%
- * Copyright (C) 2015 Eppleton IT Consulting
+ * Copyright (C) 2015 - 2019 Dukehoff GmbH
  * %%
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as
@@ -22,6 +24,7 @@ package com.dukescript.presenters.strings;
  * <http://www.gnu.org/licenses/gpl-3.0.html>.
  * #L%
  */
+
 
 import java.util.List;
 import java.util.ArrayList;

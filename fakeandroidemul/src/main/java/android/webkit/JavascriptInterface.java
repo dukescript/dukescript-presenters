@@ -1,16 +1,13 @@
 package android.webkit;
 
-import java.lang.annotation.ElementType;
-import java.lang.annotation.Retention;
-import java.lang.annotation.RetentionPolicy;
-import java.lang.annotation.Target;
-
 /*
  * #%L
- * DukeScript Presenter for Android - a library from the "DukeScript Presenters" project.
- * Visit http://dukescript.com for support and commercial license.
+ * Android Platform API - a library from the "DukeScript Presenters" project.
+ * 
+ * Dukehoff GmbH designates this particular file as subject to the "Classpath"
+ * exception as provided in the README.md file that accompanies this code.
  * %%
- * Copyright (C) 2015 Eppleton IT Consulting
+ * Copyright (C) 2015 - 2019 Dukehoff GmbH
  * %%
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as
@@ -27,6 +24,12 @@ import java.lang.annotation.Target;
  * <http://www.gnu.org/licenses/gpl-3.0.html>.
  * #L%
  */
+
+import java.lang.annotation.ElementType;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
+import java.lang.annotation.Target;
+
 
 @Retention(RetentionPolicy.RUNTIME)
 @Target(ElementType.METHOD)

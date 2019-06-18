@@ -1,5 +1,30 @@
 package com.dukescript.presenters.robovm;
 
+/*
+ * #%L
+ * DukeScript Presenter for RoboVM - a library from the "DukeScript Presenters" project.
+ * 
+ * Dukehoff GmbH designates this particular file as subject to the "Classpath"
+ * exception as provided in the README.md file that accompanies this code.
+ * %%
+ * Copyright (C) 2015 - 2019 Dukehoff GmbH
+ * %%
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as
+ * published by the Free Software Foundation, either version 3 of the
+ * License, or (at your option) any later version.
+ * 
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ * 
+ * You should have received a copy of the GNU General Public
+ * License along with this program.  If not, see
+ * <http://www.gnu.org/licenses/gpl-3.0.html>.
+ * #L%
+ */
+
 import com.dukescript.presenters.ios.UI;
 import org.openide.util.lookup.ServiceProvider;
 import org.robovm.apple.foundation.NSBundle;
@@ -12,28 +37,6 @@ import org.robovm.apple.uikit.UIWebViewDelegateAdapter;
 import org.robovm.apple.uikit.UIWebViewNavigationType;
 
 
-/*
- * #%L
- * DukeScript Presenter for iOS - a library from the "DukeScript Presenters" project.
- * Visit http://dukescript.com for support and commercial license.
- * %%
- * Copyright (C) 2015 Eppleton IT Consulting
- * %%
- * This program is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as
- * published by the Free Software Foundation, either version 3 of the
- * License, or (at your option) any later version.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public
- * License along with this program.  If not, see
- * <http://www.gnu.org/licenses/gpl-3.0.html>.
- * #L%
- */
 
 @ServiceProvider(service = UI.class)
 public final class RoboVMUI extends UI {

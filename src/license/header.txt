@@ -1,3 +1,4 @@
 ${projectName} - a library from the "DukeScript Presenters" project.
-Visit http://dukescript.com for support and commercial license.
 
+Dukehoff GmbH designates this particular file as subject to the "Classpath"
+exception as provided in the README.md file that accompanies this code.

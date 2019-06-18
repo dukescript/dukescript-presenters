@@ -3,10 +3,12 @@ package com.dukescript.presenters.moe;
 
 /*
  * #%L
- * DukeScript Presenter for iOS - a library from the "DukeScript Presenters" project.
- * Visit http://dukescript.com for support and commercial license.
+ * DukeScript Presenter for Multi OS Engine - a library from the "DukeScript Presenters" project.
+ * 
+ * Dukehoff GmbH designates this particular file as subject to the "Classpath"
+ * exception as provided in the README.md file that accompanies this code.
  * %%
- * Copyright (C) 2015 Eppleton IT Consulting
+ * Copyright (C) 2015 - 2019 Dukehoff GmbH
  * %%
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as
@@ -23,6 +25,7 @@ package com.dukescript.presenters.moe;
  * <http://www.gnu.org/licenses/gpl-3.0.html>.
  * #L%
  */
+
 
 import org.netbeans.html.geo.spi.GLProvider;
 import org.openide.util.lookup.ServiceProvider;

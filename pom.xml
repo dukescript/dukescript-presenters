@@ -27,10 +27,10 @@
     
     <licenses>
         <license>
-            <name>gpl_v3</name>
+            <name>gpl_v3+cpex</name>
             <url>http://www.gnu.org/licenses/gpl-3.0.html</url>
             <comments>
-                Visit http://dukescript.com for support and commercial license.
+                GPLv3 with "ClassPath" exception.
             </comments>
         </license>
     </licenses>
@@ -208,7 +208,7 @@
                 <version>1.7</version>
                 <configuration>
                     <inceptionYear>2015</inceptionYear>
-                    <organizationName>Eppleton IT Consulting</organizationName>
+                    <organizationName>Dukehoff GmbH</organizationName>
                     <licenseName>gpl_v3</licenseName>
                     <failOnMissingHeader>true</failOnMissingHeader>
                     <descriptionTemplate>${main.dir}/src/license/header.txt</descriptionTemplate>
