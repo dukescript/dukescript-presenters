@@ -7,16 +7,23 @@ node ('Mac') {
         jdk = tool name: 'JDK8u212'
         env.JAVA_HOME = "${jdk}"
 
-        mvn 'clean package -DskipTests'
+        withMaven(
+            maven: 'M3',
+            mavenSettingsConfig: '1745afa9-9479-4838-b15d-14029f4cfc8d'
+        ) {
+            sh "mvn clean package -DskipTests"
+        }
     }
 
     stage('QA') {
-        parallel(testing: {
-            mvn 'install'
-        })
+        withMaven(
+            maven: 'M3',
+            mavenSettingsConfig: '1745afa9-9479-4838-b15d-14029f4cfc8d'
+        ) {
+            parallel(testing: {
+                sh "mvn install"
+            })
+        }
+        junit '**/target/*-reports/*reports/TEST-*.xml'
     }
-}
-
-def mvn(args) {
-    sh "${tool 'M3'}/bin/mvn ${args}"
 }
