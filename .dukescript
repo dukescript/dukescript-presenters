@@ -1,0 +1,22 @@
+#!groovy
+
+node ('Mac') {
+    stage('Build') {
+        checkout scm
+
+        jdk = tool name: 'JDK8u212'
+        env.JAVA_HOME = "${jdk}"
+
+        mvn 'clean package -DskipTests'
+    }
+
+    stage('QA') {
+        parallel(testing: {
+            mvn 'install'
+        })
+    }
+}
+
+def mvn(args) {
+    sh "${tool 'M3'}/bin/mvn ${args}"
+}
