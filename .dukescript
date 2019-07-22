@@ -26,4 +26,13 @@ node ('Mac') {
         }
         junit '**/target/*-reports/*reports/TEST-*.xml'
     }
+
+    stage('Deploy') {
+        withMaven(
+            maven : 'M3',
+            mavenSettingsConfig : '1745afa9-9479-4838-b15d-14029f4cfc8d'
+        ) {
+            sh "mvn -DskipTests deploy"
+        }
+    }
 }
