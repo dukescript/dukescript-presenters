@@ -8,27 +8,6 @@ node ('Mac') {
         env.JAVA_HOME = "${jdk}"
 
         withMaven(
-            maven: 'M3',
-            mavenSettingsConfig: '1745afa9-9479-4838-b15d-14029f4cfc8d'
-        ) {
-            sh "mvn clean package -DskipTests"
-        }
-    }
-
-    stage('QA') {
-        withMaven(
-            maven: 'M3',
-            mavenSettingsConfig: '1745afa9-9479-4838-b15d-14029f4cfc8d'
-        ) {
-            parallel(testing: {
-                sh "mvn install"
-            })
-        }
-        junit '**/target/*-reports/*reports/TEST-*.xml'
-    }
-
-    stage('Deploy') {
-        withMaven(
             maven : 'M3',
             mavenSettingsConfig : '1745afa9-9479-4838-b15d-14029f4cfc8d'
         ) {
