@@ -7,6 +7,10 @@ node ('Mac') {
         jdk = tool name: 'JDK8u212'
         env.JAVA_HOME = "${jdk}"
 
+        if (env.GPG_DIR) {
+            env.PATH="${env.PATH}:${env.GPG_DIR}"
+        }
+
         withMaven(
             maven : 'M3',
             mavenSettingsConfig : '1745afa9-9479-4838-b15d-14029f4cfc8d'
