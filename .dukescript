@@ -15,7 +15,9 @@ node ('Mac') {
             maven : 'M3',
             mavenSettingsConfig : '1745afa9-9479-4838-b15d-14029f4cfc8d'
         ) {
-            sh "mvn -DskipTests clean package source:jar javadoc:jar gpg:sign deploy"
+            withCredentials([file(credentialsId: 'KEYSTORES_DUKESCRIPT_RELEASES', variable: 'KEYSTORE')]) {
+                sh "mvn -DskipTests clean package source:jar javadoc:jar gpg:sign deploy -Dgpg.defaultKeyring=false -Dgpg.privateKeyring=${env.KEYSTORE} -Dgpg.keyname=eppleton"
+            }
         }
     }
 }
