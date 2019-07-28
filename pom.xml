@@ -264,10 +264,11 @@
                                     <goal>sign</goal>
                                 </goals>
                                  <configuration>
-                                    <gpgArguments>                    
-                                        <arg>--pinentry-mode</arg>
-                                        <arg>loopback</arg>
-                                     </gpgArguments>
+                                 <gpgArguments>
+                                    <arg>--verbose</arg>
+                                    <arg>--pinentry-mode</arg>
+                                    <arg>loopback</arg>
+                                </gpgArguments>
                                 </configuration>
                             </execution>
                         </executions>
