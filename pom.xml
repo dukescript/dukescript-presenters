@@ -268,11 +268,7 @@
                                         <arg>--verbose</arg>
                                         <arg>--pinentry-mode</arg>
                                         <arg>loopback</arg>
-                                        <arg>--no-tty</arg>
-                                        <arg>--batch</arg>
-                                        <arg>--no-use-agent</arg>
                                     </gpgArguments>
-                                    <passphraseServerId>${gpg.keyname}</passphraseServerId>
                                 </configuration>
                             </execution>
                         </executions>
