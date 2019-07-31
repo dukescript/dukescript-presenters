@@ -26,7 +26,7 @@ node ('Mac') {
                         sh "${env.GPG_PASSPHRASE} --preset --passphrase ${GPG_PASSWD} ${GPG_ID}"
                     }
                 }
-                sh "mvn -DskipTests clean package source:jar javadoc:jar gpg:sign deploy -Dgpg.useagent=true"
+                sh "mvn -DskipTests clean deploy -Prelease -Dgpg.useagent=true"
             }
         }
     }
