@@ -17,7 +17,16 @@ node ('Mac') {
         ) {
             withCredentials([file(credentialsId: 'PRIVATE_KEY', variable: 'KEY')]) {
                 sh "gpg --batch --import ${env.KEY}"
-                sh "mvn -DskipTests clean package source:jar javadoc:jar gpg:sign deploy"
+                sh "gpgconf --kill gpg-agent"
+                sh "gpg-agent --daemon --allow-preset-passphrase --batch"
+                if (env.GPG_PASSPHRASE) {
+                    withCredentials([usernamePassword(credentialsId: 'd0aa9e41-82e0-4562-bb67-b42364e8aa35',
+                        passwordVariable: 'GPG_PASSWD', usernameVariable: 'GPG_ID')
+                    ]) {
+                        sh "${env.GPG_PASSPHRASE} --preset --passphrase ${GPG_PASSWD} ${GPG_ID}"
+                    }
+                }
+                sh "mvn -DskipTests clean package source:jar javadoc:jar gpg:sign deploy -Dgpg.useagent=true"
             }
         }
     }
