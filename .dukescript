@@ -11,6 +11,13 @@ node ('Mac') {
             env.PATH="${env.PATH}:${env.GPG_DIR}"
         }
 
+        pom = readFile 'pom.xml'
+        if (pom.contains('-SNAPSHOT</version>')) {
+            mvnargs = ""
+        } else {
+            mvnargs = "-DskipTests=true"
+        }
+
         withMaven(
             maven : 'M3',
             mavenSettingsConfig : '1745afa9-9479-4838-b15d-14029f4cfc8d'
@@ -26,7 +33,7 @@ node ('Mac') {
                         sh "${env.GPG_PASSPHRASE} --preset --passphrase ${GPG_PASSWD} ${GPG_ID}"
                     }
                 }
-                sh "mvn -DskipTests clean deploy -Prelease -Dgpg.useagent=true"
+                sh "mvn ${mvnargs} clean deploy -Prelease -Dgpg.useagent=true"
             }
         }
     }
