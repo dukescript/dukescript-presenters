@@ -40,15 +40,15 @@ import org.robovm.apple.uikit.UIInterfaceOrientation;
 import org.robovm.apple.uikit.UIScreen;
 import org.robovm.apple.uikit.UIViewAutoresizing;
 import org.robovm.apple.uikit.UIViewController;
-import org.robovm.apple.uikit.UIWebView;
-import org.robovm.apple.uikit.UIWebViewDelegate;
 import org.robovm.apple.uikit.UIWindow;
+import org.robovm.apple.webkit.WKNavigationDelegate;
+import org.robovm.apple.webkit.WKWebView;
 
 public final class RoboVMApplication extends UIApplicationDelegateAdapter {
 
     private static UIWindow window;
-    private static UIWebView webView;
-    private static UIWebViewDelegate delegate;
+    private static WKWebView webView;
+    private static WKNavigationDelegate delegate;
     private static String page;
     private static CountDownLatch waitFor;
 
@@ -56,8 +56,8 @@ public final class RoboVMApplication extends UIApplicationDelegateAdapter {
     public boolean didFinishLaunching(UIApplication application, UIApplicationLaunchOptions launchOptions) {
         application.setStatusBarHidden(false);
         final CGRect bounds = UIScreen.getMainScreen().getBounds();
-        webView = new UIWebView(bounds);
-        webView.setDelegate(delegate);
+        webView = new WKWebView(bounds);
+        webView.setNavigationDelegate(delegate);
         webView.setAutoresizingMask(UIViewAutoresizing.with(UIViewAutoresizing.FlexibleBottomMargin, UIViewAutoresizing.FlexibleHeight, UIViewAutoresizing.FlexibleLeftMargin, UIViewAutoresizing.FlexibleRightMargin, UIViewAutoresizing.FlexibleTopMargin, UIViewAutoresizing.FlexibleWidth));
         CGRect whole = UIScreen.getMainScreen().getBounds();
         window = new UIWindow(whole);
@@ -96,7 +96,7 @@ public final class RoboVMApplication extends UIApplicationDelegateAdapter {
         mq.addOperation(w);
     }
 
-    public static void displayPage(String p, UIWebViewDelegate d) {
+    public static void displayPage(String p, WKNavigationDelegate d) {
         NSAutoreleasePool pool = new NSAutoreleasePool();
         try {
             RoboVMApplication.mainView(p, d);
@@ -109,7 +109,7 @@ public final class RoboVMApplication extends UIApplicationDelegateAdapter {
 
     }
 
-    private static UIWebView mainView(String p, UIWebViewDelegate d) {
+    private static WKWebView mainView(String p, WKNavigationDelegate d) {
         page = p;
         waitFor = new CountDownLatch(1);
         delegate = d;
