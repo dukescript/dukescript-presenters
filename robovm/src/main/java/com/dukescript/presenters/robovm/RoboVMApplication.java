@@ -29,7 +29,9 @@ package com.dukescript.presenters.robovm;
 import java.util.concurrent.CountDownLatch;
 import org.robovm.apple.coregraphics.CGRect;
 import org.robovm.apple.foundation.NSAutoreleasePool;
+import org.robovm.apple.foundation.NSDate;
 import org.robovm.apple.foundation.NSOperationQueue;
+import org.robovm.apple.foundation.NSRunLoop;
 import org.robovm.apple.foundation.NSURL;
 import org.robovm.apple.foundation.NSURLRequest;
 import org.robovm.apple.uikit.UIApplication;
@@ -96,6 +98,11 @@ public final class RoboVMApplication extends UIApplicationDelegateAdapter {
         mq.addOperation(w);
     }
 
+    public static void drainQueue() {
+        NSDate now = NSDate.now();
+        NSRunLoop.getCurrent().runUntil(now);
+    }
+    
     public static void displayPage(String p, WKNavigationDelegate d) {
         NSAutoreleasePool pool = new NSAutoreleasePool();
         try {

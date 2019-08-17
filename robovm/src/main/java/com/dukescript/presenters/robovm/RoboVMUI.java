@@ -86,6 +86,11 @@ public final class RoboVMUI extends UI {
     }
 
     @Override
+    public void drainQueue() {
+        RoboVMApplication.drainQueue();
+    }
+
+    @Override
     public void displayPage(String page, WebViewAdapter webViewDelegate) {
         RoboVMApplication.displayPage(page, new WebViewDelegate(webViewDelegate));
     }

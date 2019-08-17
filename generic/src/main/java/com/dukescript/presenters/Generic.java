@@ -239,6 +239,7 @@ abstract class Generic implements Fn.Presenter, Fn.KeepAlive, Flushable {
     }
     
     abstract void dispatch(Runnable r);
+    abstract void drainQueue();
 
     /** Makes sure all pending calls into JavaScript are immediately 
      * performed. 
@@ -517,6 +518,7 @@ abstract class Generic implements Fn.Presenter, Fn.KeepAlive, Flushable {
         final Method method;
         final Object thiz;
         final Object[] params;
+        final Thread thread;
         Object result;
         
         Item(Item prev, Method method, Object thiz, Object[] params) {
@@ -525,6 +527,7 @@ abstract class Generic implements Fn.Presenter, Fn.KeepAlive, Flushable {
             this.thiz = thiz;
             this.params = adaptParams(method, Arrays.asList(params));
             this.toExec = null;
+            this.thread = Thread.currentThread();
         }
         
         
@@ -582,6 +585,7 @@ abstract class Generic implements Fn.Presenter, Fn.KeepAlive, Flushable {
             this.method = null;
             this.params = null;
             this.thiz = null;
+            this.thread = Thread.currentThread();
         }
 
         protected String sj(boolean[] finished) {
@@ -640,7 +644,7 @@ abstract class Generic implements Fn.Presenter, Fn.KeepAlive, Flushable {
             }
             params.addAll(Arrays.asList((Object[]) valueOf(encParams)));
             Object[] converted = adaptParams(method, params);
-            boolean first = call == null;
+            boolean first = call == null || Thread.currentThread() == call.thread;
             log(Level.FINE, "jc: {0}@{1}args: {2} is first: {3}, now: {4}", new Object[]{method.getName(), vm, params, first, call});
             call = new Item(call, method, vm, converted);
             if (first || synchronous) {
@@ -673,7 +677,8 @@ abstract class Generic implements Fn.Presenter, Fn.KeepAlive, Flushable {
                     }
                     return jsToExec;
                 }
-                lock().wait();
+                drainQueue();
+                lock().wait(10);
             }
         }
     }
@@ -681,6 +686,7 @@ abstract class Generic implements Fn.Presenter, Fn.KeepAlive, Flushable {
     private StringBuilder deferred;
     private Collection<Object> arguments = new LinkedList<Object>();
 
+    @Override
     public final void loadScript(final Reader reader) throws Exception {
         StringBuilder sb = new StringBuilder();
         char[] arr = new char[4092];
@@ -749,7 +755,8 @@ abstract class Generic implements Fn.Presenter, Fn.KeepAlive, Flushable {
                     break;
                 }
                 try {
-                    lock().wait();
+                    drainQueue();
+                    lock().wait(10);
                 } catch (InterruptedException ex) {
                     log(Level.SEVERE, null, ex);
                 }
@@ -770,7 +777,13 @@ abstract class Generic implements Fn.Presenter, Fn.KeepAlive, Flushable {
         synchronized (lock()) {
             if (msg == null || msg.length() == 0) {
                 try {
-                    lock().wait(10000);
+                    for (int i = 0; i < 100; i++) {
+                        if ("OK".equals(msg) || "Initialized".equals(msg)) {
+                            break;
+                        }
+                        drainQueue();
+                        lock().wait(100);
+                    }
                 } catch (InterruptedException ex) {
                     // OK, go on and check
                 }
@@ -911,8 +924,8 @@ abstract class Generic implements Fn.Presenter, Fn.KeepAlive, Flushable {
     
     private static final class Exported implements Comparable<Exported> {
         private final int id;
-        private final Object obj;
-        private final boolean ref;
+        private final Object obj; 
+       private final boolean ref;
 
         Exported(int id, boolean ref, Object obj) {
             this.id = id;

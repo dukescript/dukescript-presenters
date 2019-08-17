@@ -115,7 +115,7 @@ public final class iOS extends Generic
      * application.
      */
     public iOS() {
-        super(true, false, "iOS", UI.getDefault().identifier());
+        super(false, false, "iOS", UI.getDefault().identifier());
     }
 
     /**
@@ -335,6 +335,11 @@ public final class iOS extends Generic
     void loadJS(String js) {
         String res = UI.getDefault().evaluateJavaScript(webView, js);
         LOG.log(Level.FINE, "loadJS done: {0}", res);
+    }
+
+    @Override
+    void drainQueue() {
+        UI.getDefault().drainQueue();
     }
 
     @Override

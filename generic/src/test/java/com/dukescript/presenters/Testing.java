@@ -107,6 +107,11 @@ class Testing extends Generic {
         });
     }
 
+    @Override
+    void drainQueue() {
+    }    
+
+    @Override
     public void displayPage(URL url, Runnable r) {
         r.run();
     }

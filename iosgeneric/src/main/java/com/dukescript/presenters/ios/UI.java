@@ -51,6 +51,7 @@ public abstract class UI {
     public abstract void runOnUiThread(Runnable r);
     public abstract void displayPage(String page, WebViewAdapter webViewDelegate);
     public abstract void setViewUp(Object view, String page, WebViewAdapter webViewDelegate);
+    public abstract void drainQueue();
 
     public interface WebViewAdapter {
         public boolean shouldStartLoad(Object webView, String url);
