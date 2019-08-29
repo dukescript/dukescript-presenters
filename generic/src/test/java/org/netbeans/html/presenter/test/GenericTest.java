@@ -1,4 +1,4 @@
-package com.dukescript.presenters;
+package org.netbeans.html.presenter.test;
 
 /*
  * #%L
@@ -32,8 +32,10 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.Executors;
 import net.java.html.boot.BrowserBuilder;
+import org.netbeans.html.boot.spi.Fn;
 import org.netbeans.html.json.tck.JavaScriptTCK;
 import org.netbeans.html.json.tck.KOTest;
+import org.netbeans.html.presenter.spi.PresenterBuilder;
 import org.testng.annotations.Factory;
 
 public class GenericTest extends JavaScriptTCK {
@@ -47,7 +49,9 @@ public class GenericTest extends JavaScriptTCK {
     }
     
     static Object[] createTests(Testing p) throws Exception {
-        final BrowserBuilder bb = BrowserBuilder.newBrowser(p).loadClass(GenericTest.class).
+        Fn.Presenter presenter = p.presenter;
+
+        final BrowserBuilder bb = BrowserBuilder.newBrowser(presenter).loadClass(GenericTest.class).
             loadPage("empty.html").
             invoke("initialized");
 
@@ -67,7 +71,7 @@ public class GenericTest extends JavaScriptTCK {
         for (Class c : arr) {
             for (Method m : c.getMethods()) {
                 if (m.getAnnotation(test) != null) {
-                    res.add(new Case(p, m));
+                    res.add(new Case(presenter, m));
                 }
             }
         }

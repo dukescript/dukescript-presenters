@@ -26,6 +26,7 @@ package com.dukescript.presenters;
  */
 
 
+import org.netbeans.html.presenter.spi.Generic;
 import com.dukescript.presenters.ios.UI;
 import java.io.Closeable;
 import java.io.File;

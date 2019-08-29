@@ -26,6 +26,7 @@ package com.dukescript.presenters;
  */
 
 
+import org.netbeans.html.presenter.spi.Generic;
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.Context;

@@ -1,4 +1,4 @@
-package com.dukescript.presenters;
+package org.netbeans.html.presenter.test;
 
 /*
  * #%L
@@ -29,24 +29,45 @@ package com.dukescript.presenters;
 import java.net.URL;
 import java.util.concurrent.Executor;
 import java.util.concurrent.Executors;
+import java.util.function.Consumer;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.script.ScriptContext;
 import javax.script.ScriptEngine;
 import javax.script.ScriptEngineManager;
 import javax.script.ScriptException;
+import org.netbeans.html.boot.spi.Fn;
+import org.netbeans.html.presenter.spi.PresenterBuilder;
+import org.netbeans.html.presenter.spi.PresenterBuilder.Callback;
 
-class Testing extends Generic {
+class Testing {
     static final Logger LOG = Logger.getLogger(Testing.class.getName());
-    final Executor QUEUE = Executors.newSingleThreadExecutor();
+    final Executor QUEUE;
     final ScriptEngine eng;
+    final boolean sync;
+    final Fn.Presenter presenter;
 
     public Testing() {
         this(false);
     }
-    
+
     protected Testing(boolean sync) {
-        super(sync, true, "Testing", "test");
+        this(sync, Executors.newSingleThreadExecutor());
+    }
+    protected Testing(boolean sync, Executor queue) {
+        this.sync = sync;
+        this.QUEUE = queue;
+        this.presenter = PresenterBuilder.newBuilder()
+            .app("Testing")
+            .type("test")
+            .dispatcher(QUEUE)
+            .evalJavaScript(true)
+            .synchronous(sync)
+            .loadJavaScript(this::loadJS)
+            .displayer(this::displayPage)
+            .registerCallback(this::callbackFn)
+            .build();
+
         ScriptEngineManager sem = new ScriptEngineManager();
         eng = sem.getEngineByMimeType("text/javascript");
         try {
@@ -56,7 +77,6 @@ class Testing extends Generic {
         }        
     }
 
-    @Override
     protected void log(Level level, String msg, Object... args) {
         if (args.length == 1 && args[0] instanceof Throwable) {
             LOG.log(level, msg, (Throwable)args[0]);
@@ -70,13 +90,12 @@ class Testing extends Generic {
         }
         
         public String pass(String method, String a1, String a2, String a3, String a4) throws Exception {
-            return callback(method, a1, a2, a3, a4);
+            return ((Callback)presenter).callback(method, a1, a2, a3, a4);
         }
     }
     private final Clbk clbk = new Clbk();
     
-    @Override
-    protected void callbackFn(String welcome, OnReady ready) {
+    protected void callbackFn(Consumer<String> ready) {
         eng.getBindings(ScriptContext.ENGINE_SCOPE).put("jvm", clbk);
         try {
             eng.eval("(function(global) {\n"
@@ -90,10 +109,9 @@ class Testing extends Generic {
             throw new IllegalStateException(ex);
         }
         eng.getBindings(ScriptContext.ENGINE_SCOPE).put("jvm", "");
-        ready.callbackReady("testingCB");
+        ready.accept("testingCB");
     }
 
-    @Override
     protected void loadJS(final String js) {
         QUEUE.execute(new Runnable() {
             public void run() {
@@ -111,7 +129,6 @@ class Testing extends Generic {
         r.run();
     }
 
-    @Override
     public void dispatch(Runnable r) {
         QUEUE.execute(r);
     }
@@ -121,7 +138,7 @@ class Testing extends Generic {
     
     static class Synchronized extends Testing {
         public Synchronized() {
-            super(true);
+            super(true, (r) -> r.run());
         }
 
         @Override

@@ -1,4 +1,4 @@
-package com.dukescript.presenters;
+package org.netbeans.html.presenter.test;
 
 /*
  * #%L
@@ -26,22 +26,12 @@ package com.dukescript.presenters;
  */
 
 
-import static org.testng.Assert.*;
-import org.testng.annotations.BeforeMethod;
-import org.testng.annotations.Test;
+import static org.netbeans.html.presenter.test.GenericTest.createTests;
+import org.testng.annotations.Factory;
 
-public class ValueOfTest {
-    private Testing p;
-    @BeforeMethod public void initInstance() {
-        p = new Testing();
+public class SynchronizedTest {
+    @Factory public static Object[] compatibilityTests() throws Exception {
+        return createTests(new Testing.Synchronized());
     }
     
-    
-    @Test public void parseSimpleArray() {
-        Object res = p.valueOf("array:1:8:number:6");
-        assertTrue(res instanceof Object[], "It is an array: " + res);
-        Object[] arr = (Object[]) res;
-        assertEquals(arr.length, 1, "One array item");
-        assertEquals(arr[0], 6.0, "Value is six");
-    }
 }

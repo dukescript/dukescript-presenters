@@ -1,4 +1,4 @@
-package com.dukescript.presenters;
+package org.netbeans.html.presenter.spi;
 
 /*
  * #%L
@@ -223,7 +223,7 @@ abstract class Generic implements Fn.Presenter, Fn.KeepAlive, Flushable {
      * @return returned string
      * @throws Exception if something goes wrong
      */
-    final String callback(String method, 
+    public final String callback(String method,
         String a1, String a2, String a3, String a4
     ) throws Exception {
         if ("r".equals(method)) {
