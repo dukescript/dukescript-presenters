@@ -34,6 +34,7 @@ import com.sun.jna.Structure;
 import com.sun.jna.ptr.IntByReference;
 import java.io.Closeable;
 import java.io.File;
+import java.io.IOException;
 import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.net.URI;
@@ -153,10 +154,15 @@ final class GTK extends Show implements InvokeLater {
     }
 
     @Override
-    public void show(URI url) {
+    public void show(URI url) throws IOException {
         this.page = url.toASCIIString();
         boolean[] justInitialized = {false};
-        final Gtk gtk = getInstance(justInitialized).gtk;
+        Gtk gtk;
+        try {
+            gtk = getInstance(justInitialized).gtk;
+        } catch (LinkageError e) {
+            throw new IOException(e);
+        }
         if (justInitialized[0]) {
             gtk.gtk_init(0, null);
             run();
