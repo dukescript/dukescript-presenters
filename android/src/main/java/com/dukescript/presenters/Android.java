@@ -624,6 +624,10 @@ public final class Android extends Activity {
                 }
             }
         }
+
+        @Override
+        void drainQueue() {
+        }
     }
 
     static void invokeOnPageLoad(Fn.Presenter presenter, Context context, Class<?> clazz, final String method) throws Exception {

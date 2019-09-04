@@ -99,6 +99,11 @@ public final class MoeUI extends UI {
         }
     }
 
+    @Override
+    public void drainQueue() {
+        // UIWebView doesn't need to drain the queue
+    }
+
     private static final class WebViewDelegate implements UIWebViewDelegate {
         private final WebViewAdapter delegate;
 
