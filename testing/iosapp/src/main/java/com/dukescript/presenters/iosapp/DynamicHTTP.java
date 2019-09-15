@@ -3,7 +3,7 @@ package com.dukescript.presenters.iosapp;
 /*
  * #%L
  * iOS Testing App - a library from the "DukeScript Presenters" project.
- * 
+ *
  * Dukehoff GmbH designates this particular file as subject to the "Classpath"
  * exception as provided in the README.md file that accompanies this code.
  * %%
@@ -13,12 +13,12 @@ package com.dukescript.presenters.iosapp;
  * it under the terms of the GNU General Public License as
  * published by the Free Software Foundation, either version 3 of the
  * License, or (at your option) any later version.
- * 
+ *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU General Public
  * License along with this program.  If not, see
  * <http://www.gnu.org/licenses/gpl-3.0.html>.
@@ -39,12 +39,14 @@ import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import org.glassfish.grizzly.PortRange;
+import org.glassfish.grizzly.http.Method;
 import org.glassfish.grizzly.http.server.HttpHandler;
 import org.glassfish.grizzly.http.server.HttpServer;
 import org.glassfish.grizzly.http.server.NetworkListener;
 import org.glassfish.grizzly.http.server.Request;
 import org.glassfish.grizzly.http.server.Response;
 import org.glassfish.grizzly.http.server.ServerConfiguration;
+import org.glassfish.grizzly.http.util.HttpStatus;
 import org.glassfish.grizzly.websockets.WebSocket;
 import org.glassfish.grizzly.websockets.WebSocketAddOn;
 import org.glassfish.grizzly.websockets.WebSocketApplication;
@@ -56,28 +58,44 @@ final class DynamicHTTP extends HttpHandler {
     private static List<Resource> resources;
     private static ServerConfiguration conf;
     private static HttpServer server;
-    
+
     private DynamicHTTP() {
     }
-    
+
     static URI initServer() throws Exception {
         server = HttpServer.createSimpleServer(null, new PortRange(8080, 65535));
         final WebSocketAddOn addon = new WebSocketAddOn();
         for (NetworkListener listener : server.getListeners()) {
             listener.registerAddOn(addon);
-        }        
+        }
         resources = new ArrayList<Resource>();
 
         conf = server.getServerConfiguration();
         final DynamicHTTP dh = new DynamicHTTP();
 
         conf.addHttpHandler(dh, "/");
-        
+
         server.start();
 
         return pageURL("http", server, "/test.html");
     }
-    
+
+    static void cors(Response r, String[] parameters) {
+        r.setCharacterEncoding("UTF-8");
+        r.addHeader("Access-Control-Allow-Origin", "*");
+        r.addHeader("Access-Control-Allow-Credentials", "true");
+        StringBuilder sb = new StringBuilder("Content-Type");
+        if (parameters != null) {
+            for (String p : parameters) {
+                if (p.startsWith("http.header.")) {
+                    sb.append(", ").append(p.substring(12));
+                }
+            }
+        }
+        r.addHeader("Access-Control-Allow-Headers", sb.toString());
+        r.addHeader("Access-Control-Allow-Methods", "GET, POST, DELETE, PUT");
+    }
+
     @Override
     public void service(Request request, Response response) throws Exception {
         if ("/test.html".equals(request.getRequestURI())) {
@@ -87,6 +105,7 @@ final class DynamicHTTP extends HttpHandler {
             return;
         }
         if ("/dynamic".equals(request.getRequestURI())) {
+            cors(response, null);
             String mimeType = request.getParameter("mimeType");
             List<String> params = new ArrayList<String>();
             boolean webSocket = false;
@@ -118,7 +137,12 @@ final class DynamicHTTP extends HttpHandler {
 
         for (Resource r : resources) {
             if (r.httpPath.equals(request.getRequestURI())) {
+                cors(response, r.parameters);
                 response.setContentType(r.httpType);
+                if (request.getMethod() == Method.OPTIONS) {
+                    response.setStatus(HttpStatus.NO_CONTENT_204);
+                    return;
+                }
                 r.httpContent.reset();
                 String[] params = null;
                 if (r.parameters.length != 0) {
@@ -153,7 +177,7 @@ final class DynamicHTTP extends HttpHandler {
             }
         }
     }
-    
+
     private URI registerWebSocket(Resource r) {
         WebSocketEngine.getEngine().register("", r.httpPath, new WS(r));
         return pageURL("ws", server, r.httpPath);
@@ -166,7 +190,7 @@ final class DynamicHTTP extends HttpHandler {
         }
         return pageURL("http", server, r.httpPath);
     }
-    
+
     private static URI pageURL(String proto, HttpServer server, final String page) {
         NetworkListener listener = server.getListeners().iterator().next();
         int port = listener.getPort();
@@ -176,7 +200,7 @@ final class DynamicHTTP extends HttpHandler {
             throw new IllegalStateException(ex);
         }
     }
-    
+
     static final class Resource {
 
         final InputStream httpContent;
@@ -217,7 +241,7 @@ final class DynamicHTTP extends HttpHandler {
             }
         }
     }
-    
+
     private static class WS extends WebSocketApplication {
         private final Resource r;
 
