@@ -78,8 +78,17 @@ final class DynamicHTTP extends HttpHandler {
         return pageURL("http", server, "/test.html");
     }
     
+    static void cors(Response r) {
+        r.setCharacterEncoding("UTF-8");
+        r.addHeader("Access-Control-Allow-Origin", "*");
+        r.addHeader("Access-Control-Allow-Credentials", "true");
+        r.addHeader("Access-Control-Allow-Headers", "Content-Type");
+        r.addHeader("Access-Control-Allow-Methods", "GET, POST, DELETE, PUT");
+    }
+
     @Override
     public void service(Request request, Response response) throws Exception {
+        cors(response);
         if ("/test.html".equals(request.getRequestURI())) {
             response.setContentType("text/html");
             final InputStream is = DynamicHTTP.class.getResourceAsStream("test.html");

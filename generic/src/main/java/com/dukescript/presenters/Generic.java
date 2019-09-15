@@ -83,7 +83,7 @@ abstract class Generic implements Fn.Presenter, Fn.KeepAlive, Flushable {
         "begin=try {\n"
         + "  @1('r', 'OK', 'OK', null, null);\n"
         + "} catch (e) {\n"
-        + "  alert(e);\n"
+        + "  console.warn(e);\n"
         + "}\n",
         
         "init=(function(global) {"
@@ -130,7 +130,7 @@ abstract class Generic implements Fn.Presenter, Fn.KeepAlive, Flushable {
             + "\n  global.ds = function(key) {"
             + "\n    if (key != impl.key) {"
             + "\n      impl = null;"
-            + "\n      alert('Surprising access to Java with ' + key);"
+            + "\n      console.warn('Surprising access to Java with ' + key);"
             + "\n    }"
             + "\n    return impl;"
             + "\n  };"
@@ -343,16 +343,12 @@ abstract class Generic implements Fn.Presenter, Fn.KeepAlive, Flushable {
         "fnPPar=@2 p@1",
         "fnBody=]);\n" +
             "  var v = ds(@3).toVM('c', @1, '@2', thiz ? thiz.id : null, encParams);\n" +
-//            "  alert('toVM: ' + v + ' inner: ' + (v !== null && v.indexOf && v.indexOf('javascript:') === 0) + ' typeof: ' + (typeof v) +\n" +
             "  while (v !== null && v.indexOf && v.indexOf('javascript:') === 0) {\n" +
             "    var script = v.substring(11);\n" +
-//            "    alert('script: ' + script +\n" +
             "    try {\n" +
             "      var r = eval.call(null, script);\n" +
-//            "    alert('r: ' + r +\n" +
-            "    } catch (e) {  alert('error: ' + e + ' executing: ' + script + ' at:\\n' + e.stack); }\n" +
+            "    } catch (e) {  console.warn('error: ' + e + ' executing: ' + script + ' at:\\n' + e.stack); }\n" +
             "    v = ds(@3).toVM('jr', null, null, null, null);" +
-//            "    alert('javaresult: ' + v +\n" +
             "  }\n" +
             "  return @4 ? eval('(' + v + ')') : v;\n" +
             "};\n",
