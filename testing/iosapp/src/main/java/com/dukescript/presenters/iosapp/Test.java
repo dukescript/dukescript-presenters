@@ -200,17 +200,22 @@ public final class Test extends JavaScriptTCK {
                         run.cdl = cdl;
                         run.ex = null;
                         CTX.execute(run);
+                        Throwable in = null;
                         cdl.await();
                         if (run.ex instanceof InvocationTargetException) {
-                            Throwable in = ((InvocationTargetException)run.ex).getTargetException();
-                            if (run.cnt++ < 10 && in instanceof InterruptedException) {
+                            in = ((InvocationTargetException)run.ex).getTargetException();
+                        } else if (run.ex != null) {
+                            LOG.log(Level.WARNING, "Exception", run.ex);
+                            in = run.ex;
+                        }
+                        if (in != null) {
+                            if (run.cnt++ < 100 && in instanceof InterruptedException) {
                                 Thread.sleep(100);
+                                LOG.log(Level.INFO, "Interrupted exception. Run #{0}", run.cnt);
                                 continue;
                             }
+                            LOG.log(Level.WARNING, "Time out", in);
                             throw in;
-                        }
-                        if (run.ex != null) {
-                            throw run.ex;
                         }
                         break;
                     }
