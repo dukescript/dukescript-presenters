@@ -34,7 +34,9 @@ import java.net.URISyntaxException;
 import java.net.URL;
 import java.net.URLConnection;
 import java.util.Map;
+import java.util.concurrent.Callable;
 import java.util.logging.Level;
+import java.util.logging.Logger;
 import net.java.html.BrwsrCtx;
 import net.java.html.js.JavaScriptBody;
 import org.netbeans.html.boot.spi.Fn;
@@ -105,21 +107,40 @@ public class KnockoutEnv extends KnockoutTCK {
     )
     static native void textArea(String msg);
     
-    @JavaScriptBody(args = { "r" }, javacall = true, body = 
-        "var b = document.getElementById('result-button');\n" +
-        "b.removeAttribute('hidden');\n" +
+    @JavaScriptBody(args = { "id", "r", "text" }, javacall = true, body = 
+        "var b = document.getElementById(id);\n" +
+        "if (r) {\n" +
+        "  b.removeAttribute('hidden');\n" +
+        "} else {\n" +
+        "  b.setAttribute('hidden', true);\n" +
+        "}\n" +
+        "if (text) { b.innerHTML = text; }\n" +
         "b.onclick = function() { r.@java.lang.Runnable::run()(); };\n"
     )
-    private static native void button(Runnable r);
+    private static native void button(String id, Runnable r, String text);
     
     static void exitButton(final int value) {
-        button(new Runnable() {
+        button("result-button", new Runnable() {
             @Override
             public void run() {
                 System.exit(value);
             }
-        });
+        }, null);
     }
+
+    static void againButton(final Callable<Void> callable, String text) {
+        button("repeat-button", callable == null ? null : new Runnable() {
+            @Override
+            public void run() {
+                try {
+                    callable.call();
+                } catch (Exception ex) {
+                    throw new IllegalStateException(ex);
+                }
+            }
+        }, text);
+    }
+
 
     @Override
     public URI prepareURL(String content, String mimeType, String[] parameters) {

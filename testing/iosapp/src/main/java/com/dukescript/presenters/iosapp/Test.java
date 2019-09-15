@@ -30,6 +30,9 @@ import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Timer;
+import java.util.TimerTask;
+import java.util.concurrent.Callable;
 import java.util.concurrent.CountDownLatch;
 import java.util.logging.ConsoleHandler;
 import java.util.logging.Level;
@@ -73,12 +76,48 @@ public final class Test extends JavaScriptTCK {
             public void run() {
                 l.info("browser thread loaded");
                 CTX = BrwsrCtx.findDefault(Test.class);
-                CDL.countDown();
+                final int[] countDown = { 6 };
+                final Callable<Void> runNow = new Callable<Void>() {
+                    @Override
+                    public Void call() throws Exception {
+                        CDL.countDown();
+                        return null;
+                    }
+                };
+                final Callable<Void> suspend = new Callable<Void>() {
+                    @Override
+                    public Void call() throws Exception {
+                        countDown[0] = -1;
+                        return null;
+                    }
+                };
+                final Timer timer = new Timer("Counting down");
+                timer.schedule(new TimerTask() {
+                    @Override
+                    public void run() {
+                        CTX.execute(new Runnable() {
+                            @Override
+                            public void run() {
+                                if (countDown[0] > 0) {
+                                    if (--countDown[0] == 0) {
+                                        CDL.countDown();
+                                        timer.cancel();
+                                        KnockoutEnv.againButton(null, "Running");
+                                    } else {
+                                        KnockoutEnv.againButton(suspend, "Suspend execution (" + countDown[0] + " s)");
+                                    }
+                                } else {
+                                    KnockoutEnv.againButton(runNow, "Start the tests");
+                                    timer.cancel();
+                                }
+                            }
+                        });
+                    }
+                }, 100, 1000);
             }
         }
         l.info("Launching the Presenter");
         BrowserBuilder.newBrowser().loadPage("pages/test.html").
-                loadClass(Test.class).
                 loadFinished(new Loaded()).
                 showAndWait();
     }
