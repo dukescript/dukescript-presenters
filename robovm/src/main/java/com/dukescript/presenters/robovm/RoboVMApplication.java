@@ -43,8 +43,12 @@ import org.robovm.apple.uikit.UIScreen;
 import org.robovm.apple.uikit.UIViewAutoresizing;
 import org.robovm.apple.uikit.UIViewController;
 import org.robovm.apple.uikit.UIWindow;
+import org.robovm.apple.webkit.WKFrameInfo;
 import org.robovm.apple.webkit.WKNavigationDelegate;
+import org.robovm.apple.webkit.WKUIDelegateAdapter;
 import org.robovm.apple.webkit.WKWebView;
+import org.robovm.objc.block.VoidBlock1;
+import org.robovm.objc.block.VoidBooleanBlock;
 
 public final class RoboVMApplication extends UIApplicationDelegateAdapter {
 
@@ -60,6 +64,17 @@ public final class RoboVMApplication extends UIApplicationDelegateAdapter {
         final CGRect bounds = UIScreen.getMainScreen().getBounds();
         webView = new WKWebView(bounds);
         webView.setNavigationDelegate(delegate);
+        webView.setUIDelegate(new WKUIDelegateAdapter() {
+            @Override
+            public void runJavaScriptTextInputPanel(WKWebView webView, String prompt, String defaultText, WKFrameInfo frame, VoidBlock1<String> completionHandler) {
+                if (prompt.startsWith("presenter://")) {
+                    String ret = ((RoboVMUI.WebViewDelegate)delegate).processInvoke(webView, prompt);
+                    completionHandler.invoke(ret);
+                    return;
+                }
+                super.runJavaScriptTextInputPanel(webView, prompt, defaultText, frame, completionHandler);
+            }
+        });
         webView.setAutoresizingMask(UIViewAutoresizing.with(UIViewAutoresizing.FlexibleBottomMargin, UIViewAutoresizing.FlexibleHeight, UIViewAutoresizing.FlexibleLeftMargin, UIViewAutoresizing.FlexibleRightMargin, UIViewAutoresizing.FlexibleTopMargin, UIViewAutoresizing.FlexibleWidth));
         CGRect whole = UIScreen.getMainScreen().getBounds();
         window = new UIWindow(whole);

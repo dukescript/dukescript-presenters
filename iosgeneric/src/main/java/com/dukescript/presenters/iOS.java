@@ -115,7 +115,7 @@ public final class iOS extends Generic
      * application.
      */
     public iOS() {
-        super(false, false, "iOS", UI.getDefault().identifier());
+        super(true, true, "iOS", UI.getDefault().identifier());
     }
 
     /**
@@ -313,17 +313,9 @@ public final class iOS extends Generic
                 + "  url += '&p1=' + encodeURIComponent(a2);\n"
                 + "  url += '&p2=' + encodeURIComponent(a3);\n"
                 + "  url += '&p3=' + encodeURIComponent(a4);\n"
-                + "  var iframe = document.createElement('iframe');\n"
-                + "  iframe.setAttribute('width','1');\n"
-                + "  iframe.setAttribute('height','1');\n"
-                + "  iframe.setAttribute('frameborder',0);\n"
-                + "  iframe.setAttribute('style','display:none');\n"
-                + "  iframe.setAttribute('src', url);\n"
-                + "  document.documentElement.appendChild(iframe);\n"
-                + "  iframe.parentNode.removeChild(iframe);\n"
-                + "  iframe = null;\n"
-                + "  var r = window.iOSVal;\n"
-                + "  delete window.iOSVal;\n"
+                + "  console.log('prompt calling for : ' + url);\n"
+                + "  var r = window.prompt(url);\n"
+                + "  console.log('prompt got in: ' + url + ' x: ' + r);\n"
                 + "  return r;\n"
                 + "}\n"
         );
@@ -354,9 +346,9 @@ public final class iOS extends Generic
         public WebViewDelegate(Runnable onPageLoad) {
             this.onPageLoad = onPageLoad;
         }
-
+        
         @Override
-        public boolean shouldStartLoad(Object webView, String url) {
+        public String processInvoke(Object webView, String url) {
             final String pref = "presenter://";
             if (url.startsWith(pref)) {
                 int[] q = {url.indexOf('?')};
@@ -367,36 +359,48 @@ public final class iOS extends Generic
                     String p2 = nextParam(url, q);
                     String p3 = nextParam(url, q);
                     String ret = callback(method, p0, p1, p2, p3);
-                    if (ret != null) {
-                        StringBuilder exec = new StringBuilder();
-                        exec.append("window.iOSVal = ");
-                        if (ret.startsWith("javascript:")) {
-                            exec.append("\"");
-                            for (int i = 0; i < ret.length(); i++) {
-                                char ch = ret.charAt(i);
-                                if (ch == '\n') {
-                                    exec.append("\\n");
-                                } else if (ch == '\"') {
-                                    exec.append("\\\"");
-                                } else if (ch == '\\') {
-                                    exec.append("\\\\");
-                                } else if (ch < 16) {
-                                    exec.append("\\u000").append(Integer.toHexString(ch));
-                                } else if (ch < 32) {
-                                    exec.append("\\u00").append(Integer.toHexString(ch));
-                                } else {
-                                    exec.append(ch);
-                                }
-                            }
-                            exec.append("\"");
-                        } else {
-                            exec.append(ret);
-                        }
-                        String check = UI.getDefault().evaluateJavaScript(webView, exec.toString());
-                        LOG.log(Level.FINE, "evaluating {0} with return {1}", new Object[]{exec, check});
-                    }
+                    System.err.println("returning " + ret);
+                    return ret;
                 } catch (Exception ex) {
                     LOG.log(Level.SEVERE, "Error processing " + url, ex);
+                } 
+            }
+            return null;   
+        }
+        
+        @Override
+        public boolean shouldStartLoad(Object webView, String url) {
+            final String pref = "presenter://";
+            if (url.startsWith(pref)) {
+                String ret = processInvoke(webView, url);
+                if (ret != null) {
+                    StringBuilder exec = new StringBuilder();
+                    exec.append("window.iOSVal = ");
+                    if (ret.startsWith("javascript:")) {
+                        exec.append("\"");
+                        for (int i = 0; i < ret.length(); i++) {
+                            char ch = ret.charAt(i);
+                            if (ch == '\n') {
+                                exec.append("\\n");
+                            } else if (ch == '\"') {
+                                exec.append("\\\"");
+                            } else if (ch == '\\') {
+                                exec.append("\\\\");
+                            } else if (ch < 16) {
+                                exec.append("\\u000").append(Integer.toHexString(ch));
+                            } else if (ch < 32) {
+                                exec.append("\\u00").append(Integer.toHexString(ch));
+                            } else {
+                                exec.append(ch);
+                            }
+                        }
+                        exec.append("\"");
+                    } else {
+                        exec.append(ret);
+                    }
+                    String check = UI.getDefault().evaluateJavaScript(webView, exec.toString());
+                    UI.getDefault().drainQueue();
+                    LOG.log(Level.FINE, "evaluating {0} with return {1}", new Object[]{exec, check});
                 }
                 return false;
             }

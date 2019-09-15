@@ -26,6 +26,7 @@ package com.dukescript.presenters.robovm;
  */
 
 import com.dukescript.presenters.ios.UI;
+import java.util.concurrent.CountDownLatch;
 import org.openide.util.lookup.ServiceProvider;
 import org.robovm.apple.foundation.NSBundle;
 import org.robovm.apple.foundation.NSError;
@@ -33,13 +34,16 @@ import org.robovm.apple.foundation.NSObject;
 import org.robovm.apple.foundation.NSURL;
 import org.robovm.apple.foundation.NSURLRequest;
 import org.robovm.apple.uikit.UIApplication;
+import org.robovm.apple.webkit.WKFrameInfo;
 import org.robovm.apple.webkit.WKNavigation;
 import org.robovm.apple.webkit.WKNavigationAction;
 import org.robovm.apple.webkit.WKNavigationActionPolicy;
 import org.robovm.apple.webkit.WKNavigationDelegateAdapter;
+import org.robovm.apple.webkit.WKUIDelegateAdapter;
 import org.robovm.apple.webkit.WKWebView;
 import org.robovm.objc.block.VoidBlock1;
 import org.robovm.objc.block.VoidBlock2;
+import org.robovm.objc.block.VoidBooleanBlock;
 
 
 
@@ -60,13 +64,23 @@ public final class RoboVMUI extends UI {
     }
 
     @Override
-    public String evaluateJavaScript(Object webView, String js) {
+    public String evaluateJavaScript(Object webView, final String js) {
         WKWebView v = (WKWebView) webView;
+        System.err.println("evaluating " + js);
+        final NSObject[] res = { null };
+        final CountDownLatch cdl = new CountDownLatch(1);
         v.evaluateJavaScript(js, new VoidBlock2<NSObject, NSError>() {
             @Override
             public void invoke(NSObject a, NSError b) {
+                res[0] = a;
+                System.err.println("evaluated " + js + " to " + a);
+                cdl.countDown();
             }
         });
+        while (cdl.getCount() > 0) {
+            reallyDrainQueue();
+        }
+        System.err.println("evaluation end of " + js + " yields " + res[0]);
         return null;
     }
 
@@ -87,6 +101,10 @@ public final class RoboVMUI extends UI {
 
     @Override
     public void drainQueue() {
+        reallyDrainQueue();
+    }
+    
+    private void reallyDrainQueue() {
         RoboVMApplication.drainQueue();
     }
 
@@ -102,13 +120,29 @@ public final class RoboVMUI extends UI {
         }
         WKWebView webView = (WKWebView) view;
         webView.setNavigationDelegate(new WebViewDelegate(adapter));
+        webView.setUIDelegate(new WKUIDelegateAdapter() {
+            @Override
+            public void runJavaScriptConfirmPanel(WKWebView webView, String message, WKFrameInfo frame, VoidBooleanBlock completionHandler) {
+                throw new UnsupportedOperationException("Confirm");
+            }
+
+            @Override
+            public void runJavaScriptAlertPanel(WKWebView webView, String message, WKFrameInfo frame, Runnable completionHandler) {
+                throw new UnsupportedOperationException("Alert");
+            }
+
+            @Override
+            public void runJavaScriptTextInputPanel(WKWebView webView, String prompt, String defaultText, WKFrameInfo frame, VoidBlock1<String> completionHandler) {
+                throw new UnsupportedOperationException("TextInput");
+            }
+        });
         if (page != null) {
             NSURLRequest req = new NSURLRequest(new NSURL(page));
             webView.loadRequest(req);
         }
     }
 
-    private final class WebViewDelegate extends WKNavigationDelegateAdapter {
+    final class WebViewDelegate extends WKNavigationDelegateAdapter {
         private final WebViewAdapter delegate;
 
         WebViewDelegate(WebViewAdapter delegate) {
@@ -123,6 +157,10 @@ public final class RoboVMUI extends UI {
             } else {
                 handler.invoke(WKNavigationActionPolicy.Cancel);
             }
+        }
+
+        String processInvoke(WKWebView webView, final String url) {
+            return delegate.processInvoke(webView, url);
         }
 
         @Override

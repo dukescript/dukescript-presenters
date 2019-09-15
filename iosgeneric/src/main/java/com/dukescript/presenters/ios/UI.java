@@ -54,6 +54,7 @@ public abstract class UI {
     public abstract void drainQueue();
 
     public interface WebViewAdapter {
+        public String processInvoke(Object webView, String url);
         public boolean shouldStartLoad(Object webView, String url);
         public void didStartLoad(Object webView);
         public void didFailLoad(Object webView, String error);
