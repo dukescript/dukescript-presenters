@@ -37,6 +37,8 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.ServiceLoader;
 import java.util.concurrent.Executor;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ThreadFactory;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import net.java.html.BrwsrCtx;
@@ -107,6 +109,7 @@ public final class iOS extends Generic
 
     static final Logger LOG = Logger.getLogger(iOS.class.getName());
     private Object webView;
+    private Executor dispatchExecutor;
     private Thread dispatchThread;
     private List<Runnable> pending;
 
@@ -115,7 +118,7 @@ public final class iOS extends Generic
      * application.
      */
     public iOS() {
-        super(true, true, "iOS", UI.getDefault().identifier());
+        super(false, true, "iOS", UI.getDefault().identifier());
     }
 
     /**
@@ -234,8 +237,14 @@ public final class iOS extends Generic
         boolean assigned = false;
         List<Runnable> tmp = null;
         synchronized (this) {
-            if (dispatchThread == null) {
-                dispatchThread = t;
+            if (dispatchExecutor == null) {
+                dispatchExecutor = Executors.newSingleThreadExecutor(new ThreadFactory() {
+                    @Override
+                    public Thread newThread(Runnable r) {
+                        dispatchThread = new Thread(r, "DukeScript Worker");
+                        return dispatchThread;
+                    }
+                });
                 assigned = true;
                 tmp = pending;
                 pending = null;
@@ -243,7 +252,7 @@ public final class iOS extends Generic
         }
         if (tmp != null) {
             for (Runnable r : tmp) {
-                r.run();
+                dispatchExecutor.execute(r);
             }
         }
         return assigned;
@@ -252,7 +261,7 @@ public final class iOS extends Generic
     @Override
     final void dispatch(final Runnable r) {
         synchronized (this) {
-            if (dispatchThread == null) {
+            if (dispatchExecutor == null) {
                 if (pending == null) {
                     pending = new LinkedList<Runnable>();
                 }
@@ -264,7 +273,7 @@ public final class iOS extends Generic
         if (dispatchThread == Thread.currentThread()) {
             r.run();
         } else {
-            UI.getDefault().runOnUiThread(r);
+            dispatchExecutor.execute(r);
         }
     }
 
@@ -324,9 +333,14 @@ public final class iOS extends Generic
     }
 
     @Override
-    void loadJS(String js) {
-        String res = UI.getDefault().evaluateJavaScript(webView, js);
-        LOG.log(Level.FINE, "loadJS done: {0}", res);
+    void loadJS(final String js) {
+        UI.getDefault().runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                String res = UI.getDefault().evaluateJavaScript(webView, js);
+                LOG.log(Level.FINE, "loadJS done: {0}", res);
+            }
+        });
     }
 
     @Override

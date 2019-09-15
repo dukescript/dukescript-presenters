@@ -101,7 +101,6 @@ public final class RoboVMUI extends UI {
 
     @Override
     public void drainQueue() {
-        reallyDrainQueue();
     }
     
     private void reallyDrainQueue() {
