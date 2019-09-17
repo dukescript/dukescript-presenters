@@ -168,7 +168,7 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-javadoc-plugin</artifactId>
-                <version>3.0.1</version>
+                <version>3.1.1</version>
                 <configuration>
                     <excludePackageNames>android.*</excludePackageNames>
                     <groups>
@@ -178,7 +178,9 @@
                         </group>
                     </groups>
                     <nodeprecated>true</nodeprecated>
+                    <detectJavaApiLink>false</detectJavaApiLink>
                     <links>
+                        <link>https://docs.oracle.com/en/java/javase/11/docs/api/</link>
                         <link>https://dukescript.com/javadoc/html+java/${net.java.html.version}/</link>
                         <link>https://developer.android.com/reference/</link>
                     </links>
