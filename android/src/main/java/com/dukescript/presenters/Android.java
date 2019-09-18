@@ -26,7 +26,6 @@ package com.dukescript.presenters;
  */
 
 
-import org.netbeans.html.presenter.spi.Generic;
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.Context;
@@ -67,11 +66,15 @@ import java.util.concurrent.Executor;
 import java.util.concurrent.Executors;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.ThreadFactory;
+import java.util.function.BiConsumer;
+import java.util.function.Consumer;
 import java.util.logging.Level;
 import net.java.html.BrwsrCtx;
 import net.java.html.js.JavaScriptBody;
 import org.netbeans.html.boot.spi.Fn;
 import org.netbeans.html.context.spi.Contexts;
+import org.netbeans.html.presenter.spi.PresenterBuilder;
+import org.netbeans.html.presenter.spi.PresenterBuilder.Initialize;
 import org.netbeans.html.sound.spi.AudioEnvironment;
 
 /** Ultimate <a target="_blank" href="http://dukescript.com">DukeScript</a>
@@ -232,7 +235,7 @@ public final class Android extends Activity {
             @Override
             public void run() {
                 androidLog(Level.FINE, "Initializing presenter for {0}", view);
-                p.init();
+                ((Initialize)p.presenter).initialize();
                 androidLog(Level.FINE, "Init done for {0}", view);
             }
         }, false);
@@ -376,7 +379,7 @@ public final class Android extends Activity {
         }
     }
 
-    private static final class Presenter extends Generic implements Executor, Runnable {
+    private static final class Presenter extends Object implements Executor, Runnable {
         final WebView view;
         final Chrome chrome;
         final JVM jvm;
@@ -385,9 +388,9 @@ public final class Android extends Activity {
         final BrwsrCtx ctx;
         final Class<?> loadClass;
         String invoke;
+        final Fn.Presenter presenter;
 
         Presenter(final WebView view, String app, String page, Class<?> loadClass, String invoke, Boolean runOnUiThread) {
-            super(false, true, "Android", app);
             this.view = view;
             this.page = page;
             this.loadClass = loadClass;
@@ -404,7 +407,7 @@ public final class Android extends Activity {
 
                         @Override
                         public void run() {
-                            Closeable c = Fn.activate(Presenter.this);
+                            Closeable c = Fn.activate(Presenter.this.presenter);
                             try {
                                 command.run();
                             } finally {
@@ -424,12 +427,27 @@ public final class Android extends Activity {
                     p.dispatch(new CtxRun());
                 }
             };
+
+            this.presenter = PresenterBuilder.newBuilder().
+                type("Android").
+                app(app).
+                dispatcher(e, true).
+                displayer(new BiConsumer<URL, Runnable>() {
+                    @Override
+                    public void accept(URL t, Runnable u) {
+                        Presenter.this.displayPage(t, u);
+                    }
+                }).
+                synchronous(false).
+                evalJavaScript(true).
+                build();
+
             final Audio audio = new Audio(view.getContext(), page);
 
             Contexts.Builder cb = Contexts.newBuilder();
             Contexts.fillInByProviders(ctxClass, cb);
             cb.register(Context.class, view.getContext(), 100);
-            cb.register(Fn.Presenter.class, p, 100);
+            cb.register(Fn.Presenter.class, this.presenter, 100);
             cb.register(Executor.class, e, 100);
             cb.register(AudioEnvironment.class, audio, 100);
             this.ctx = cb.build();
@@ -443,12 +461,10 @@ public final class Android extends Activity {
             view.addJavascriptInterface(jvm, "jvm");
         }
 
-        @Override
         protected void loadJS(String js) {
             loadScript("javascript:" + js);
         }
 
-        @Override
         public void displayPage(URL page, final Runnable onPageLoad) {
             view.setWebViewClient(new WebViewClient() {
                 @Override
@@ -487,12 +503,10 @@ public final class Android extends Activity {
             });
         }
 
-        @Override
         protected void log(Level level, String msg, Object... args) {
             androidLog(level, msg, args);
         }
 
-        @Override
         protected final void dispatch(Runnable r) {
             if (jvm.dispatch(r)) {
                 Activity a = (Activity) view.getContext();
@@ -505,8 +519,7 @@ public final class Android extends Activity {
             ctx.execute(command);
         }
 
-        @Override
-        void callbackFn(final String welcome, final OnReady onReady) {
+        void callbackFn(final Consumer<String> onReady) {
             class LoadPage extends WebViewClient implements Runnable {
                 private final Runnable initialize;
 
@@ -576,10 +589,10 @@ public final class Android extends Activity {
                             //                + "    alert('val: ' + ret + ' typeof: ' + typeof ret);\n"
                             + "    return ret;"
                             + "  };"
-                            + "})(this);\n" + welcome
+                            + "})(this);\n"
                     );
                     done = true;
-                    onReady.callbackReady("androidCB");
+                    onReady.accept("androidCB");
                     dispatch(jvm, true);
                 }
             }
@@ -596,7 +609,7 @@ public final class Android extends Activity {
                 @Override
                 public void run() {
                     try {
-                        invokeOnPageLoad(Presenter.this, view.getContext(), loadClass, invoke);
+                        invokeOnPageLoad(Presenter.this.presenter, view.getContext(), loadClass, invoke);
                     } catch (Exception ex) {
                         androidLog(Level.SEVERE, null, ex);
                     }
@@ -949,7 +962,8 @@ public final class Android extends Activity {
                 }
                 return res[0] ? line.getText().toString() : null;
             }
-            return presenter.callback(method, a1, a2, a3, a4);
+            PresenterBuilder.Callback cb = (PresenterBuilder.Callback) presenter.presenter;
+            return cb.callback(method, a1, a2, a3, a4);
         }
 
         @Override

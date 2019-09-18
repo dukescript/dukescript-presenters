@@ -104,6 +104,10 @@ public final class PresenterBuilder {
         String callback(String method, String a1, String a2, String a3, String a4) throws Exception;
     }
 
+    public static interface Initialize {
+        void initialize();
+    }
+
     private static final class GenPresenterWithExecutor extends GenPresenter implements Executor {
         GenPresenterWithExecutor(PresenterBuilder b) {
             super(b);
@@ -115,7 +119,7 @@ public final class PresenterBuilder {
         }
     }
 
-    private static class GenPresenter extends Generic implements Callback {
+    private static class GenPresenter extends Generic implements Callback, Initialize {
         private final Consumer<String> loadScript;
         private final Executor executor;
         private final Consumer<Consumer<String>> onReady;
@@ -151,6 +155,11 @@ public final class PresenterBuilder {
         @Override
         public void displayPage(URL url, Runnable r) {
             displayer.accept(url, r);
+        }
+
+        @Override
+        public void initialize() {
+            init();
         }
     }
 }
