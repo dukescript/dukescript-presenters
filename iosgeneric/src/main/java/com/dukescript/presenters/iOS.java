@@ -26,24 +26,26 @@ package com.dukescript.presenters;
  */
 
 
-import org.netbeans.html.presenter.spi.Generic;
 import com.dukescript.presenters.ios.UI;
 import java.io.Closeable;
 import java.io.File;
 import java.io.Flushable;
 import java.io.IOException;
+import java.io.Reader;
 import java.net.URL;
 import java.net.URLDecoder;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.ServiceLoader;
 import java.util.concurrent.Executor;
+import java.util.function.Consumer;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import net.java.html.BrwsrCtx;
 import net.java.html.js.JavaScriptBody;
 import net.java.html.boot.BrowserBuilder;
 import org.netbeans.html.boot.spi.Fn;
+import org.netbeans.html.presenter.spi.PresenterBuilder;
 import org.openide.util.lookup.ServiceProvider;
 
 /** Versatile <a target="_blank" href="http://dukescript.com">DukeScript</a>
@@ -103,20 +105,30 @@ import org.openide.util.lookup.ServiceProvider;
  *
  */
 @ServiceProvider(service = Fn.Presenter.class)
-public final class iOS extends Generic
+public final class iOS 
         implements Executor, Fn.Presenter, Fn.KeepAlive, Flushable {
 
     static final Logger LOG = Logger.getLogger(iOS.class.getName());
     private Object webView;
     private Thread dispatchThread;
     private List<Runnable> pending;
+    private final Fn.Presenter presenter;
 
     /** Default constructor. Used by {@link ServiceLoader#load(java.lang.Class)}
      * to lookup instance of presenter registered on the classpath of the
      * application.
      */
     public iOS() {
-        super(true, false, "iOS", UI.getDefault().identifier());
+        presenter = PresenterBuilder.newBuilder().
+            type("iOS").
+            app(UI.getDefault().identifier()).
+            synchronous(true).
+            evalJavaScript(false).
+            dispatcher(this, true).
+            loadJavaScript(this::loadJS).
+            registerCallback(this::callbackFn).
+            displayer(this::displayPage).
+            build();
     }
 
     /**
@@ -222,7 +234,6 @@ public final class iOS extends Generic
         return presenter;
     }
 
-    @Override
     void log(Level level, String msg, Object... args) {
         if (args.length == 1 && args[0] instanceof Throwable) {
             LOG.log(level, msg, (Throwable) args[0]);
@@ -250,7 +261,6 @@ public final class iOS extends Generic
         return assigned;
     }
 
-    @Override
     final void dispatch(final Runnable r) {
         synchronized (this) {
             if (dispatchThread == null) {
@@ -304,8 +314,7 @@ public final class iOS extends Generic
         dispatch(new CtxRun());
     }
 
-    @Override
-    void callbackFn(String welcome, OnReady onReady) {
+    void callbackFn(Consumer<String> onReady) {
         loadJS(
                 "function iOS(method, a1, a2, a3, a4) {\n"
                 + "  window.iOSVal = null;\n"
@@ -328,11 +337,9 @@ public final class iOS extends Generic
                 + "  return r;\n"
                 + "}\n"
         );
-        loadJS(welcome);
-        onReady.callbackReady("iOS");
+        onReady.accept("iOS");
     }
 
-    @Override
     void loadJS(String js) {
         String res = UI.getDefault().evaluateJavaScript(webView, js);
         LOG.log(Level.FINE, "loadJS done: {0}", res);
@@ -341,6 +348,26 @@ public final class iOS extends Generic
     @Override
     public void displayPage(URL page, Runnable onPageLoad) {
         UI.getDefault().displayPage(page.toExternalForm(), new WebViewDelegate(onPageLoad));
+    }
+
+    @Override
+    public Fn defineFn(String code, String... args) {
+        return presenter.defineFn(code, args);
+    }
+
+    @Override
+    public void loadScript(Reader reader) throws Exception {
+        presenter.loadScript(reader);
+    }
+
+    @Override
+    public Fn defineFn(String code, String[] args, boolean[] keep) {
+        return ((Fn.KeepAlive)presenter).defineFn(code, args, keep);
+    }
+
+    @Override
+    public void flush() throws IOException {
+        ((Flushable)presenter).flush();
     }
 
     private final class WebViewDelegate implements UI.WebViewAdapter {
@@ -362,7 +389,8 @@ public final class iOS extends Generic
                     String p1 = nextParam(url, q);
                     String p2 = nextParam(url, q);
                     String p3 = nextParam(url, q);
-                    String ret = callback(method, p0, p1, p2, p3);
+                    PresenterBuilder.Callback cb = (PresenterBuilder.Callback) presenter;
+                    String ret = cb.callback(method, p0, p1, p2, p3);
                     if (ret != null) {
                         StringBuilder exec = new StringBuilder();
                         exec.append("window.iOSVal = ");
