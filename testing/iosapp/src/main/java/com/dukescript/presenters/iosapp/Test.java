@@ -30,6 +30,9 @@ import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Timer;
+import java.util.TimerTask;
+import java.util.concurrent.Callable;
 import java.util.concurrent.CountDownLatch;
 import java.util.logging.ConsoleHandler;
 import java.util.logging.Level;
@@ -73,12 +76,48 @@ public final class Test extends JavaScriptTCK {
             public void run() {
                 l.info("browser thread loaded");
                 CTX = BrwsrCtx.findDefault(Test.class);
-                CDL.countDown();
+                final int[] countDown = { 6 };
+                final Callable<Void> runNow = new Callable<Void>() {
+                    @Override
+                    public Void call() throws Exception {
+                        CDL.countDown();
+                        return null;
+                    }
+                };
+                final Callable<Void> suspend = new Callable<Void>() {
+                    @Override
+                    public Void call() throws Exception {
+                        countDown[0] = -1;
+                        return null;
+                    }
+                };
+                final Timer timer = new Timer("Counting down");
+                timer.schedule(new TimerTask() {
+                    @Override
+                    public void run() {
+                        CTX.execute(new Runnable() {
+                            @Override
+                            public void run() {
+                                if (countDown[0] > 0) {
+                                    if (--countDown[0] == 0) {
+                                        CDL.countDown();
+                                        timer.cancel();
+                                        KnockoutEnv.againButton(null, "Running");
+                                    } else {
+                                        KnockoutEnv.againButton(suspend, "Suspend execution (" + countDown[0] + " s)");
+                                    }
+                                } else {
+                                    KnockoutEnv.againButton(runNow, "Start the tests");
+                                    timer.cancel();
+                                }
+                            }
+                        });
+                    }
+                }, 100, 1000);
             }
         }
         l.info("Launching the Presenter");
         BrowserBuilder.newBrowser().loadPage("pages/test.html").
-                loadClass(Test.class).
                 loadFinished(new Loaded()).
                 showAndWait();
     }
@@ -161,17 +200,22 @@ public final class Test extends JavaScriptTCK {
                         run.cdl = cdl;
                         run.ex = null;
                         CTX.execute(run);
+                        Throwable in = null;
                         cdl.await();
                         if (run.ex instanceof InvocationTargetException) {
-                            Throwable in = ((InvocationTargetException)run.ex).getTargetException();
-                            if (run.cnt++ < 10 && in instanceof InterruptedException) {
+                            in = ((InvocationTargetException)run.ex).getTargetException();
+                        } else if (run.ex != null) {
+                            LOG.log(Level.WARNING, "Exception", run.ex);
+                            in = run.ex;
+                        }
+                        if (in != null) {
+                            if (run.cnt++ < 100 && in instanceof InterruptedException) {
                                 Thread.sleep(100);
+                                LOG.log(Level.INFO, "Interrupted exception. Run #{0}", run.cnt);
                                 continue;
                             }
+                            LOG.log(Level.WARNING, "Time out", in);
                             throw in;
-                        }
-                        if (run.ex != null) {
-                            throw run.ex;
                         }
                         break;
                     }

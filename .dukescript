@@ -4,7 +4,7 @@ node ('Mac') {
     stage('Build') {
         checkout scm
 
-        jdk = tool name: 'JDK8u212'
+        jdk = tool name: 'JDK8u221'
         env.JAVA_HOME = "${jdk}"
 
         if (env.GPG_DIR) {
