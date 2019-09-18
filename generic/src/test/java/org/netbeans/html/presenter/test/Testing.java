@@ -60,7 +60,7 @@ class Testing {
         this.presenter = PresenterBuilder.newBuilder()
             .app("Testing")
             .type("test")
-            .dispatcher(QUEUE)
+            .dispatcher(QUEUE, false)
             .evalJavaScript(true)
             .synchronous(sync)
             .loadJavaScript(this::loadJS)

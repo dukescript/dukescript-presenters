@@ -26,7 +26,6 @@ package com.dukescript.presenters;
  */
 
 
-import org.netbeans.html.presenter.spi.Generic;
 import com.dukescript.presenters.renderer.Show;
 import java.io.Closeable;
 import java.io.FileNotFoundException;
@@ -50,6 +49,7 @@ import java.util.UUID;
 import java.util.concurrent.Executor;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ThreadFactory;
+import java.util.function.Consumer;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import org.glassfish.grizzly.PortRange;
@@ -62,6 +62,8 @@ import org.glassfish.grizzly.http.server.ServerConfiguration;
 import org.glassfish.grizzly.http.util.HttpStatus;
 import org.netbeans.html.boot.spi.Fn;
 import org.netbeans.html.boot.spi.Fn.Presenter;
+import org.netbeans.html.presenter.spi.PresenterBuilder;
+import org.netbeans.html.presenter.spi.PresenterBuilder.Callback;
 import org.openide.util.lookup.ServiceProvider;
 
 /** Browser based {@link Presenter}. It starts local server and
@@ -121,7 +123,13 @@ public final class Browser implements Fn.Presenter, Fn.KeepAlive, Flushable, Exe
     }
 
     static HttpServer findServer(Object obj) {
-        return ((Command)obj).browser.server();
+        Command c = null;
+        if (obj instanceof Command) {
+            c = (Command) obj;
+        } else {
+            c = Command.MAP.get(obj);
+        }
+        return c.browser.server();
     }
 
     /** Shows URL in a browser.
@@ -367,8 +375,8 @@ public final class Browser implements Fn.Presenter, Fn.KeepAlive, Flushable, Exe
         return "org.netbeans.html"; // NOI18N
     }
     
-    private static final class Command extends Generic
-    implements Fn.Presenter, Fn.KeepAlive, Flushable, Executor, ThreadFactory {
+    private static final class Command extends Object
+    implements Executor, ThreadFactory {
         private final Queue<Object> exec;
         private final Browser browser;
         private final String id;
@@ -376,13 +384,25 @@ public final class Browser implements Fn.Presenter, Fn.KeepAlive, Flushable, Exe
         private Thread RUNNER;
         private Response suspended;
         private boolean initialized;
+        private final Presenter presenter;
+        static final Map<Presenter,Command> MAP = new HashMap<>();
 
         Command(Browser browser) {
-            super(false, true, "Browser", browser.app);
             this.RUN = Executors.newSingleThreadExecutor(this);
             this.id = UUID.randomUUID().toString();
             this.exec = new LinkedList<Object>();
             this.browser = browser;
+            this.presenter = PresenterBuilder.newBuilder().
+                registerCallback(this::callbackFn).
+                loadJavaScript(this::loadJS).
+                app(browser.app).
+                dispatcher(this, true).
+                displayer(this::displayPage).
+                evalJavaScript(true).
+                synchronous(false).
+                type("Browser").
+                build();
+            MAP.put(presenter, this);
         }
 
         @Override
@@ -402,7 +422,7 @@ public final class Browser implements Fn.Presenter, Fn.KeepAlive, Flushable, Exe
                 @Override
                 public void run() {
                     if (context) {
-                        Closeable c = Fn.activate(Command.this);
+                        Closeable c = Fn.activate(Command.this.presenter);
                         try {
                             r.run();
                         } finally {
@@ -483,7 +503,8 @@ public final class Browser implements Fn.Presenter, Fn.KeepAlive, Flushable, Exe
                 String res;
                 try {
                     LOG.log(Level.FINE, "Call {0}", methodName + " with " + args);
-                    res = callback(methodName,
+                    Callback cb = (Callback) presenter;
+                    res = cb.callback(methodName,
                         args.get(0), args.get(1), args.get(2), args.get(3)
                     );
                     LOG.log(Level.FINE, "Result: {0}", res);
@@ -499,8 +520,7 @@ public final class Browser implements Fn.Presenter, Fn.KeepAlive, Flushable, Exe
             w.close();
         }
 
-        @Override
-        void callbackFn(String welcome, OnReady onReady) {
+        void callbackFn(Consumer<String> onReady) {
             StringBuilder sb = new StringBuilder();
             sb.append("this.toBrwsrSrvr = function(name, a1, a2, a3, a4) {\n"
                 + "var url = 'command.js?id=" + id + "&name=' + name;\n"
@@ -514,12 +534,10 @@ public final class Browser implements Fn.Presenter, Fn.KeepAlive, Flushable, Exe
                 + "request.send();\n"
                 + "return request.responseText;\n"
                 + "};\n");
-            sb.append(welcome);
             add(sb);
-            onReady.callbackReady("toBrwsrSrvr");
+            onReady.accept("toBrwsrSrvr");
         }
 
-        @Override
         void log(Level level, String msg, Object... args) {
             if (args.length == 1 && args[0] instanceof Throwable) {
                 LOG.log(level, msg, (Throwable) args[0]);
@@ -528,18 +546,15 @@ public final class Browser implements Fn.Presenter, Fn.KeepAlive, Flushable, Exe
             }
         }
 
-        @Override
         final void loadJS(String js) {
             add(js);
         }
 
-        @Override
         void dispatch(Runnable r) {
             runSafe(r, false);
         }
 
 
-        @Override
         public void displayPage(URL url, Runnable r) {
             throw new UnsupportedOperationException(url.toString());
         }

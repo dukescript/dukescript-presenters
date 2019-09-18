@@ -43,6 +43,7 @@ public final class PresenterBuilder {
     private String type;
     private String app;
     private BiConsumer<URL, Runnable> displayer;
+    private boolean implementExecutor;
 
     private PresenterBuilder() {
     }
@@ -56,8 +57,9 @@ public final class PresenterBuilder {
         return this;
     }
 
-    public PresenterBuilder dispatcher(Executor executor) {
+    public PresenterBuilder dispatcher(Executor executor, boolean implementExecutor) {
         this.executor = executor;
+        this.implementExecutor = implementExecutor;
         return this;
     }
 
@@ -92,6 +94,9 @@ public final class PresenterBuilder {
     }
 
     public Fn.Presenter build() {
+        if (implementExecutor) {
+            return new GenPresenterWithExecutor(this);
+        }
         return new GenPresenter(this);
     }
 
@@ -99,7 +104,18 @@ public final class PresenterBuilder {
         String callback(String method, String a1, String a2, String a3, String a4) throws Exception;
     }
 
-    private static final class GenPresenter extends Generic implements Callback {
+    private static final class GenPresenterWithExecutor extends GenPresenter implements Executor {
+        GenPresenterWithExecutor(PresenterBuilder b) {
+            super(b);
+        }
+
+        @Override
+        public void execute(Runnable command) {
+            dispatch(command);
+        }
+    }
+
+    private static class GenPresenter extends Generic implements Callback {
         private final Consumer<String> loadScript;
         private final Executor executor;
         private final Consumer<Consumer<String>> onReady;
