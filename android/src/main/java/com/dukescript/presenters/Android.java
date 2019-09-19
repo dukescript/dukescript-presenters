@@ -431,10 +431,9 @@ public final class Android extends Activity {
                 type("Android").
                 app(app).
                 dispatcher(e, true).
-                displayer(this).preparator(this).
-                loadJavaScript(this).
-                synchronous(false).
-                evalJavaScript(true).
+                displayer(this).
+                preparator(this, true).
+                loadJavaScript(this, false).
                 build();
 
             final Audio audio = new Audio(view.getContext(), page);
@@ -517,7 +516,7 @@ public final class Android extends Activity {
         }
 
         @Override
-        public void prepare(final ProtoPresenterBuilder.OnPrepare onReady) {
+        public void prepare(final ProtoPresenterBuilder.OnPrepared onReady) {
             class LoadPage extends WebViewClient implements Runnable {
                 private final Runnable initialize;
 

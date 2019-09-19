@@ -124,10 +124,9 @@ public final class iOS
         presenter = ProtoPresenterBuilder.newBuilder().
             type("iOS").
             app(id).
-            synchronous(true).
-            evalJavaScript(false).
             dispatcher(this, true).
-            loadJavaScript(this::loadJS).preparator(this::callbackFn).
+            loadJavaScript(this::loadJS, true).
+            preparator(this::callbackFn, false).
             displayer(this::displayPage).
             build();
     }
@@ -315,7 +314,7 @@ public final class iOS
         dispatch(new CtxRun());
     }
 
-    void callbackFn(ProtoPresenterBuilder.OnPrepare onReady) {
+    void callbackFn(ProtoPresenterBuilder.OnPrepared onReady) {
         loadJS(
                 "function iOS(method, a1, a2, a3, a4) {\n"
                 + "  window.iOSVal = null;\n"

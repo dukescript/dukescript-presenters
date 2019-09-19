@@ -390,15 +390,14 @@ public final class Browser implements Fn.Presenter, Fn.KeepAlive, Flushable, Exe
         Command(Browser browser) {
             this.RUN = Executors.newSingleThreadExecutor(this);
             this.id = UUID.randomUUID().toString();
-            this.exec = new LinkedList<Object>();
+            this.exec = new LinkedList<>();
             this.browser = browser;
-            this.presenter = ProtoPresenterBuilder.newBuilder().preparator(this::callbackFn).
-                loadJavaScript(this::loadJS).
+            this.presenter = ProtoPresenterBuilder.newBuilder().
+                preparator(this::callbackFn, true).
+                loadJavaScript(this::loadJS, false).
                 app(browser.app).
                 dispatcher(this, true).
                 displayer(this::displayPage).
-                evalJavaScript(true).
-                synchronous(false).
                 type("Browser").
                 build();
             MAP.put(presenter, this);
@@ -518,7 +517,7 @@ public final class Browser implements Fn.Presenter, Fn.KeepAlive, Flushable, Exe
             w.close();
         }
 
-        void callbackFn(ProtoPresenterBuilder.OnPrepare onReady) {
+        void callbackFn(ProtoPresenterBuilder.OnPrepared onReady) {
             StringBuilder sb = new StringBuilder();
             sb.append("this.toBrwsrSrvr = function(name, a1, a2, a3, a4) {\n"
                 + "var url = 'command.js?id=" + id + "&name=' + name;\n"

@@ -59,11 +59,9 @@ class Testing {
             .app("Testing")
             .type("test")
             .dispatcher(QUEUE, false)
-            .evalJavaScript(true)
-            .synchronous(sync)
-            .loadJavaScript(this::loadJS)
+            .loadJavaScript(this::loadJS, sync)
             .displayer(this::displayPage)
-            .preparator(this::callbackFn)
+            .preparator(this::callbackFn, true)
             .build();
 
         ScriptEngineManager sem = new ScriptEngineManager();
@@ -93,7 +91,7 @@ class Testing {
     }
     private final Clbk clbk = new Clbk();
     
-    protected void callbackFn(ProtoPresenterBuilder.OnPrepare ready) {
+    protected void callbackFn(ProtoPresenterBuilder.OnPrepared ready) {
         eng.getBindings(ScriptContext.ENGINE_SCOPE).put("jvm", clbk);
         try {
             eng.eval("(function(global) {\n"
