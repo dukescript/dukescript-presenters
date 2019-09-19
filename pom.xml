@@ -44,14 +44,6 @@
     
     <repositories>
         <repository>
-            <id>nb</id>
-            <name>NetBeans</name>
-            <url>http://bits.netbeans.org/maven2/</url>
-            <snapshots>
-                <enabled>false</enabled>
-            </snapshots>
-        </repository>
-        <repository>
             <id>snapshots</id>
             <name>OSS Snapshots</name>
             <url>https://oss.sonatype.org/content/repositories/snapshots/</url>
@@ -106,7 +98,7 @@
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <net.java.html.version>1.5.1</net.java.html.version>
         <testng.version>6.7</testng.version>
-        <netbeans.version>RELEASE82</netbeans.version>
+        <netbeans.version>RELEASE111</netbeans.version>
         <grizzly.version>2.3.8</grizzly.version>
         <netbeans.compile.on.save>none</netbeans.compile.on.save>
         <robovm.version>2.3.5</robovm.version>
