@@ -378,7 +378,8 @@ public final class Android extends Activity {
     }
 
     private static final class Presenter extends Object
-    implements Executor, Runnable, ProtoPresenterBuilder.Displayer, ProtoPresenterBuilder.Evaluator, ProtoPresenterBuilder.Preparator {
+    implements Executor, Runnable, ProtoPresenterBuilder.Displayer,
+    ProtoPresenterBuilder.Evaluator, ProtoPresenterBuilder.Preparator, ProtoPresenterBuilder.Logger {
         final WebView view;
         final Chrome chrome;
         final JVM jvm;
@@ -413,7 +414,7 @@ public final class Android extends Activity {
                                 try {
                                     c.close();
                                 } catch (IOException ex) {
-                                    Presenter.this.log(Level.SEVERE, null, ex);
+                                    androidLog(Level.SEVERE, null, ex);
                                 }
                             }
                         }
@@ -434,6 +435,7 @@ public final class Android extends Activity {
                 displayer(this).
                 preparator(this, true).
                 loadJavaScript(this, false).
+                logger(this).
                 build();
 
             final Audio audio = new Audio(view.getContext(), page);
@@ -499,8 +501,22 @@ public final class Android extends Activity {
             });
         }
 
-        protected void log(Level level, String msg, Object... args) {
-            androidLog(level, msg, args);
+        private static Level findLevel(int priority) {
+            if (priority >= Level.SEVERE.intValue()) {
+                return Level.SEVERE;
+            }
+            if (priority >= Level.WARNING.intValue()) {
+                return Level.WARNING;
+            }
+            if (priority >= Level.INFO.intValue()) {
+                return Level.INFO;
+            }
+            return Level.FINE;
+        }
+
+        @Override
+        public void log(int level, String msg, Object... args) {
+            androidLog(findLevel(level), msg, args);
         }
 
         protected final void dispatch(Runnable r) {

@@ -48,7 +48,6 @@ import java.util.Set;
 import java.util.TreeSet;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.atomic.AtomicInteger;
-import java.util.logging.Level;
 import org.netbeans.html.boot.spi.Fn;
 
 abstract class Generic implements Fn.Presenter, Fn.KeepAlive, Flushable {

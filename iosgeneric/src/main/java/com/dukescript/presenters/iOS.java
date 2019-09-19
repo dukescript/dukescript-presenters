@@ -128,6 +128,7 @@ public final class iOS
             loadJavaScript(this::loadJS, true).
             preparator(this::callbackFn, false).
             displayer(this::displayPage).
+            logger(this::log).
             build();
     }
 
@@ -234,7 +235,21 @@ public final class iOS
         return presenter;
     }
 
-    void log(Level level, String msg, Object... args) {
+    private static Level findLevel(int priority) {
+        if (priority >= Level.SEVERE.intValue()) {
+            return Level.SEVERE;
+        }
+        if (priority >= Level.WARNING.intValue()) {
+            return Level.WARNING;
+        }
+        if (priority >= Level.INFO.intValue()) {
+            return Level.INFO;
+        }
+        return Level.FINE;
+    }
+
+    void log(int priority, String msg, Object... args) {
+        Level level = findLevel(priority);
         if (args.length == 1 && args[0] instanceof Throwable) {
             LOG.log(level, msg, (Throwable) args[0]);
         } else {
@@ -297,16 +312,16 @@ public final class iOS
                 try {
                     command.run();
                 } catch (Error ex) {
-                    iOS.this.log(Level.SEVERE, "Error executing " + command.getClass().getName(), ex);
+                    iOS.this.log(Level.SEVERE.intValue(), "Error executing " + command.getClass().getName(), ex);
                     throw ex;
                 } catch (RuntimeException ex) {
-                    iOS.this.log(Level.SEVERE, "Error executing " + command.getClass().getName(), ex);
+                    iOS.this.log(Level.SEVERE.intValue(), "Error executing " + command.getClass().getName(), ex);
                     throw ex;
                 } finally {
                     try {
                         c.close();
                     } catch (IOException ex) {
-                        iOS.this.log(Level.SEVERE, null, ex);
+                        iOS.this.log(Level.SEVERE.intValue(), null, ex);
                     }
                 }
             }

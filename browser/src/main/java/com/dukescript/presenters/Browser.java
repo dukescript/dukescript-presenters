@@ -396,6 +396,7 @@ public final class Browser implements Fn.Presenter, Fn.KeepAlive, Flushable, Exe
                 app(browser.app).
                 dispatcher(this, true).
                 displayer(this::displayPage).
+                logger(this::log).
                 type("Browser").
                 register(this).
                 build();
@@ -533,7 +534,22 @@ public final class Browser implements Fn.Presenter, Fn.KeepAlive, Flushable, Exe
             onReady.callbackIsPrepared("toBrwsrSrvr");
         }
 
-        void log(Level level, String msg, Object... args) {
+        private static Level findLevel(int priority) {
+            if (priority >= Level.SEVERE.intValue()) {
+                return Level.SEVERE;
+            }
+            if (priority >= Level.WARNING.intValue()) {
+                return Level.WARNING;
+            }
+            if (priority >= Level.INFO.intValue()) {
+                return Level.INFO;
+            }
+            return Level.FINE;
+        }
+        
+        void log(int priority, String msg, Object... args) {
+            Level level = findLevel(priority);
+
             if (args.length == 1 && args[0] instanceof Throwable) {
                 LOG.log(level, msg, (Throwable) args[0]);
             } else {

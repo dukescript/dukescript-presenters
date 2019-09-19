@@ -62,6 +62,7 @@ class Testing {
             .loadJavaScript(this::loadJS, sync)
             .displayer(this::displayPage)
             .preparator(this::callbackFn, true)
+            .logger(this::log)
             .build();
 
         ScriptEngineManager sem = new ScriptEngineManager();
@@ -73,12 +74,26 @@ class Testing {
         }        
     }
 
-    protected void log(Level level, String msg, Object... args) {
+    protected void log(int priority, String msg, Object... args) {
+        Level level = findLevel(priority);
         if (args.length == 1 && args[0] instanceof Throwable) {
             LOG.log(level, msg, (Throwable)args[0]);
         } else {
             LOG.log(level, msg, args);
         }
+    }
+
+    private static Level findLevel(int priority) {
+        if (priority >= Level.SEVERE.intValue()) {
+            return Level.SEVERE;
+        }
+        if (priority >= Level.WARNING.intValue()) {
+            return Level.WARNING;
+        }
+        if (priority >= Level.INFO.intValue()) {
+            return Level.INFO;
+        }
+        return Level.FINE;
     }
 
     public final class Clbk {

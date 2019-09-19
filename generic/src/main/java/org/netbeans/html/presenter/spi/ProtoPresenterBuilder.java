@@ -4,7 +4,6 @@ import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.Executor;
-import java.util.logging.Level;
 import org.netbeans.html.boot.spi.Fn;
 
 /*
@@ -44,6 +43,7 @@ public final class ProtoPresenterBuilder {
     private String type;
     private String app;
     private Displayer displayer;
+    private Logger logger;
     private boolean implementExecutor;
     private final List<Object> data = new ArrayList<Object>();
 
@@ -178,12 +178,36 @@ public final class ProtoPresenterBuilder {
         return this;
     }
 
-    /** *  Registers additional data with the {@link ProtoPresenter}.The data can be obtained by {@link ProtoPresenter#lookup}.
+    /** Registers additional data with the {@link ProtoPresenter}.The data can be obtained by {@link ProtoPresenter#lookup}.
      * @param data instance of some data
      * @return this builder
      */
     public ProtoPresenterBuilder register(Object data) {
         this.data.add(data);
+        return this;
+    }
+
+    /** Implementation of a logging interface from the {@link ProtoPresenter}.
+     */
+    @FunctionalInterface
+    public interface Logger {
+        /** Log a message. Uses levels and message formats suitable for
+         * java.util.logging package.
+         *
+         * @param level value from 500-1000
+         * @param msg message with optional curly braces parameters
+         * @param args the parameter values
+         */
+        public void log(int level, String msg, Object... args);
+    }
+
+    /** Registers instance of logger.
+     *
+     * @param logger instance of logger - may be {@code null}
+     * @return this builder
+     */
+    public ProtoPresenterBuilder logger(Logger logger) {
+        this.logger = logger;
         return this;
     }
 
@@ -213,6 +237,7 @@ public final class ProtoPresenterBuilder {
         private final Executor executor;
         private final Preparator onReady;
         private final Displayer displayer;
+        private final Logger logger;
         private final Object[] data;
 
         GenPresenter(ProtoPresenterBuilder b) {
@@ -221,11 +246,15 @@ public final class ProtoPresenterBuilder {
             this.executor = b.executor;
             this.onReady = b.onReady;
             this.displayer = b.displayer;
+            this.logger = b.logger;
             this.data = b.data.toArray();
         }
 
         @Override
         void log(Level level, String msg, Object... args) {
+            if (logger != null) {
+                logger.log(level.intValue(), msg, args);
+            }
         }
 
         @Override

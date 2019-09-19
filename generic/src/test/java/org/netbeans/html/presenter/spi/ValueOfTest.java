@@ -27,7 +27,6 @@ package org.netbeans.html.presenter.spi;
 
 
 import java.net.URL;
-import java.util.logging.Level;
 import static org.testng.Assert.*;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
