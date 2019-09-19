@@ -37,8 +37,8 @@ import javax.script.ScriptEngine;
 import javax.script.ScriptEngineManager;
 import javax.script.ScriptException;
 import org.netbeans.html.boot.spi.Fn;
-import org.netbeans.html.presenter.spi.PresenterBuilder;
-import org.netbeans.html.presenter.spi.PresenterBuilder.Callback;
+import org.netbeans.html.presenter.spi.ProtoPresenter;
+import org.netbeans.html.presenter.spi.ProtoPresenter.Callback;
 
 class Testing {
     static final Logger LOG = Logger.getLogger(Testing.class.getName());
@@ -57,7 +57,7 @@ class Testing {
     protected Testing(boolean sync, Executor queue) {
         this.sync = sync;
         this.QUEUE = queue;
-        this.presenter = PresenterBuilder.newBuilder()
+        this.presenter = ProtoPresenter.newBuilder()
             .app("Testing")
             .type("test")
             .dispatcher(QUEUE, false)
@@ -95,7 +95,7 @@ class Testing {
     }
     private final Clbk clbk = new Clbk();
     
-    protected void callbackFn(Consumer<String> ready) {
+    protected void callbackFn(ProtoPresenter.OnPrepare ready) {
         eng.getBindings(ScriptContext.ENGINE_SCOPE).put("jvm", clbk);
         try {
             eng.eval("(function(global) {\n"
@@ -109,7 +109,7 @@ class Testing {
             throw new IllegalStateException(ex);
         }
         eng.getBindings(ScriptContext.ENGINE_SCOPE).put("jvm", "");
-        ready.accept("testingCB");
+        ready.callbackIsPrepared("testingCB");
     }
 
     protected void loadJS(final String js) {

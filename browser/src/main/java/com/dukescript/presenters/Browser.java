@@ -62,8 +62,8 @@ import org.glassfish.grizzly.http.server.ServerConfiguration;
 import org.glassfish.grizzly.http.util.HttpStatus;
 import org.netbeans.html.boot.spi.Fn;
 import org.netbeans.html.boot.spi.Fn.Presenter;
-import org.netbeans.html.presenter.spi.PresenterBuilder;
-import org.netbeans.html.presenter.spi.PresenterBuilder.Callback;
+import org.netbeans.html.presenter.spi.ProtoPresenter;
+import org.netbeans.html.presenter.spi.ProtoPresenter.Callback;
 import org.openide.util.lookup.ServiceProvider;
 
 /** Browser based {@link Presenter}. It starts local server and
@@ -392,7 +392,7 @@ public final class Browser implements Fn.Presenter, Fn.KeepAlive, Flushable, Exe
             this.id = UUID.randomUUID().toString();
             this.exec = new LinkedList<Object>();
             this.browser = browser;
-            this.presenter = PresenterBuilder.newBuilder().
+            this.presenter = ProtoPresenter.newBuilder().
                 registerCallback(this::callbackFn).
                 loadJavaScript(this::loadJS).
                 app(browser.app).
@@ -520,7 +520,7 @@ public final class Browser implements Fn.Presenter, Fn.KeepAlive, Flushable, Exe
             w.close();
         }
 
-        void callbackFn(Consumer<String> onReady) {
+        void callbackFn(ProtoPresenter.OnPrepare onReady) {
             StringBuilder sb = new StringBuilder();
             sb.append("this.toBrwsrSrvr = function(name, a1, a2, a3, a4) {\n"
                 + "var url = 'command.js?id=" + id + "&name=' + name;\n"
@@ -535,7 +535,7 @@ public final class Browser implements Fn.Presenter, Fn.KeepAlive, Flushable, Exe
                 + "return request.responseText;\n"
                 + "};\n");
             add(sb);
-            onReady.accept("toBrwsrSrvr");
+            onReady.callbackIsPrepared("toBrwsrSrvr");
         }
 
         void log(Level level, String msg, Object... args) {

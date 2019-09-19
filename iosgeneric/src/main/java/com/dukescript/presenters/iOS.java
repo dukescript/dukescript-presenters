@@ -45,7 +45,7 @@ import net.java.html.BrwsrCtx;
 import net.java.html.js.JavaScriptBody;
 import net.java.html.boot.BrowserBuilder;
 import org.netbeans.html.boot.spi.Fn;
-import org.netbeans.html.presenter.spi.PresenterBuilder;
+import org.netbeans.html.presenter.spi.ProtoPresenter;
 import org.openide.util.lookup.ServiceProvider;
 
 /** Versatile <a target="_blank" href="http://dukescript.com">DukeScript</a>
@@ -119,9 +119,10 @@ public final class iOS
      * application.
      */
     public iOS() {
-        presenter = PresenterBuilder.newBuilder().
+        final String id = UI.getDefault().identifier();
+        presenter = ProtoPresenter.newBuilder().
             type("iOS").
-            app(UI.getDefault().identifier()).
+            app(id).
             synchronous(true).
             evalJavaScript(false).
             dispatcher(this, true).
@@ -314,7 +315,7 @@ public final class iOS
         dispatch(new CtxRun());
     }
 
-    void callbackFn(Consumer<String> onReady) {
+    void callbackFn(ProtoPresenter.OnPrepare onReady) {
         loadJS(
                 "function iOS(method, a1, a2, a3, a4) {\n"
                 + "  window.iOSVal = null;\n"
@@ -337,7 +338,7 @@ public final class iOS
                 + "  return r;\n"
                 + "}\n"
         );
-        onReady.accept("iOS");
+        onReady.callbackIsPrepared("iOS");
     }
 
     void loadJS(String js) {
@@ -389,7 +390,7 @@ public final class iOS
                     String p1 = nextParam(url, q);
                     String p2 = nextParam(url, q);
                     String p3 = nextParam(url, q);
-                    PresenterBuilder.Callback cb = (PresenterBuilder.Callback) presenter;
+                    ProtoPresenter.Callback cb = (ProtoPresenter.Callback) presenter;
                     String ret = cb.callback(method, p0, p1, p2, p3);
                     if (ret != null) {
                         StringBuilder exec = new StringBuilder();

@@ -73,8 +73,8 @@ import net.java.html.BrwsrCtx;
 import net.java.html.js.JavaScriptBody;
 import org.netbeans.html.boot.spi.Fn;
 import org.netbeans.html.context.spi.Contexts;
-import org.netbeans.html.presenter.spi.PresenterBuilder;
-import org.netbeans.html.presenter.spi.PresenterBuilder.Initialize;
+import org.netbeans.html.presenter.spi.ProtoPresenter;
+import org.netbeans.html.presenter.spi.ProtoPresenter.Initialize;
 import org.netbeans.html.sound.spi.AudioEnvironment;
 
 /** Ultimate <a target="_blank" href="http://dukescript.com">DukeScript</a>
@@ -379,7 +379,8 @@ public final class Android extends Activity {
         }
     }
 
-    private static final class Presenter extends Object implements Executor, Runnable {
+    private static final class Presenter extends Object
+    implements Executor, Runnable, ProtoPresenter.Displayer, ProtoPresenter.Evaluator {
         final WebView view;
         final Chrome chrome;
         final JVM jvm;
@@ -428,16 +429,12 @@ public final class Android extends Activity {
                 }
             };
 
-            this.presenter = PresenterBuilder.newBuilder().
+            this.presenter = ProtoPresenter.newBuilder().
                 type("Android").
                 app(app).
                 dispatcher(e, true).
-                displayer(new BiConsumer<URL, Runnable>() {
-                    @Override
-                    public void accept(URL t, Runnable u) {
-                        Presenter.this.displayPage(t, u);
-                    }
-                }).
+                displayer(this).
+                loadJavaScript(this).
                 synchronous(false).
                 evalJavaScript(true).
                 build();
@@ -461,7 +458,8 @@ public final class Android extends Activity {
             view.addJavascriptInterface(jvm, "jvm");
         }
 
-        protected void loadJS(String js) {
+        @Override
+        public void eval(String js) {
             loadScript("javascript:" + js);
         }
 
@@ -962,7 +960,7 @@ public final class Android extends Activity {
                 }
                 return res[0] ? line.getText().toString() : null;
             }
-            PresenterBuilder.Callback cb = (PresenterBuilder.Callback) presenter.presenter;
+            ProtoPresenter.Callback cb = (ProtoPresenter.Callback) presenter.presenter;
             return cb.callback(method, a1, a2, a3, a4);
         }
 

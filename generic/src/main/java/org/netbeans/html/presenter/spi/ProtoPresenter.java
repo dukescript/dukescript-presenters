@@ -2,15 +2,13 @@ package org.netbeans.html.presenter.spi;
 
 import java.net.URL;
 import java.util.concurrent.Executor;
-import java.util.function.BiConsumer;
-import java.util.function.Consumer;
 import java.util.logging.Level;
 import org.netbeans.html.boot.spi.Fn;
 
 /*
  * #%L
  * DukeScript Generic Presenter - a library from the "DukeScript Presenters" project.
- * 
+ *
  * Dukehoff GmbH designates this particular file as subject to the "Classpath"
  * exception as provided in the README.md file that accompanies this code.
  * %%
@@ -20,75 +18,96 @@ import org.netbeans.html.boot.spi.Fn;
  * it under the terms of the GNU General Public License as
  * published by the Free Software Foundation, either version 3 of the
  * License, or (at your option) any later version.
- * 
+ *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU General Public
  * License along with this program.  If not, see
  * <http://www.gnu.org/licenses/gpl-3.0.html>.
  * #L%
  */
 
-
-public final class PresenterBuilder {
-
-    private Consumer<String> loadScript;
+/** The <em>prototypical</em> presenter builder. Builds a {@link Fn.Presenter} based on
+ * top of textual protocol transfered between JVM and JavaScript engines.
+ */
+public final class ProtoPresenter {
+    private Evaluator loadScript;
     private Executor executor;
-    private Consumer<Consumer<String>> onReady;
+    private Preparator onReady;
     private boolean sync;
     private boolean eval;
     private String type;
     private String app;
-    private BiConsumer<URL, Runnable> displayer;
+    private Displayer displayer;
     private boolean implementExecutor;
 
-    private PresenterBuilder() {
+    private ProtoPresenter() {
     }
 
-    public static PresenterBuilder newBuilder() {
-        return new PresenterBuilder();
+    public static ProtoPresenter newBuilder() {
+        return new ProtoPresenter();
     }
 
-    public PresenterBuilder loadJavaScript(Consumer<String> loadScript) {
+    @FunctionalInterface
+    public interface Evaluator {
+        public void eval(String code);
+    }
+
+    public ProtoPresenter loadJavaScript(Evaluator loadScript) {
         this.loadScript = loadScript;
         return this;
     }
 
-    public PresenterBuilder dispatcher(Executor executor, boolean implementExecutor) {
+    public ProtoPresenter dispatcher(Executor executor, boolean implementExecutor) {
         this.executor = executor;
         this.implementExecutor = implementExecutor;
         return this;
     }
 
-    public PresenterBuilder registerCallback(Consumer<Consumer<String>> onReady) {
+    @FunctionalInterface
+    public interface Preparator {
+        void prepare(OnPrepare onReady);
+    }
+
+    @FunctionalInterface
+    public interface OnPrepare {
+        void callbackIsPrepared(String callbackFunctionName);
+    }
+
+    public ProtoPresenter registerCallback(Preparator onReady) {
         this.onReady = onReady;
         return this;
     }
 
-    public PresenterBuilder synchronous(boolean sync) {
+    public ProtoPresenter synchronous(boolean sync) {
         this.sync = sync;
         return this;
     }
 
-    public PresenterBuilder evalJavaScript(boolean eval) {
+    public ProtoPresenter evalJavaScript(boolean eval) {
         this.eval = eval;
         return this;
     }
 
-    public PresenterBuilder type(String type) {
+    public ProtoPresenter type(String type) {
         this.type = type;
         return this;
     }
 
-    public PresenterBuilder app(String app) {
+    public ProtoPresenter app(String app) {
         this.app = app;
         return this;
     }
 
-    public PresenterBuilder displayer(BiConsumer<URL,Runnable> displayer) {
+    @FunctionalInterface
+    public interface Displayer {
+        public void displayPage(URL url, Runnable onLoad);
+    }
+
+    public ProtoPresenter displayer(Displayer displayer) {
         this.displayer = displayer;
         return this;
     }
@@ -100,16 +119,16 @@ public final class PresenterBuilder {
         return new GenPresenter(this);
     }
 
-    public static interface Callback {
+    public static interface Callback extends Fn.Presenter {
         String callback(String method, String a1, String a2, String a3, String a4) throws Exception;
     }
 
-    public static interface Initialize {
+    public static interface Initialize extends Fn.Presenter {
         void initialize();
     }
 
     private static final class GenPresenterWithExecutor extends GenPresenter implements Executor {
-        GenPresenterWithExecutor(PresenterBuilder b) {
+        GenPresenterWithExecutor(ProtoPresenter b) {
             super(b);
         }
 
@@ -120,12 +139,12 @@ public final class PresenterBuilder {
     }
 
     private static class GenPresenter extends Generic implements Callback, Initialize {
-        private final Consumer<String> loadScript;
+        private final Evaluator loadScript;
         private final Executor executor;
-        private final Consumer<Consumer<String>> onReady;
-        private BiConsumer<URL, Runnable> displayer;
+        private final Preparator onReady;
+        private final Displayer displayer;
 
-        GenPresenter(PresenterBuilder b) {
+        GenPresenter(ProtoPresenter b) {
             super(b.sync, b.eval, b.type, b.app);
             this.loadScript = b.loadScript;
             this.executor = b.executor;
@@ -139,12 +158,12 @@ public final class PresenterBuilder {
 
         @Override
         void callbackFn(String ignored, OnReady onReady) {
-            this.onReady.accept(onReady::callbackReady);
+            this.onReady.prepare(onReady::callbackReady);
         }
 
         @Override
         void loadJS(String js) {
-            loadScript.accept(js);
+            loadScript.eval(js);
         }
 
         @Override
@@ -154,7 +173,7 @@ public final class PresenterBuilder {
 
         @Override
         public void displayPage(URL url, Runnable r) {
-            displayer.accept(url, r);
+            displayer.displayPage(url, r);
         }
 
         @Override
