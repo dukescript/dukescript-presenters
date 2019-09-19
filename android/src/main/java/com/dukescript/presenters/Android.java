@@ -233,7 +233,7 @@ public final class Android extends Activity {
             @Override
             public void run() {
                 androidLog(Level.FINE, "Initializing presenter for {0}", view);
-                p.presenter.initialize();
+                p.presenter.displayPage(null, null);
                 androidLog(Level.FINE, "Init done for {0}", view);
             }
         }, false);

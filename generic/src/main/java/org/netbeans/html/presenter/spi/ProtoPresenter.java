@@ -34,9 +34,6 @@ import org.netbeans.html.boot.spi.Fn;
  * interface.
  */
 public interface ProtoPresenter extends Fn.Presenter, Fn.KeepAlive, Flushable {
-    /** Explicitly initializes the presenter. */
-    void initialize();
-
     /** Dispatches callback from JavaScript back into appropriate
      * Java implementation.
      * @param method the type of call to make

@@ -177,12 +177,11 @@ public final class ProtoPresenterBuilder {
 
         @Override
         public void displayPage(URL url, Runnable r) {
-            displayer.displayPage(url, r);
-        }
-
-        @Override
-        public void initialize() {
-            init();
+            if (url == null && r == null) {
+                init();
+            } else {
+                displayer.displayPage(url, r);
+            }
         }
     }
 }
