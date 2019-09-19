@@ -66,15 +66,13 @@ import java.util.concurrent.Executor;
 import java.util.concurrent.Executors;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.ThreadFactory;
-import java.util.function.BiConsumer;
-import java.util.function.Consumer;
 import java.util.logging.Level;
 import net.java.html.BrwsrCtx;
 import net.java.html.js.JavaScriptBody;
 import org.netbeans.html.boot.spi.Fn;
 import org.netbeans.html.context.spi.Contexts;
 import org.netbeans.html.presenter.spi.ProtoPresenter;
-import org.netbeans.html.presenter.spi.ProtoPresenter.Initialize;
+import org.netbeans.html.presenter.spi.ProtoPresenterBuilder;
 import org.netbeans.html.sound.spi.AudioEnvironment;
 
 /** Ultimate <a target="_blank" href="http://dukescript.com">DukeScript</a>
@@ -235,7 +233,7 @@ public final class Android extends Activity {
             @Override
             public void run() {
                 androidLog(Level.FINE, "Initializing presenter for {0}", view);
-                ((Initialize)p.presenter).initialize();
+                p.presenter.initialize();
                 androidLog(Level.FINE, "Init done for {0}", view);
             }
         }, false);
@@ -380,7 +378,7 @@ public final class Android extends Activity {
     }
 
     private static final class Presenter extends Object
-    implements Executor, Runnable, ProtoPresenter.Displayer, ProtoPresenter.Evaluator, ProtoPresenter.Preparator {
+    implements Executor, Runnable, ProtoPresenterBuilder.Displayer, ProtoPresenterBuilder.Evaluator, ProtoPresenterBuilder.Preparator {
         final WebView view;
         final Chrome chrome;
         final JVM jvm;
@@ -389,7 +387,7 @@ public final class Android extends Activity {
         final BrwsrCtx ctx;
         final Class<?> loadClass;
         String invoke;
-        final Fn.Presenter presenter;
+        final ProtoPresenter presenter;
 
         Presenter(final WebView view, String app, String page, Class<?> loadClass, String invoke, Boolean runOnUiThread) {
             this.view = view;
@@ -429,12 +427,11 @@ public final class Android extends Activity {
                 }
             };
 
-            this.presenter = ProtoPresenter.newBuilder().
+            this.presenter = ProtoPresenterBuilder.newBuilder().
                 type("Android").
                 app(app).
                 dispatcher(e, true).
-                displayer(this).
-                registerCallback(this).
+                displayer(this).preparator(this).
                 loadJavaScript(this).
                 synchronous(false).
                 evalJavaScript(true).
@@ -520,7 +517,7 @@ public final class Android extends Activity {
         }
 
         @Override
-        public void prepare(final ProtoPresenter.OnPrepare onReady) {
+        public void prepare(final ProtoPresenterBuilder.OnPrepare onReady) {
             class LoadPage extends WebViewClient implements Runnable {
                 private final Runnable initialize;
 
@@ -963,8 +960,8 @@ public final class Android extends Activity {
                 }
                 return res[0] ? line.getText().toString() : null;
             }
-            ProtoPresenter.Callback cb = (ProtoPresenter.Callback) presenter.presenter;
-            return cb.callback(method, a1, a2, a3, a4);
+            ProtoPresenter cb = presenter.presenter;
+            return cb.js2java(method, a1, a2, a3, a4);
         }
 
         @Override

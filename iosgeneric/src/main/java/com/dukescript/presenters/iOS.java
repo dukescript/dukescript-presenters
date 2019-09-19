@@ -46,6 +46,7 @@ import net.java.html.js.JavaScriptBody;
 import net.java.html.boot.BrowserBuilder;
 import org.netbeans.html.boot.spi.Fn;
 import org.netbeans.html.presenter.spi.ProtoPresenter;
+import org.netbeans.html.presenter.spi.ProtoPresenterBuilder;
 import org.openide.util.lookup.ServiceProvider;
 
 /** Versatile <a target="_blank" href="http://dukescript.com">DukeScript</a>
@@ -112,7 +113,7 @@ public final class iOS
     private Object webView;
     private Thread dispatchThread;
     private List<Runnable> pending;
-    private final Fn.Presenter presenter;
+    private final ProtoPresenter presenter;
 
     /** Default constructor. Used by {@link ServiceLoader#load(java.lang.Class)}
      * to lookup instance of presenter registered on the classpath of the
@@ -120,14 +121,13 @@ public final class iOS
      */
     public iOS() {
         final String id = UI.getDefault().identifier();
-        presenter = ProtoPresenter.newBuilder().
+        presenter = ProtoPresenterBuilder.newBuilder().
             type("iOS").
             app(id).
             synchronous(true).
             evalJavaScript(false).
             dispatcher(this, true).
-            loadJavaScript(this::loadJS).
-            registerCallback(this::callbackFn).
+            loadJavaScript(this::loadJS).preparator(this::callbackFn).
             displayer(this::displayPage).
             build();
     }
@@ -315,7 +315,7 @@ public final class iOS
         dispatch(new CtxRun());
     }
 
-    void callbackFn(ProtoPresenter.OnPrepare onReady) {
+    void callbackFn(ProtoPresenterBuilder.OnPrepare onReady) {
         loadJS(
                 "function iOS(method, a1, a2, a3, a4) {\n"
                 + "  window.iOSVal = null;\n"
@@ -390,8 +390,7 @@ public final class iOS
                     String p1 = nextParam(url, q);
                     String p2 = nextParam(url, q);
                     String p3 = nextParam(url, q);
-                    ProtoPresenter.Callback cb = (ProtoPresenter.Callback) presenter;
-                    String ret = cb.callback(method, p0, p1, p2, p3);
+                    String ret = presenter.js2java(method, p0, p1, p2, p3);
                     if (ret != null) {
                         StringBuilder exec = new StringBuilder();
                         exec.append("window.iOSVal = ");

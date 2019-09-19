@@ -1,8 +1,6 @@
 package org.netbeans.html.presenter.spi;
 
-import java.net.URL;
-import java.util.concurrent.Executor;
-import java.util.logging.Level;
+import java.io.Flushable;
 import org.netbeans.html.boot.spi.Fn;
 
 /*
@@ -30,155 +28,24 @@ import org.netbeans.html.boot.spi.Fn;
  * #L%
  */
 
-/** The <em>prototypical</em> presenter builder. Builds a {@link Fn.Presenter} based on
- * top of textual protocol transfered between JVM and JavaScript engines.
+/** The <em>prototypical</em> presenter. An implementation of a {@link Fn.Presenter} based on
+ * top of textual protocol transferred between JVM and JavaScript engines. Use
+ * {@link ProtoPresenterBuilder#newBuilder()} to construct instance of this
+ * interface.
  */
-public final class ProtoPresenter {
-    private Evaluator loadScript;
-    private Executor executor;
-    private Preparator onReady;
-    private boolean sync;
-    private boolean eval;
-    private String type;
-    private String app;
-    private Displayer displayer;
-    private boolean implementExecutor;
+public interface ProtoPresenter extends Fn.Presenter, Fn.KeepAlive, Flushable {
+    /** Explicitly initializes the presenter. */
+    void initialize();
 
-    private ProtoPresenter() {
-    }
-
-    public static ProtoPresenter newBuilder() {
-        return new ProtoPresenter();
-    }
-
-    @FunctionalInterface
-    public interface Evaluator {
-        public void eval(String code);
-    }
-
-    public ProtoPresenter loadJavaScript(Evaluator loadScript) {
-        this.loadScript = loadScript;
-        return this;
-    }
-
-    public ProtoPresenter dispatcher(Executor executor, boolean implementExecutor) {
-        this.executor = executor;
-        this.implementExecutor = implementExecutor;
-        return this;
-    }
-
-    @FunctionalInterface
-    public interface Preparator {
-        void prepare(OnPrepare onReady);
-    }
-
-    @FunctionalInterface
-    public interface OnPrepare {
-        void callbackIsPrepared(String callbackFunctionName);
-    }
-
-    public ProtoPresenter registerCallback(Preparator onReady) {
-        this.onReady = onReady;
-        return this;
-    }
-
-    public ProtoPresenter synchronous(boolean sync) {
-        this.sync = sync;
-        return this;
-    }
-
-    public ProtoPresenter evalJavaScript(boolean eval) {
-        this.eval = eval;
-        return this;
-    }
-
-    public ProtoPresenter type(String type) {
-        this.type = type;
-        return this;
-    }
-
-    public ProtoPresenter app(String app) {
-        this.app = app;
-        return this;
-    }
-
-    @FunctionalInterface
-    public interface Displayer {
-        public void displayPage(URL url, Runnable onLoad);
-    }
-
-    public ProtoPresenter displayer(Displayer displayer) {
-        this.displayer = displayer;
-        return this;
-    }
-
-    public Fn.Presenter build() {
-        if (implementExecutor) {
-            return new GenPresenterWithExecutor(this);
-        }
-        return new GenPresenter(this);
-    }
-
-    public static interface Callback extends Fn.Presenter {
-        String callback(String method, String a1, String a2, String a3, String a4) throws Exception;
-    }
-
-    public static interface Initialize extends Fn.Presenter {
-        void initialize();
-    }
-
-    private static final class GenPresenterWithExecutor extends GenPresenter implements Executor {
-        GenPresenterWithExecutor(ProtoPresenter b) {
-            super(b);
-        }
-
-        @Override
-        public void execute(Runnable command) {
-            dispatch(command);
-        }
-    }
-
-    private static class GenPresenter extends Generic implements Callback, Initialize {
-        private final Evaluator loadScript;
-        private final Executor executor;
-        private final Preparator onReady;
-        private final Displayer displayer;
-
-        GenPresenter(ProtoPresenter b) {
-            super(b.sync, b.eval, b.type, b.app);
-            this.loadScript = b.loadScript;
-            this.executor = b.executor;
-            this.onReady = b.onReady;
-            this.displayer = b.displayer;
-        }
-
-        @Override
-        void log(Level level, String msg, Object... args) {
-        }
-
-        @Override
-        void callbackFn(ProtoPresenter.OnPrepare onReady) {
-            this.onReady.prepare(onReady);
-        }
-
-        @Override
-        void loadJS(String js) {
-            loadScript.eval(js);
-        }
-
-        @Override
-        void dispatch(Runnable r) {
-            executor.execute(r);
-        }
-
-        @Override
-        public void displayPage(URL url, Runnable r) {
-            displayer.displayPage(url, r);
-        }
-
-        @Override
-        public void initialize() {
-            init();
-        }
-    }
+    /** Dispatches callback from JavaScript back into appropriate
+     * Java implementation.
+     * @param method the type of call to make
+     * @param a1 first argument
+     * @param a2 second argument
+     * @param a3 third argument
+     * @param a4 fourth argument
+     * @return returned string
+     * @throws Exception if something goes wrong
+     */
+    String js2java(String method, String a1, String a2, String a3, String a4) throws Exception;
 }

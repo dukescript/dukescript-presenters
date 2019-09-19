@@ -29,23 +29,21 @@ package org.netbeans.html.presenter.test;
 import java.net.URL;
 import java.util.concurrent.Executor;
 import java.util.concurrent.Executors;
-import java.util.function.Consumer;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.script.ScriptContext;
 import javax.script.ScriptEngine;
 import javax.script.ScriptEngineManager;
 import javax.script.ScriptException;
-import org.netbeans.html.boot.spi.Fn;
 import org.netbeans.html.presenter.spi.ProtoPresenter;
-import org.netbeans.html.presenter.spi.ProtoPresenter.Callback;
+import org.netbeans.html.presenter.spi.ProtoPresenterBuilder;
 
 class Testing {
     static final Logger LOG = Logger.getLogger(Testing.class.getName());
     final Executor QUEUE;
     final ScriptEngine eng;
     final boolean sync;
-    final Fn.Presenter presenter;
+    final ProtoPresenter presenter;
 
     public Testing() {
         this(false);
@@ -57,7 +55,7 @@ class Testing {
     protected Testing(boolean sync, Executor queue) {
         this.sync = sync;
         this.QUEUE = queue;
-        this.presenter = ProtoPresenter.newBuilder()
+        this.presenter = ProtoPresenterBuilder.newBuilder()
             .app("Testing")
             .type("test")
             .dispatcher(QUEUE, false)
@@ -65,7 +63,7 @@ class Testing {
             .synchronous(sync)
             .loadJavaScript(this::loadJS)
             .displayer(this::displayPage)
-            .registerCallback(this::callbackFn)
+            .preparator(this::callbackFn)
             .build();
 
         ScriptEngineManager sem = new ScriptEngineManager();
@@ -90,12 +88,12 @@ class Testing {
         }
         
         public String pass(String method, String a1, String a2, String a3, String a4) throws Exception {
-            return ((Callback)presenter).callback(method, a1, a2, a3, a4);
+            return presenter.js2java(method, a1, a2, a3, a4);
         }
     }
     private final Clbk clbk = new Clbk();
     
-    protected void callbackFn(ProtoPresenter.OnPrepare ready) {
+    protected void callbackFn(ProtoPresenterBuilder.OnPrepare ready) {
         eng.getBindings(ScriptContext.ENGINE_SCOPE).put("jvm", clbk);
         try {
             eng.eval("(function(global) {\n"
