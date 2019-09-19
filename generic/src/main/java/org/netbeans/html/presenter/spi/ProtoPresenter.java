@@ -157,8 +157,8 @@ public final class ProtoPresenter {
         }
 
         @Override
-        void callbackFn(String ignored, OnReady onReady) {
-            this.onReady.prepare(onReady::callbackReady);
+        void callbackFn(ProtoPresenter.OnPrepare onReady) {
+            this.onReady.prepare(onReady);
         }
 
         @Override

@@ -41,7 +41,7 @@ public class ValueOfTest {
             }
 
             @Override
-            void callbackFn(String welcome, Generic.OnReady onReady) {
+            void callbackFn(ProtoPresenter.OnPrepare onReady) {
             }
 
             @Override

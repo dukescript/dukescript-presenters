@@ -188,9 +188,9 @@ abstract class Generic implements Fn.Presenter, Fn.KeepAlive, Flushable {
         }
         this.msg = "";
         String welcome = "";
-        callbackFn(welcome, new OnReady() {
+        callbackFn(new ProtoPresenter.OnPrepare() {
             @Override
-            public void callbackReady(String clbk) {
+            public void callbackIsPrepared(String clbk) {
                 log(Level.FINE, "callbackReady with {0}", clbk);
                 loadJS(Strings.begin(clbk).toString());
                 log(Level.FINE, "checking OK state");
@@ -210,7 +210,7 @@ abstract class Generic implements Fn.Presenter, Fn.KeepAlive, Flushable {
     }
 
     /** @return the name of the callback function */
-    abstract void callbackFn(String welcome, OnReady onReady);
+    abstract void callbackFn(ProtoPresenter.OnPrepare onReady);
     abstract void loadJS(String js);
     
     /** Dispatches callback from JavaScript back into appropriate

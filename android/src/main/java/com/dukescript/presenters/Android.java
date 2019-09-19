@@ -380,7 +380,7 @@ public final class Android extends Activity {
     }
 
     private static final class Presenter extends Object
-    implements Executor, Runnable, ProtoPresenter.Displayer, ProtoPresenter.Evaluator {
+    implements Executor, Runnable, ProtoPresenter.Displayer, ProtoPresenter.Evaluator, ProtoPresenter.Preparator {
         final WebView view;
         final Chrome chrome;
         final JVM jvm;
@@ -434,6 +434,7 @@ public final class Android extends Activity {
                 app(app).
                 dispatcher(e, true).
                 displayer(this).
+                registerCallback(this).
                 loadJavaScript(this).
                 synchronous(false).
                 evalJavaScript(true).
@@ -463,6 +464,7 @@ public final class Android extends Activity {
             loadScript("javascript:" + js);
         }
 
+        @Override
         public void displayPage(URL page, final Runnable onPageLoad) {
             view.setWebViewClient(new WebViewClient() {
                 @Override
@@ -517,7 +519,8 @@ public final class Android extends Activity {
             ctx.execute(command);
         }
 
-        void callbackFn(final Consumer<String> onReady) {
+        @Override
+        public void prepare(final ProtoPresenter.OnPrepare onReady) {
             class LoadPage extends WebViewClient implements Runnable {
                 private final Runnable initialize;
 
@@ -590,7 +593,7 @@ public final class Android extends Activity {
                             + "})(this);\n"
                     );
                     done = true;
-                    onReady.accept("androidCB");
+                    onReady.callbackIsPrepared("androidCB");
                     dispatch(jvm, true);
                 }
             }
