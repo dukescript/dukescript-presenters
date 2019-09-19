@@ -1,6 +1,8 @@
 package org.netbeans.html.presenter.spi;
 
 import java.net.URL;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.concurrent.Executor;
 import java.util.logging.Level;
 import org.netbeans.html.boot.spi.Fn;
@@ -43,6 +45,7 @@ public final class ProtoPresenterBuilder {
     private String app;
     private Displayer displayer;
     private boolean implementExecutor;
+    private final List<Object> data = new ArrayList<Object>();
 
     private ProtoPresenterBuilder() {
     }
@@ -175,6 +178,15 @@ public final class ProtoPresenterBuilder {
         return this;
     }
 
+    /** *  Registers additional data with the {@link ProtoPresenter}.The data can be obtained by {@link ProtoPresenter#lookup}.
+     * @param data instance of some data
+     * @return this builder
+     */
+    public ProtoPresenterBuilder register(Object data) {
+        this.data.add(data);
+        return this;
+    }
+
     /** Builds instance of presenter based on registered values.
      * @return instance of presenter
      */
@@ -201,6 +213,7 @@ public final class ProtoPresenterBuilder {
         private final Executor executor;
         private final Preparator onReady;
         private final Displayer displayer;
+        private final Object[] data;
 
         GenPresenter(ProtoPresenterBuilder b) {
             super(b.sync, b.eval, b.type, b.app);
@@ -208,6 +221,7 @@ public final class ProtoPresenterBuilder {
             this.executor = b.executor;
             this.onReady = b.onReady;
             this.displayer = b.displayer;
+            this.data = b.data.toArray();
         }
 
         @Override
@@ -236,6 +250,16 @@ public final class ProtoPresenterBuilder {
             } else {
                 displayer.displayPage(url, r);
             }
+        }
+
+        @Override
+        public <T> T lookup(Class<T> type) {
+            for (Object o : data) {
+                if (type == o.getClass()) {
+                    return type.cast(o);
+                }
+            }
+            return null;
         }
     }
 }

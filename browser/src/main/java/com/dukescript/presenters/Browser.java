@@ -49,7 +49,6 @@ import java.util.UUID;
 import java.util.concurrent.Executor;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ThreadFactory;
-import java.util.function.Consumer;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import org.glassfish.grizzly.PortRange;
@@ -126,8 +125,8 @@ public final class Browser implements Fn.Presenter, Fn.KeepAlive, Flushable, Exe
         Command c = null;
         if (obj instanceof Command) {
             c = (Command) obj;
-        } else {
-            c = Command.MAP.get(obj);
+        } else if (obj instanceof ProtoPresenter) {
+            c = ((ProtoPresenter) obj).lookup(Command.class);
         }
         return c.browser.server();
     }
@@ -385,7 +384,6 @@ public final class Browser implements Fn.Presenter, Fn.KeepAlive, Flushable, Exe
         private Response suspended;
         private boolean initialized;
         private final ProtoPresenter presenter;
-        static final Map<Presenter,Command> MAP = new HashMap<>();
 
         Command(Browser browser) {
             this.RUN = Executors.newSingleThreadExecutor(this);
@@ -399,8 +397,8 @@ public final class Browser implements Fn.Presenter, Fn.KeepAlive, Flushable, Exe
                 dispatcher(this, true).
                 displayer(this::displayPage).
                 type("Browser").
+                register(this).
                 build();
-            MAP.put(presenter, this);
         }
 
         @Override

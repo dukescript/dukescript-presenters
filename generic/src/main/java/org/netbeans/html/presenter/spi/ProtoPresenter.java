@@ -48,4 +48,13 @@ public interface ProtoPresenter extends Fn.Presenter, Fn.KeepAlive, Flushable {
      * @throws Exception if something goes wrong
      */
     String js2java(String method, String a1, String a2, String a3, String a4) throws Exception;
+
+    /** Looks for additional data stored in the presenter. Data
+     * can be registered via {@link ProtoPresenterBuilder#register} method.
+     *
+     * @param <T> the type of data to search for
+     * @param type exact type of the data
+     * @return found data or null
+     */
+    <T> T lookup(Class<T> type);
 }
