@@ -42,44 +42,6 @@
         <tag>HEAD</tag>
     </scm>
     
-    <repositories>
-        <repository>
-            <id>snapshots</id>
-            <name>OSS Snapshots</name>
-            <url>https://oss.sonatype.org/content/repositories/snapshots/</url>
-            <snapshots>
-                <enabled>true</enabled>
-            </snapshots>
-            <releases>
-                <enabled>false</enabled>
-            </releases>
-        </repository>
-        <repository>
-            <id>java.net</id>
-            <name>Java.net Snapshots</name>
-            <url>https://maven.java.net/content/repositories/snapshots/</url>
-            <snapshots>
-                <enabled>true</enabled>
-            </snapshots>
-            <releases>
-                <enabled>false</enabled>
-            </releases>
-        </repository>
-    </repositories>
-    <pluginRepositories>
-        <pluginRepository>
-            <id>java.net</id>
-            <name>Java.net Snapshots</name>
-            <url>https://maven.java.net/content/repositories/snapshots/</url>
-            <snapshots>
-                <enabled>true</enabled>
-            </snapshots>
-            <releases>
-                <enabled>false</enabled>
-            </releases>
-        </pluginRepository>
-    </pluginRepositories>
-
     <modules>
         <module>browser</module>
         <module>strings</module>

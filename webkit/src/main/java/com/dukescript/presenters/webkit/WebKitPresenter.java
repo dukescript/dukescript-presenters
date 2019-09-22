@@ -28,7 +28,6 @@ package com.dukescript.presenters.webkit;
 
 import com.dukescript.presenters.renderer.JSC;
 import com.dukescript.presenters.renderer.Show;
-import com.dukescript.presenters.strings.Messages;
 import com.sun.jna.Callback;
 import com.sun.jna.Memory;
 import com.sun.jna.Native;
@@ -50,6 +49,7 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import org.netbeans.html.boot.spi.Fn;
 import org.openide.util.lookup.ServiceProvider;
+import com.dukescript.api.strings.Texts;
 
 /** Displays using native WebKit component on Linux and Mac OS X.
  * Requires necessary native libraries to be installed. Uses GTK3 on
@@ -378,7 +378,7 @@ public final class WebKitPresenter implements Fn.Presenter, Fn.KeepAlive, Execut
     }
 
 
-    @Messages({
+    @Texts({
         "version=$version"
     })
     final void onPageLoad() {

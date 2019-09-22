@@ -8,7 +8,7 @@
     </parent>
     
     <name>Strings Helpers</name>
-    <groupId>com.dukescript.presenters</groupId>
+    <groupId>com.dukescript.api</groupId>
     <artifactId>strings</artifactId>
     <version>2.0-SNAPSHOT</version>
     <packaging>jar</packaging>

@@ -27,13 +27,14 @@ package com.dukescript.presenters.strings;
 
 import static org.testng.Assert.*;
 import org.testng.annotations.Test;
+import com.dukescript.api.strings.Texts;
 
 public class MessagesTest {
     
     public MessagesTest() {
     }
 
-    @Messages({
+    @Texts({
         "helloWorld=Hello World!",
         "hello=Hello @1!"
     })
@@ -44,7 +45,7 @@ public class MessagesTest {
         assertEquals(Strings.hello("Guys").toString(), "Hello Guys!");
     }
 
-    @Messages({
+    @Texts({
         "helloTwice=Hello @1! Hello @1!"
     })
     @Test
@@ -53,14 +54,14 @@ public class MessagesTest {
         assertEquals(hw.toString(), "Hello Guys! Hello Guys!");
     }
     
-    @Messages({
+    @Texts({
         "newLine=x\ny"
     })
     @Test public void newLines() {
         assertEquals(Strings.newLine(), "x\ny");
     }
 
-    @Messages(
+    @Texts(
         "annotationProcessorOption=$value"
     )
     @Test
@@ -68,14 +69,14 @@ public class MessagesTest {
         assertEquals(Strings.annotationProcessorOption(), "myValue");
     }
     
-    @Messages({
+    @Texts({
         "order=2nd: @2 1st: @1"
     })
     @Test public void checkOrder() {
         assertEquals(Strings.order("1", "2").toString(), "2nd: 2 1st: 1");
     }
     
-    @Messages({
+    @Texts({
 "quoted=(function() {" +
 "    var logo = document.createElement(\"div\");\n" +
 "    logo.style.height = \"100vh\";\n" +
@@ -89,7 +90,7 @@ public class MessagesTest {
         assertEquals(Strings.quoted(), exp, "Should be the same");
     }
     
-    @Messages({
+    @Texts({
         "svg=    var svg = \"<svg version=\\\"1.1\\\" xmlns=\\\"http://www.w3.org/2000/svg\\\" xmlns:xlink=\\\"http://www.w3.org/1999/xlink\\\" x=\\\"0px\\\" y=\\\"0px\\\" width=\\\"100%\\\"\\n\" +\n"
     })
     @Test public void svgTest() {

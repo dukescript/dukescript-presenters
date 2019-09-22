@@ -50,13 +50,14 @@ import javax.lang.model.element.PackageElement;
 import javax.lang.model.element.TypeElement;
 import javax.tools.Diagnostic.Kind;
 import org.openide.util.lookup.ServiceProvider;
+import com.dukescript.api.strings.Texts;
 
 @ServiceProvider(service = Processor.class)
 @SupportedSourceVersion(SourceVersion.RELEASE_6)
 public final class MessagesProcessor extends AbstractProcessor {
 
     public @Override Set<String> getSupportedAnnotationTypes() {
-        return Collections.singleton(Messages.class.getName());
+        return Collections.singleton(Texts.class.getName());
     }
 
     public @Override boolean process(Set<? extends TypeElement> annotations, RoundEnvironment roundEnv) {
@@ -64,8 +65,8 @@ public final class MessagesProcessor extends AbstractProcessor {
             return false;
         }
         Map</*package*/String,Set<Element>> annotatedElementsByPackage = new HashMap<String,Set<Element>>();
-        for (Element e : roundEnv.getElementsAnnotatedWith(Messages.class)) {
-            Messages messages = e.getAnnotation(Messages.class);
+        for (Element e : roundEnv.getElementsAnnotatedWith(Texts.class)) {
+            Texts messages = e.getAnnotation(Texts.class);
             if (messages == null) { // bug in java.source, apparently; similar to #195983
                 continue;
             }
@@ -99,7 +100,7 @@ public final class MessagesProcessor extends AbstractProcessor {
             Map</*key*/String,/*simplename*/String> compilationUnits = new HashMap<String,String>();
             for (Element e : annotatedElements) {
                 String simplename = findCompilationUnitName(e);
-                for (String keyValue : e.getAnnotation(Messages.class).value()) {
+                for (String keyValue : e.getAnnotation(Texts.class).value()) {
                     int i = keyValue.indexOf('=');
                     if (i == -1) {
                         processingEnv.getMessager().printMessage(Kind.ERROR, "Bad key=value: " + keyValue, e);
@@ -231,7 +232,7 @@ public final class MessagesProcessor extends AbstractProcessor {
 
     private void addToAnnotatedElements(Collection<? extends Element> unscannedElements, Set<Element> annotatedElements) {
         for (Element e : unscannedElements) {
-            if (e.getAnnotation(Messages.class) != null) {
+            if (e.getAnnotation(Texts.class) != null) {
                 annotatedElements.add(e);
             }
             if (e.getKind() != ElementKind.PACKAGE) {

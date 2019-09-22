@@ -36,7 +36,7 @@
             <version>${net.java.html.version}</version>
         </dependency>
         <dependency>
-            <groupId>com.dukescript.presenters</groupId>
+            <groupId>com.dukescript.api</groupId>
             <artifactId>strings</artifactId>
             <version>${project.version}</version>
             <scope>provided</scope>

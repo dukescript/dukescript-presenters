@@ -25,7 +25,6 @@ package org.netbeans.html.presenter.spi;
  * #L%
  */
 
-import com.dukescript.presenters.strings.Messages;
 import java.io.Flushable;
 import java.io.IOException;
 import java.io.Reader;
@@ -49,6 +48,7 @@ import java.util.TreeSet;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.atomic.AtomicInteger;
 import org.netbeans.html.boot.spi.Fn;
+import com.dukescript.api.strings.Texts;
 
 abstract class Generic implements Fn.Presenter, Fn.KeepAlive, Flushable {
     private String msg;
@@ -78,7 +78,7 @@ abstract class Generic implements Fn.Presenter, Fn.KeepAlive, Flushable {
     
     abstract void log(Level level, String msg, Object... args);
     
-    @Messages({
+    @Texts({
         "begin=try {\n"
         + "  @1('r', 'OK', 'OK', null, null);\n"
         + "} catch (e) {\n"
@@ -318,7 +318,7 @@ abstract class Generic implements Fn.Presenter, Fn.KeepAlive, Flushable {
         return obj == null || obj.id != id ? null : obj.get();
     }
     
-    @Messages({
+    @Texts({
         "fnHead=var jsvm = {};\n",
         "fnName=jsvm.@1 = function(",
         "fnThiz=thiz",
@@ -388,7 +388,7 @@ abstract class Generic implements Fn.Presenter, Fn.KeepAlive, Flushable {
         return vmNumber;
     }
 
-    @Messages({
+    @Texts({
         "v_null=null",
         "v_number=number",
         "v_java=java",
@@ -694,7 +694,7 @@ abstract class Generic implements Fn.Presenter, Fn.KeepAlive, Flushable {
         }
     }
 
-    @Messages({
+    @Texts({
         "flushExec=\n\nds(@1).toJava('r',null);\n"
     })
     void flushImpl() {
@@ -814,7 +814,7 @@ abstract class Generic implements Fn.Presenter, Fn.KeepAlive, Flushable {
             return this.index == other.index;
         }
 
-        @Messages({
+        @Texts({
             "jsObject=[jsobject-@1]"
         })
         @Override
@@ -825,7 +825,7 @@ abstract class Generic implements Fn.Presenter, Fn.KeepAlive, Flushable {
     } // end of JSObject
     
     static final AtomicInteger COUNTER = new AtomicInteger(0);
-    @Messages({
+    @Texts({
         "registerFn=ds(@2).rg(@1, function(",
         "registerCode=) {\n@1\n});",
         "v_vm=vm"
@@ -867,7 +867,7 @@ abstract class Generic implements Fn.Presenter, Fn.KeepAlive, Flushable {
             invokeImpl(false, thiz, args);
         }
 
-        @Messages({
+        @Texts({
             "invokeImplFn=ds(@3).fn(@1, @2, "
         })
         private Object invokeImpl(boolean wait4js, Object thiz, Object... args) throws Exception {

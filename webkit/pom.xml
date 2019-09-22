@@ -141,7 +141,7 @@
             <type>jar</type>
         </dependency>
         <dependency>
-            <groupId>${project.groupId}</groupId>
+            <groupId>com.dukescript.api</groupId>
             <artifactId>strings</artifactId>
             <version>${project.version}</version>
             <scope>provided</scope>
