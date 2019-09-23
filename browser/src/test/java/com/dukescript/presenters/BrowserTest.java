@@ -45,7 +45,7 @@ public class BrowserTest extends JavaScriptTCK {
     }
 
     @Factory public static Object[] compatibilityTests() throws Exception {
-        final BrowserBuilder bb = BrowserBuilder.newBrowser(new Browser("BrowserTest")).
+        final BrowserBuilder bb = BrowserBuilder.newBrowser(new Browser("BrowserTest", new Browser.Config())).
             loadClass(BrowserTest.class).
             loadPage("empty.html").
             invoke("initialized");

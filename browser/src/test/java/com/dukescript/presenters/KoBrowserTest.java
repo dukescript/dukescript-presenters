@@ -100,7 +100,7 @@ public class KoBrowserTest extends KnockoutTCK {
         Browser.LOG.setLevel(Level.FINE);
         Browser.LOG.addHandler(new ConsoleHandler());
         
-        final BrowserBuilder bb = BrowserBuilder.newBrowser(new Browser("KoBrowserTest")).
+        final BrowserBuilder bb = BrowserBuilder.newBrowser(new Browser("KoBrowserTest", new Browser.Config())).
             loadClass(KoBrowserTest.class).
             loadPage("empty.html").
             invoke("initialized");

@@ -103,13 +103,19 @@ public final class Browser implements Fn.Presenter, Fn.KeepAlive, Flushable, Exe
     private HttpServer s;
     private Runnable onPageLoad;
     private Command current;
+    private final Config config;
     
     public Browser() throws Exception {
-        this(findCalleeClassName());
+        this(new Config());
+    }
+
+    public Browser(Config config) {
+        this(findCalleeClassName(), config);
     }
     
-    Browser(String app) throws Exception {
+    Browser(String app, Config config) {
         this.app = app;
+        this.config = new Config(config);
     }
 
     @Override
@@ -136,7 +142,7 @@ public final class Browser implements Fn.Presenter, Fn.KeepAlive, Flushable, Exe
      * @throws IOException if something goes wrong
      */
     void show(URI page) throws IOException {
-        String impl = System.getProperty("com.dukescript.presenters.browser"); // NOI18N
+        String impl = config.getBrowser();
         if ("none".equalsIgnoreCase(impl)) { // NOI18N
             return;
         }
@@ -189,12 +195,12 @@ public final class Browser implements Fn.Presenter, Fn.KeepAlive, Flushable, Exe
         throw new UnsupportedOperationException();
     }
     
-    private static HttpServer server(RootPage r) {
+    private static HttpServer server(RootPage r, Config config) {
         int from = 8080;
         int to = 65535;
-        String port = System.getProperty("com.dukescript.presenters.browserPort"); // NOI18N
-        if (port != null) {
-            from = to = Integer.parseInt(port);
+        int port = config.getPort();
+        if (port != -1) {
+            from = to = port;
         }
         HttpServer s = HttpServer.createSimpleServer(null, new PortRange(from, to));
         final ServerConfiguration conf = s.getServerConfiguration();
@@ -216,11 +222,81 @@ public final class Browser implements Fn.Presenter, Fn.KeepAlive, Flushable, Exe
     public final void displayPage(URL page, Runnable onPageLoad) {
         try {
             this.onPageLoad = onPageLoad;
-            s = server(new RootPage(page));
+            s = server(new RootPage(page), config);
             s.start();
             show(pageURL("http", s, "/"));
         } catch (IOException ex) {
             Logger.getLogger(Browser.class.getName()).log(Level.SEVERE, null, ex);
+        }
+    }
+
+    /** Parameters to configure {@link Browser}.
+     * Create an instance and pass it 
+     * to {@link Browser#Browser(com.dukescript.presenters.Browser.Config) }
+     * constructor.
+     */
+    public final static class Config {
+        String browser;
+        Integer port;
+
+        public Config() {
+        }
+
+        private Config(Config copy) {
+            this.browser = copy.browser;
+            this.port = copy.port;
+        }
+
+        /** The command to use when invoking a browser. Possible values:
+         * <ul>
+         * <li>
+         *   <b>GTK</b> - use Gtk WebKit implementation. Requires presence of appropriate native libraries
+         * </li>
+         * <li>
+         *   <b>AWT</b> - use Desktop.browse(java.net.URI) to launch a browser
+         * </li>
+         * <li>
+         *   <b>NONE</b> - just launches the server, useful together with {@link #port(int)} to specify a fixed port to open the server at
+         * </li>
+         * <li>
+         * any other value is interpreted as a command which is then launched on a command line with one parameter - the URL to connect to
+         * </li>
+         * </ul>
+         *
+         * @param executable browser to execute
+         * @return this instance
+         */
+        public Config command(String executable) {
+            return this;
+        }
+
+        /** The port to start the server at.
+         * By default a random port is selected.
+         * @param port the port
+         * @return this instance
+         */
+        public Config port(int port) {
+            this.port = port;
+            return this;
+        }
+        
+        final String getBrowser() {
+            if (browser != null) {
+                return browser;
+            }
+            return System.getProperty("com.dukescript.presenters.browser"); // NOI18N
+        }
+
+        final int getPort() {
+            if (port != null) {
+                return port;
+            }
+            String port = System.getProperty("com.dukescript.presenters.browserPort"); // NOI18N
+            try {
+                return Integer.parseInt(port);
+            } catch (NumberFormatException ex) {
+                return -1;
+            }
         }
     }
 
