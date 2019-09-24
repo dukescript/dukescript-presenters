@@ -96,7 +96,8 @@ import org.openide.util.lookup.ServiceProvider;
  * </pre>
  */
 @ServiceProvider(service = Presenter.class)
-public final class Browser implements Fn.Presenter, Fn.KeepAlive, Flushable, Executor {
+public final class Browser implements Fn.Presenter, Fn.KeepAlive, Flushable,
+Executor, Closeable {
     static final Logger LOG = Logger.getLogger(Browser.class.getName());
     private final Map<String,Command> SESSIONS = new HashMap<String, Command>();
     private final String app;
@@ -121,6 +122,11 @@ public final class Browser implements Fn.Presenter, Fn.KeepAlive, Flushable, Exe
     @Override
     public final void execute(final Runnable r) {
         current.runSafe(r, true);
+    }
+
+    @Override
+    public void close() throws IOException {
+        s.shutdownNow();
     }
 
     HttpServer server() {
@@ -267,6 +273,7 @@ public final class Browser implements Fn.Presenter, Fn.KeepAlive, Flushable, Exe
          * @return this instance
          */
         public Config command(String executable) {
+            this.browser = executable;
             return this;
         }
 
