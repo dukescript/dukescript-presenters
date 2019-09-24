@@ -1,4 +1,4 @@
-package org.netbeans.html.presenter.test;
+package com.dukescript.presenters.spi.test;
 
 /*
  * #%L
@@ -35,8 +35,8 @@ import javax.script.ScriptContext;
 import javax.script.ScriptEngine;
 import javax.script.ScriptEngineManager;
 import javax.script.ScriptException;
-import org.netbeans.html.presenter.spi.ProtoPresenter;
-import org.netbeans.html.presenter.spi.ProtoPresenterBuilder;
+import com.dukescript.presenters.spi.ProtoPresenter;
+import com.dukescript.presenters.spi.ProtoPresenterBuilder;
 
 class Testing {
     static final Logger LOG = Logger.getLogger(Testing.class.getName());

@@ -1,4 +1,4 @@
-package org.netbeans.html.presenter.spi;
+package com.dukescript.presenters.spi;
 
 /*
  * #%L
@@ -26,6 +26,9 @@ package org.netbeans.html.presenter.spi;
  */
 
 
+import com.dukescript.presenters.spi.ProtoPresenterBuilder;
+import com.dukescript.presenters.spi.Level;
+import com.dukescript.presenters.spi.Generic;
 import java.net.URL;
 import static org.testng.Assert.*;
 import org.testng.annotations.BeforeMethod;

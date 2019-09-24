@@ -1,4 +1,4 @@
-package org.netbeans.html.presenter.test;
+package com.dukescript.presenters.spi.test;
 
 /*
  * #%L

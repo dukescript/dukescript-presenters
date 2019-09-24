@@ -68,7 +68,7 @@
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-javadoc-plugin</artifactId>
                 <configuration>
-                    <subpackages>org.netbeans.html.presenter.spi</subpackages>
+                    <subpackages>com.dukescript.presenters.spi</subpackages>
                 </configuration>
                 <executions>
                     <execution>

@@ -61,8 +61,8 @@ import org.glassfish.grizzly.http.server.ServerConfiguration;
 import org.glassfish.grizzly.http.util.HttpStatus;
 import org.netbeans.html.boot.spi.Fn;
 import org.netbeans.html.boot.spi.Fn.Presenter;
-import org.netbeans.html.presenter.spi.ProtoPresenter;
-import org.netbeans.html.presenter.spi.ProtoPresenterBuilder;
+import com.dukescript.presenters.spi.ProtoPresenter;
+import com.dukescript.presenters.spi.ProtoPresenterBuilder;
 import org.openide.util.lookup.ServiceProvider;
 
 /** Browser based {@link Presenter}. It starts local server and

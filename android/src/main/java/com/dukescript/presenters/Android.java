@@ -71,8 +71,8 @@ import net.java.html.BrwsrCtx;
 import net.java.html.js.JavaScriptBody;
 import org.netbeans.html.boot.spi.Fn;
 import org.netbeans.html.context.spi.Contexts;
-import org.netbeans.html.presenter.spi.ProtoPresenter;
-import org.netbeans.html.presenter.spi.ProtoPresenterBuilder;
+import com.dukescript.presenters.spi.ProtoPresenter;
+import com.dukescript.presenters.spi.ProtoPresenterBuilder;
 import org.netbeans.html.sound.spi.AudioEnvironment;
 
 /** Ultimate <a target="_blank" href="http://dukescript.com">DukeScript</a>

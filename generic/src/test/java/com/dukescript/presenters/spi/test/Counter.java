@@ -1,4 +1,4 @@
-package org.netbeans.html.presenter.test;
+package com.dukescript.presenters.spi.test;
 
 /*
  * #%L
@@ -26,12 +26,30 @@ package org.netbeans.html.presenter.test;
  */
 
 
-import static org.netbeans.html.presenter.test.GenericTest.createTests;
-import org.testng.annotations.Factory;
+import net.java.html.js.JavaScriptBody;
 
-public class SynchronizedTest {
-    @Factory public static Object[] compatibilityTests() throws Exception {
-        return createTests(new Testing.Synchronized());
+public final class Counter {
+    static int calls;
+    static int callbacks;
+
+    static int count() {
+        return ++callbacks;
     }
+    
+    public static final void registerCounter() {
+        if (rCounter()) {
+            callbacks = 0;
+        }
+    }
+
+    @JavaScriptBody(args = {}, javacall = true, body
+            = "if (!this.counter) {\n"
+            + "  this.counter = function() { return @com.dukescript.presenters.spi.test.Counter::count()(); };\n"
+            + "  return true;\n"
+            + "} else {\n"
+            + "  return false;\n"
+            + "}\n"
+    )
+    private static native boolean rCounter();
     
 }

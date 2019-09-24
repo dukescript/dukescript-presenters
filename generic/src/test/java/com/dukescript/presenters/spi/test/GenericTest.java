@@ -1,4 +1,4 @@
-package org.netbeans.html.presenter.test;
+package com.dukescript.presenters.spi.test;
 
 /*
  * #%L
@@ -35,7 +35,7 @@ import net.java.html.boot.BrowserBuilder;
 import org.netbeans.html.boot.spi.Fn;
 import org.netbeans.html.json.tck.JavaScriptTCK;
 import org.netbeans.html.json.tck.KOTest;
-import org.netbeans.html.presenter.spi.ProtoPresenterBuilder;
+import com.dukescript.presenters.spi.ProtoPresenterBuilder;
 import org.testng.annotations.Factory;
 
 public class GenericTest extends JavaScriptTCK {

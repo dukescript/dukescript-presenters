@@ -1,4 +1,4 @@
-package org.netbeans.html.presenter.spi;
+package com.dukescript.presenters.spi;
 
 import java.io.Flushable;
 import org.netbeans.html.boot.spi.Fn;
