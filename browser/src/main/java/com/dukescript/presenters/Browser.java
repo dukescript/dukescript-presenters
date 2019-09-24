@@ -34,6 +34,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
+import java.io.PrintStream;
 import java.io.Reader;
 import java.io.Writer;
 import java.net.URI;
@@ -155,7 +156,7 @@ Executor, Closeable {
         if (impl != null) {
             Show.show(impl, page);
         } else {
-            IOException one, two = null;
+            IOException one, two;
             try {
                 String ui = System.getProperty("os.name").contains("Mac") ?
                     "Cocoa" : "GTK";
@@ -172,7 +173,6 @@ Executor, Closeable {
             }
             try {
                 Show.show(impl, page);
-                return;
             } catch (IOException ex) {
                 two.initCause(one);
                 ex.initCause(two);
@@ -306,6 +306,14 @@ Executor, Closeable {
             }
         }
     }
+    
+    static void cors(Response r) {
+        r.setCharacterEncoding("UTF-8");
+        r.addHeader("Access-Control-Allow-Origin", "*");
+        r.addHeader("Access-Control-Allow-Credentials", "true");
+        r.addHeader("Access-Control-Allow-Headers", "Content-Type");
+        r.addHeader("Access-Control-Allow-Methods", "GET, POST, DELETE, PUT");
+    }
 
     private final class RootPage extends HttpHandler {
         private final URL page;
@@ -317,19 +325,20 @@ Executor, Closeable {
         @Override
         public void service(Request rqst, Response rspns) throws Exception {
             String path = rqst.getRequestURI();
-            rspns.setCharacterEncoding("UTF-8");
+            cors(rspns);
             if ("/".equals(path) || "index.html".equals(path)) {
                 Reader is;
+                String prefix = "http://" + rqst.getServerName() + ":" + rqst.getServerPort() + "/";
                 Writer w = rspns.getWriter();
                 rspns.setContentType("text/html");
-                final Command cmd = new Command(Browser.this);
+                final Command cmd = new Command(Browser.this, prefix);
                 try {
                     is = new InputStreamReader(page.openStream());
                 } catch (IOException ex) {
                     w.write("<html><body>");
                     w.write("<h1>Browser</h1>");
                     w.write("<pre id='cmd'></pre>");
-                    emitScript(w, cmd.id);
+                    emitScript(w, prefix, cmd.id);
                     w.write("</body></html>");
                     w.close();
                     return;
@@ -357,12 +366,12 @@ Executor, Closeable {
                     }
                     w.write((char)ch);
                     if (state == 500) {
-                        emitScript(w, cmd.id);
+                        emitScript(w, prefix, cmd.id);
                         state = 1000;
                     }
                 }
                 if (state != 1000) {
-                    emitScript(w, cmd.id);
+                    emitScript(w, prefix, cmd.id);
                 }
                 is.close();
                 w.close();
@@ -370,7 +379,9 @@ Executor, Closeable {
                 String id = rqst.getParameter("id");
                 Command c = SESSIONS.get(id);
                 if (c == null) {
-                    throw new NullPointerException("No command for " + id);
+                    rspns.getOutputBuffer().write("No command for " + id);
+                    rspns.setStatus(HttpStatus.NOT_FOUND_404);
+                    return;
                 }
                 c.service(rqst, rspns);
             } else {
@@ -398,14 +409,22 @@ Executor, Closeable {
             }
         }
 
-        private void emitScript(Writer w, String id) throws IOException {
+        private void emitScript(Writer w, String prefix, String id) throws IOException {
             w.write("  <script id='exec' type='text/javascript'>");
             w.write("\n"
                     + "function waitForCommand() {\n"
                     + "  try {\n"
+                    + "    if (waitForCommand.seenError) {\n"
+                    + "      console.warn('Disconnected from " + prefix + "');\n"
+                    + "      return;\n"
+                    + "    };\n"
                     + "    var request = new XMLHttpRequest();\n"
-                    + "    request.open('GET', 'command.js?id=" + id + "', true);\n"
+                    + "    request.open('GET', '" + prefix + "command.js?id=" + id + "', true);\n"
                     + "    request.setRequestHeader('Content-Type', 'text/plain; charset=utf-8');\n"
+                    + "    request.onerror = function(ev) {\n"
+                    + "      console.warn(ev);\n"
+                    + "      waitForCommand.seenError = true;\n"
+                    + "    };\n"
                     + "    request.onreadystatechange = function() {\n"
                     + "      if (this.readyState!==4) return;\n"
                     + "      try {\n"
@@ -413,14 +432,14 @@ Executor, Closeable {
                     + "        if (cmd) cmd.innerHTML = this.responseText.substring(0,80);\n"
                     + "        (0 || eval)(this.responseText);\n"
                     + "      } catch (e) {\n"
-                    + "        alert(e); \n"
+                    + "        console.warn(e); \n"
                     + "      } finally {\n"
                     + "        waitForCommand();\n"
                     + "      }\n"
                     + "    };\n"
                     + "    request.send();\n"
                     + "  } catch (e) {\n"
-                    + "    alert(e);\n"
+                    + "    console.warn(e);\n"
                     + "    waitForCommand();\n"
                     + "  }\n"
                     + "}\n"
@@ -462,16 +481,18 @@ Executor, Closeable {
         private final Queue<Object> exec;
         private final Browser browser;
         private final String id;
+        private final String prefix;
         private final Executor RUN;
         private Thread RUNNER;
         private Response suspended;
         private boolean initialized;
         private final ProtoPresenter presenter;
 
-        Command(Browser browser) {
+        Command(Browser browser, String prefix) {
             this.RUN = Executors.newSingleThreadExecutor(this);
             this.id = UUID.randomUUID().toString();
             this.exec = new LinkedList<>();
+            this.prefix = prefix;
             this.browser = browser;
             this.presenter = ProtoPresenterBuilder.newBuilder().
                 preparator(this::callbackFn, true).
@@ -602,7 +623,7 @@ Executor, Closeable {
         void callbackFn(ProtoPresenterBuilder.OnPrepared onReady) {
             StringBuilder sb = new StringBuilder();
             sb.append("this.toBrwsrSrvr = function(name, a1, a2, a3, a4) {\n"
-                + "var url = 'command.js?id=" + id + "&name=' + name;\n"
+                + "var url = '").append(prefix).append("command.js?id=").append(id).append("&name=' + name;\n"
                 + "url += '&p0=' + encodeURIComponent(a1);\n"
                 + "url += '&p1=' + encodeURIComponent(a2);\n"
                 + "url += '&p2=' + encodeURIComponent(a3);\n"
