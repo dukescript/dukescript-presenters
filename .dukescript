@@ -33,7 +33,7 @@ node ('Mac') {
                         sh "${env.GPG_PASSPHRASE} --preset --passphrase ${GPG_PASSWD} ${GPG_ID}"
                     }
                 }
-                sh "mvn ${mvnargs} clean deploy -Prelease -Dgpg.useagent=true"
+                sh "mvn ${mvnargs} -f strings clean deploy -Prelease -Dgpg.useagent=true"
             }
         }
     }
