@@ -57,6 +57,7 @@ public @interface Texts {
      * Each key will result into {@code key()} method being generated into
      * the {@code Strings} class. If the message has parameters, they will
      * become substituable by the methods arguments.
+     * @return array of {@code key=message} strings
      */
     String[] value();
 }
