@@ -29,6 +29,7 @@ import com.dukescript.presenters.renderer.Show;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.ServerSocket;
+import java.net.URI;
 import java.net.URL;
 import net.java.html.boot.BrowserBuilder;
 import net.java.html.js.JavaScriptBody;
@@ -69,12 +70,12 @@ public class ServerTest {
         final String page = new String(arr, 0, len, "UTF-8");
         assertTrue(page.contains("<h1>Server</h1>"), "Server page loaded OK:\n" + page);
 
-        Show.show(null, connect.toURI());
+        show(connect.toURI());
 
         awaitLoaded(1, loaded);
         assertEquals(loaded[0], 1, "Connection has been opened");
 
-        Show.show(null, connect.toURI());
+        show(connect.toURI());
 
         awaitLoaded(2, loaded);
         assertEquals(loaded[0], 2, "Second connection has been opened");
@@ -108,4 +109,29 @@ public class ServerTest {
 
     @JavaScriptBody(args = { "ms" }, body = "window.setTimeout(function() { window.close(); }, ms);")
     private static native void closeSoon(int ms);
+
+    private static void show(URI page) throws IOException {
+        IOException one, two;
+        try {
+            String ui = System.getProperty("os.name").contains("Mac")
+                    ? "Cocoa" : "GTK";
+            Show.show(ui, page);
+            return;
+        } catch (IOException ex) {
+            one = ex;
+        }
+        try {
+            Show.show("AWT", page);
+            return;
+        } catch (IOException ex) {
+            two = ex;
+        }
+        try {
+            Show.show(null, page);
+        } catch (IOException ex) {
+            two.initCause(one);
+            ex.initCause(two);
+            throw ex;
+        }
+    }
 }
