@@ -3,7 +3,7 @@ package com.dukescript.presenters.iosapp;
 /*
  * #%L
  * iOS Testing App - a library from the "DukeScript Presenters" project.
- * 
+ *
  * Dukehoff GmbH designates this particular file as subject to the "Classpath"
  * exception as provided in the README.md file that accompanies this code.
  * %%
@@ -13,12 +13,12 @@ package com.dukescript.presenters.iosapp;
  * it under the terms of the GNU General Public License as
  * published by the Free Software Foundation, either version 3 of the
  * License, or (at your option) any later version.
- * 
+ *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU General Public
  * License along with this program.  If not, see
  * <http://www.gnu.org/licenses/gpl-3.0.html>.
@@ -34,8 +34,9 @@ import java.util.Timer;
 import java.util.TimerTask;
 import java.util.concurrent.Callable;
 import java.util.concurrent.CountDownLatch;
-import java.util.logging.ConsoleHandler;
+import java.util.logging.Handler;
 import java.util.logging.Level;
+import java.util.logging.LogRecord;
 import java.util.logging.Logger;
 import net.java.html.BrwsrCtx;
 import net.java.html.boot.BrowserBuilder;
@@ -43,17 +44,17 @@ import org.netbeans.html.json.tck.JavaScriptTCK;
 import org.netbeans.html.json.tck.KOTest;
 
 public final class Test extends JavaScriptTCK {
+    private static final TextHandler HANDLER = new TextHandler();
     static final Logger LOG = Logger.getLogger(Test.class.getName());
     static BrwsrCtx CTX;
-    
+
     public static void main(final String... args) throws Exception {
         final Logger l = Logger.getLogger("com.dukescript");
         l.setLevel(Level.FINE);
-        ConsoleHandler ch = new ConsoleHandler();
-        ch.setLevel(Level.FINE);
-        l.addHandler(ch);
+        HANDLER.setLevel(Level.FINE);
+        l.addHandler(HANDLER);
         l.setUseParentHandlers(false);
-        
+
         final CountDownLatch CDL = new CountDownLatch(1);
         l.info("Launching Testing harness thread");
         Thread t = new Thread("Testing harness") {
@@ -70,7 +71,7 @@ public final class Test extends JavaScriptTCK {
             }
         };
         t.start();
-        
+
         class Loaded implements Runnable {
             @Override
             public void run() {
@@ -121,7 +122,7 @@ public final class Test extends JavaScriptTCK {
                 loadFinished(new Loaded()).
                 showAndWait();
     }
-    
+
     private static void processTests() throws Exception {
         int[] cnt = { 0 };
         List<String> failed = new ArrayList<String>();
@@ -152,7 +153,7 @@ public final class Test extends JavaScriptTCK {
         LOG.log(Level.INFO, "All {0} tests are OK!", cnt[0]);
         System.exit(0);
     }
-    
+
     private static void runTestsIn(final Class<?> c, int[] cnt, List<String> failed) {
         if (c.getSimpleName().equals("GCBodyTest")) {
             LOG.log(Level.INFO, "Skipping {0}", c.getName());
@@ -171,7 +172,7 @@ public final class Test extends JavaScriptTCK {
                     Exception ex;
                     int cnt;
                     CountDownLatch cdl;
-                    
+
                     @Override
                     public void run() {
                         try {
@@ -219,12 +220,54 @@ public final class Test extends JavaScriptTCK {
                         }
                         break;
                     }
+                    HANDLER.clear();
                     LOG.log(Level.INFO, "TEST {0} OK", method);
                 } catch (Throwable t) {
                     failed.add(method.getName());
                     LOG.log(Level.SEVERE, "TEST " + method + "FAILED", t);
+                    System.err.println(HANDLER.toString());
+                    HANDLER.clear();
                 }
             }
         }
+    }
+
+    private static final class TextHandler extends Handler {
+        private final StringBuffer sb = new StringBuffer();
+
+        TextHandler() {
+        }
+
+        @Override
+        public void publish(LogRecord record) {
+            String msg = record.getMessage();
+            final Object[] params = record.getParameters();
+            if (params != null) {
+                for (int i = 0; i < params.length; i++) {
+                    final Object ith = params[i];
+                    msg = msg.replace("{" + i + "}", ith == null ? "null" : ith.toString());
+                }
+            }
+            sb.append("\n").append(msg);
+        }
+
+        @Override
+        public void flush() {
+        }
+
+        @Override
+        public void close() throws SecurityException {
+        }
+
+        public void clear() {
+            sb.setLength(0);
+        }
+
+        @Override
+        public String toString() {
+            return sb.toString();
+        }
+
+
     }
 }
