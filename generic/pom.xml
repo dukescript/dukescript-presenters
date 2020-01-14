@@ -18,7 +18,7 @@
     <dependencies>
         <dependency>
             <groupId>org.netbeans.html</groupId>
-            <artifactId>net.java.html.boot</artifactId>
+            <artifactId>generic</artifactId>
             <type>jar</type>
             <version>${net.java.html.version}</version>
         </dependency>
@@ -51,10 +51,8 @@
                     <compilerArguments>
                         <Aversion>${project.version}</Aversion>
                     </compilerArguments>
-                    <source>1.6</source>
-                    <target>1.6</target>
-                    <testSource>1.8</testSource>
-                    <testTarget>1.8</testTarget>
+                    <source>1.8</source>
+                    <target>1.8</target>
                 </configuration>
             </plugin>
             <plugin>

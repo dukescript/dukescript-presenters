@@ -25,7 +25,6 @@ package com.dukescript.presenters;
  * #L%
  */
 
-import com.dukescript.presenters.renderer.Show;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.ServerSocket;
@@ -33,6 +32,7 @@ import java.net.URI;
 import java.net.URL;
 import net.java.html.boot.BrowserBuilder;
 import net.java.html.js.JavaScriptBody;
+import org.netbeans.html.presenters.render.Show;
 import org.testng.Assert;
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertTrue;

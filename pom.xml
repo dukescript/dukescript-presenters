@@ -58,7 +58,7 @@
 
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-        <net.java.html.version>1.5.1</net.java.html.version>
+        <net.java.html.version>1.7</net.java.html.version>
         <testng.version>6.7</testng.version>
         <netbeans.version>RELEASE111</netbeans.version>
         <grizzly.version>2.3.8</grizzly.version>
@@ -131,7 +131,7 @@
                             <packages>com.dukescript.presenters</packages>
                         </group>
                     </groups>
-                    <nodeprecated>true</nodeprecated>
+                    <nodeprecated>false</nodeprecated>
                     <detectJavaApiLink>false</detectJavaApiLink>
                     <links>
                         <link>https://docs.oracle.com/en/java/javase/11/docs/api/</link>

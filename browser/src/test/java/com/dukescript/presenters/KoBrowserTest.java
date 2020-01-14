@@ -97,10 +97,7 @@ public class KoBrowserTest extends KnockoutTCK {
     }
    
     @Factory public static Object[] compatibilityTests() throws Exception {
-        Browser.LOG.setLevel(Level.FINE);
-        Browser.LOG.addHandler(new ConsoleHandler());
-        
-        final BrowserBuilder bb = BrowserBuilder.newBrowser(new Browser("KoBrowserTest", new Browser.Config())).
+        final BrowserBuilder bb = BrowserBuilder.newBrowser(new Browser(new Browser.Config())).
             loadClass(KoBrowserTest.class).
             loadPage("empty.html").
             invoke("initialized");
@@ -112,14 +109,16 @@ public class KoBrowserTest extends KnockoutTCK {
             }
         });
 
-        List<Object> res = new ArrayList<Object>();
+        List<Object> res = new ArrayList<>();
         Class<? extends Annotation> test = 
             loadClass().getClassLoader().loadClass(KOTest.class.getName()).
             asSubclass(Annotation.class);
 
         Class[] arr = (Class[]) loadClass().getDeclaredMethod("tests").invoke(null);
 
-        final HttpServer s = Browser.findServer(browserPresenter);
+        Method findServer = org.netbeans.html.presenters.browser.Browser.class.getDeclaredMethod("findServer", Object.class);
+        findServer.setAccessible(true);
+        final HttpServer s = (HttpServer) findServer.invoke(null, browserPresenter);
         ServerConfiguration conf = s.getServerConfiguration();
         conf.addHttpHandler(new DynamicHTTP(s), "/dynamic");
         for (Class c : arr) {

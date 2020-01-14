@@ -83,13 +83,8 @@
             <scope>test</scope>
         </dependency>
         <dependency>
-            <groupId>net.java.dev.jna</groupId>
-            <artifactId>jna</artifactId>
-            <version>${jna.version}</version>
-        </dependency>
-        <dependency>
             <groupId>org.netbeans.html</groupId>
-            <artifactId>net.java.html.boot</artifactId>
+            <artifactId>webkit</artifactId>
             <version>${net.java.html.version}</version>
             <type>jar</type>
         </dependency>
@@ -97,7 +92,7 @@
             <groupId>org.netbeans.api</groupId>
             <artifactId>org-openide-util-lookup</artifactId>
             <version>${netbeans.version}</version>
-            <scope>provided</scope>
+            <scope>test</scope>
         </dependency>
         <dependency>
             <groupId>org.netbeans.html</groupId>
@@ -139,17 +134,6 @@
             <version>${net.java.html.version}</version>
             <scope>test</scope>
             <type>jar</type>
-        </dependency>
-        <dependency>
-            <groupId>com.dukescript.api</groupId>
-            <artifactId>strings</artifactId>
-            <version>${project.version}</version>
-            <scope>provided</scope>
-        </dependency>
-        <dependency>
-            <groupId>${project.groupId}</groupId>
-            <artifactId>renderer</artifactId>
-            <version>${project.version}</version>
         </dependency>
     </dependencies>
 </project>

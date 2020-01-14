@@ -35,8 +35,10 @@ import com.sun.jna.ptr.PointerByReference;
 import java.util.Arrays;
 import java.util.List;
 
-/** Interface to JavaScriptCore native library.
+/** @deprecated use {@link org.netbeans.html.presenters.render.Show} and
+ * {@link org.netbeans.html.presenters.render.JSC}.
  */
+@Deprecated
 public interface JSC extends Library {
     /** Data to create new JSC class definition.
      */

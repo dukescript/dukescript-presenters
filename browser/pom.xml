@@ -76,21 +76,9 @@
             <scope>test</scope>
         </dependency>
         <dependency>
-            <groupId>org.glassfish.grizzly</groupId>
-            <artifactId>grizzly-http-server</artifactId>
-            <version>2.3.19</version>
-        </dependency>
-        <dependency>
             <groupId>org.netbeans.html</groupId>
-            <artifactId>ko4j</artifactId>
+            <artifactId>browser</artifactId>
             <version>${net.java.html.version}</version>
-            <scope>test</scope>
-        </dependency>
-        <dependency>
-            <groupId>org.netbeans.api</groupId>
-            <artifactId>org-openide-util-lookup</artifactId>
-            <version>${netbeans.version}</version>
-            <scope>provided</scope>
         </dependency>
         <dependency>
             <groupId>org.netbeans.html</groupId>
@@ -103,16 +91,18 @@
             <artifactId>grizzly-websockets-server</artifactId>
             <scope>test</scope>
             <version>2.3.19</version>
+        </dependency>   
+        <dependency>
+            <groupId>org.netbeans.api</groupId>
+            <artifactId>org-openide-util-lookup</artifactId>
+            <version>${netbeans.version}</version>
+            <scope>provided</scope>
         </dependency>
         <dependency>
-            <groupId>com.dukescript.presenters</groupId>
-            <artifactId>generic</artifactId>
-            <version>${project.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>${project.groupId}</groupId>
-            <artifactId>renderer</artifactId>
-            <version>${project.version}</version>
+            <groupId>org.netbeans.html</groupId>
+            <artifactId>ko4j</artifactId>
+            <version>${net.java.html.version}</version>
+            <scope>test</scope>
         </dependency>
     </dependencies>
 </project>

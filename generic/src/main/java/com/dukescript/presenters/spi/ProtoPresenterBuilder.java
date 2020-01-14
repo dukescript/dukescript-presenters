@@ -1,5 +1,7 @@
 package com.dukescript.presenters.spi;
 
+import java.io.IOException;
+import java.io.Reader;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
@@ -31,35 +33,30 @@ import org.netbeans.html.boot.spi.Fn;
  * #L%
  */
 
-/** The <em>prototypical</em> presenter builder. Builds a {@link Fn.Presenter} based on
- * top of textual protocol transferred between JVM and JavaScript engines.
+/** @deprecated Use {@link org.netbeans.html.presenters.spi.ProtoPresenterBuilder}.
  */
+@Deprecated
 public final class ProtoPresenterBuilder {
-    private Evaluator loadScript;
-    private Executor executor;
-    private Preparator onReady;
-    private boolean sync;
-    private boolean eval;
-    private String type;
-    private String app;
-    private Displayer displayer;
-    private Logger logger;
-    private boolean implementExecutor;
-    private final List<Object> data = new ArrayList<Object>();
+    private final org.netbeans.html.presenters.spi.ProtoPresenterBuilder delegate;
 
     private ProtoPresenterBuilder() {
+        delegate = org.netbeans.html.presenters.spi.ProtoPresenterBuilder.newBuilder();
     }
 
-    /** Starts building new, customized instance of {@link ProtoPresenter}.
-     * @return new builder
+    /**
+     * @deprecated Use
+     * {@link org.netbeans.html.presenters.spi.ProtoPresenterBuilder}.
      */
+    @Deprecated
     public static ProtoPresenterBuilder newBuilder() {
         return new ProtoPresenterBuilder();
     }
 
-    /** Interfaces for evaluation of JavaScript code.
-     * Registered via {@link #loadJavaScript} method.
+    /**
+     * @deprecated Use
+     * {@link org.netbeans.html.presenters.spi.ProtoPresenterBuilder}.
      */
+    @Deprecated
     @FunctionalInterface
     public interface Evaluator {
         /** Evaluates (potentially asynchronously) given code in the JavaScript
@@ -70,47 +67,40 @@ public final class ProtoPresenterBuilder {
     }
 
     /**
-     * Registers an implementation of {@link Evaluator}.
-     * @param loadScript the evaluator to use
-     * @param synchronous is the evaluator synchronous or asynchronous
-     * @return this builder
+     * @deprecated Use
+     * {@link org.netbeans.html.presenters.spi.ProtoPresenterBuilder}.
      */
+    @Deprecated
     public ProtoPresenterBuilder loadJavaScript(Evaluator loadScript, boolean synchronous) {
-        this.loadScript = loadScript;
-        this.sync = synchronous;
+        delegate.loadJavaScript(loadScript::eval, synchronous);
         return this;
     }
 
     /**
-     * Registers the executor to run all tasks in.
-     *
-     * @param executor the executor
-     * @param implementExecutor {@code true} if the presenter created
-     *   by {@link #build()} method should also implement the {@link Executor}
-     *   interface
-     * @return this builder
+     * @deprecated Use
+     * {@link org.netbeans.html.presenters.spi.ProtoPresenterBuilder}.
      */
+    @Deprecated
     public ProtoPresenterBuilder dispatcher(Executor executor, boolean implementExecutor) {
-        this.executor = executor;
-        this.implementExecutor = implementExecutor;
+        delegate.dispatcher(executor, implementExecutor);
         return this;
     }
 
-    /** Prepares the JavaScript environment. Defines a globally visible
-     * JavaScript function which takes five string arguments and
-     * then calls {@link ProtoPresenter#js2java(java.lang.String, java.lang.String, java.lang.String, java.lang.String, java.lang.String) }
-     * method of the {@link #build() created} {@link ProtoPresenter}.
-     * Once the function is ready, it should notify the system
-     * of the name of the function by calling {@link OnPrepared#callbackIsPrepared(java.lang.String)}.
+    /**
+     * @deprecated Use
+     * {@link org.netbeans.html.presenters.spi.ProtoPresenterBuilder}.
      */
+    @Deprecated
     @FunctionalInterface
     public interface Preparator {
         void prepare(OnPrepared onReady);
     }
 
-    /** Callback to make when {@link Preparator#prepare(OnPrepared)} is
-     * finished.
+    /**
+     * @deprecated Use
+     * {@link org.netbeans.html.presenters.spi.ProtoPresenterBuilder}.
      */
+    @Deprecated
     public static abstract class OnPrepared {
         OnPrepared() {
         }
@@ -123,41 +113,48 @@ public final class ProtoPresenterBuilder {
         public abstract void callbackIsPrepared(String callbackFunctionName);
     }
 
-    /** Registers instance of {@link Preparator}.
-     *
-     * @param onReady the instance to use
-     * @param evalJavaScript is the result of function registered by {@link OnPrepared#callbackIsPrepared(java.lang.String)}
-     *   just a string (return {@code true}) or real JavaScript object (return {@code false})?
-     * @return this builder
+    /**
+     * @deprecated Use
+     * {@link org.netbeans.html.presenters.spi.ProtoPresenterBuilder}.
      */
+    @Deprecated
     public ProtoPresenterBuilder preparator(Preparator onReady, boolean evalJavaScript) {
-        this.onReady = onReady;
-        this.eval = evalJavaScript;
+        delegate.preparator((when) -> {
+            onReady.prepare(new OnPrepared() {
+                @Override
+                public void callbackIsPrepared(String callbackFunctionName) {
+                    when.callbackIsPrepared(callbackFunctionName);
+                }
+            });
+        }, evalJavaScript);
         return this;
     }
 
-    /** The type of the presenter (iOS, Android, etc.).
-     * @param type string to identify the presenter
-    * @return this builder
-    */
+    /**
+     * @deprecated Use
+     * {@link org.netbeans.html.presenters.spi.ProtoPresenterBuilder}.
+     */
+    @Deprecated
     public ProtoPresenterBuilder type(String type) {
-        this.type = type;
+        delegate.type(type);
         return this;
     }
 
-    /** The identification of the application.
-     *
-     * @param app string to identify the application
-     * @return this builder
+    /**
+     * @deprecated Use
+     * {@link org.netbeans.html.presenters.spi.ProtoPresenterBuilder}.
      */
+    @Deprecated
     public ProtoPresenterBuilder app(String app) {
-        this.app = app;
+        delegate.app(app);
         return this;
     }
 
-    /** Interface to handle displaying of a URL.
-     * Register via {@link ProtoPresenterBuilder#displayer(org.netbeans.html.presenter.spi.ProtoPresenterBuilder.Displayer)}.
+    /**
+     * @deprecated Use
+     * {@link org.netbeans.html.presenters.spi.ProtoPresenterBuilder}.
      */
+    @Deprecated
     @FunctionalInterface
     public interface Displayer {
         /** Display given URL and callback when the page is ready.
@@ -168,27 +165,31 @@ public final class ProtoPresenterBuilder {
         public void displayPage(URL url, Runnable onLoad);
     }
 
-    /** Registers new displayer.
-     *
-     * @param displayer the instance of displayer.
-     * @return this builder
+    /**
+     * @deprecated Use
+     * {@link org.netbeans.html.presenters.spi.ProtoPresenterBuilder}.
      */
+    @Deprecated
     public ProtoPresenterBuilder displayer(Displayer displayer) {
-        this.displayer = displayer;
+        delegate.displayer(displayer::displayPage);
         return this;
     }
 
-    /** Registers additional data with the {@link ProtoPresenter}.The data can be obtained by {@link ProtoPresenter#lookup}.
-     * @param data instance of some data
-     * @return this builder
+    /**
+     * @deprecated Use
+     * {@link org.netbeans.html.presenters.spi.ProtoPresenterBuilder}.
      */
+    @Deprecated
     public ProtoPresenterBuilder register(Object data) {
-        this.data.add(data);
+        delegate.register(data);
         return this;
     }
 
-    /** Implementation of a logging interface from the {@link ProtoPresenter}.
+    /**
+     * @deprecated Use
+     * {@link org.netbeans.html.presenters.spi.ProtoPresenterBuilder}.
      */
+    @Deprecated
     @FunctionalInterface
     public interface Logger {
         /** Log a message. Uses levels and message formats suitable for
@@ -201,94 +202,80 @@ public final class ProtoPresenterBuilder {
         public void log(int level, String msg, Object... args);
     }
 
-    /** Registers instance of logger.
-     *
-     * @param logger instance of logger - may be {@code null}
-     * @return this builder
+    /**
+     * @deprecated Use
+     * {@link org.netbeans.html.presenters.spi.ProtoPresenterBuilder}.
      */
+    @Deprecated
     public ProtoPresenterBuilder logger(Logger logger) {
-        this.logger = logger;
+        delegate.logger(logger::log);
         return this;
     }
 
-    /** Builds instance of presenter based on registered values.
-     * @return instance of presenter
+    /**
+     * @deprecated Use
+     * {@link org.netbeans.html.presenters.spi.ProtoPresenterBuilder}.
      */
+    @Deprecated
     public ProtoPresenter build() {
-        if (implementExecutor) {
-            return new GenPresenterWithExecutor(this);
+        org.netbeans.html.presenters.spi.ProtoPresenter p = delegate.build();
+        if (p instanceof Executor) {
+            return new GenPresenterWithExecutor(p);
         }
-        return new GenPresenter(this);
+        return new GenPresenter(p);
     }
+    
+    private class GenPresenter implements ProtoPresenter {
+        final org.netbeans.html.presenters.spi.ProtoPresenter delegate;
 
-    private static final class GenPresenterWithExecutor extends GenPresenter implements Executor {
-        GenPresenterWithExecutor(ProtoPresenterBuilder b) {
-            super(b);
+        GenPresenter(org.netbeans.html.presenters.spi.ProtoPresenter p) {
+            this.delegate = p;
         }
 
         @Override
-        public void execute(Runnable command) {
-            dispatch(command);
-        }
-    }
-
-    private static class GenPresenter extends Generic implements ProtoPresenter {
-        private final Evaluator loadScript;
-        private final Executor executor;
-        private final Preparator onReady;
-        private final Displayer displayer;
-        private final Logger logger;
-        private final Object[] data;
-
-        GenPresenter(ProtoPresenterBuilder b) {
-            super(b.sync, b.eval, b.type, b.app);
-            this.loadScript = b.loadScript;
-            this.executor = b.executor;
-            this.onReady = b.onReady;
-            this.displayer = b.displayer;
-            this.logger = b.logger;
-            this.data = b.data.toArray();
-        }
-
-        @Override
-        void log(Level level, String msg, Object... args) {
-            if (logger != null) {
-                logger.log(level.intValue(), msg, args);
-            }
-        }
-
-        @Override
-        void callbackFn(ProtoPresenterBuilder.OnPrepared onReady) {
-            this.onReady.prepare(onReady);
-        }
-
-        @Override
-        void loadJS(String js) {
-            loadScript.eval(js);
-        }
-
-        @Override
-        void dispatch(Runnable r) {
-            executor.execute(r);
-        }
-
-        @Override
-        public void displayPage(URL url, Runnable r) {
-            if (url == null && r == null) {
-                init();
-            } else {
-                displayer.displayPage(url, r);
-            }
+        public String js2java(String method, String a1, String a2, String a3, String a4) throws Exception {
+            return delegate.js2java(method, a1, a2, a3, a4);
         }
 
         @Override
         public <T> T lookup(Class<T> type) {
-            for (Object o : data) {
-                if (type == o.getClass()) {
-                    return type.cast(o);
-                }
-            }
-            return null;
+            return delegate.lookup(type);
+        }
+
+        @Override
+        public Fn defineFn(String code, String... names) {
+            return delegate.defineFn(code, names);
+        }
+
+        @Override
+        public void displayPage(URL page, Runnable onPageLoad) {
+            delegate.displayPage(page, onPageLoad);
+        }
+
+        @Override
+        public void loadScript(Reader code) throws Exception {
+            delegate.loadScript(code);
+        }
+
+        @Override
+        public Fn defineFn(String code, String[] names, boolean[] keepAlive) {
+            return delegate.defineFn(code, names, keepAlive);
+        }
+
+        @Override
+        public void flush() throws IOException {
+            delegate.flush();
+        }
+    }
+    
+    private final class GenPresenterWithExecutor extends GenPresenter implements Executor {
+        public GenPresenterWithExecutor(org.netbeans.html.presenters.spi.ProtoPresenter p) {
+            super(p);
+        }
+
+        @Override
+        public void execute(Runnable command) {
+            ((Executor)delegate).execute(command);
         }
     }
 }

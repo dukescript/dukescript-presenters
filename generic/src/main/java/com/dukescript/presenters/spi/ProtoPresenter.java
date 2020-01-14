@@ -28,11 +28,9 @@ import org.netbeans.html.boot.spi.Fn;
  * #L%
  */
 
-/** The <em>prototypical</em> presenter. An implementation of a {@link Fn.Presenter} based on
- * top of textual protocol transferred between JVM and JavaScript engines. Use
- * {@link ProtoPresenterBuilder#newBuilder()} to construct instance of this
- * interface.
+/** @deprecated Use {@link org.netbeans.html.presenters.spi.ProtoPresenterBuilder}.
  */
+@Deprecated
 public interface ProtoPresenter extends Fn.Presenter, Fn.KeepAlive, Flushable {
     /** Dispatches callback from JavaScript back into appropriate
      * Java implementation. User of {@link ProtoPresenterBuilder} is expected

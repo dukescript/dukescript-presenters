@@ -33,19 +33,8 @@
     </build>
     <dependencies>
         <dependency>
-            <groupId>org.testng</groupId>
-            <artifactId>testng</artifactId>
-            <version>${testng.version}</version>
-            <scope>test</scope>
-        </dependency>
-        <dependency>
-            <groupId>net.java.dev.jna</groupId>
-            <artifactId>jna</artifactId>
-            <version>${jna.version}</version>
-        </dependency>
-        <dependency>
             <groupId>org.netbeans.html</groupId>
-            <artifactId>net.java.html.boot</artifactId>
+            <artifactId>renderer</artifactId>
             <version>${net.java.html.version}</version>
         </dependency>
     </dependencies>    
