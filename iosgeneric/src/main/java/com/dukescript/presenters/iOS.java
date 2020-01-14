@@ -45,8 +45,8 @@ import net.java.html.BrwsrCtx;
 import net.java.html.js.JavaScriptBody;
 import net.java.html.boot.BrowserBuilder;
 import org.netbeans.html.boot.spi.Fn;
-import com.dukescript.presenters.spi.ProtoPresenter;
-import com.dukescript.presenters.spi.ProtoPresenterBuilder;
+import org.netbeans.html.presenters.spi.ProtoPresenter;
+import org.netbeans.html.presenters.spi.ProtoPresenterBuilder;
 import org.openide.util.lookup.ServiceProvider;
 
 /** Versatile <a target="_blank" href="http://dukescript.com">DukeScript</a>

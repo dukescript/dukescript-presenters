@@ -53,9 +53,9 @@
     </build>
     <dependencies>
         <dependency>
-            <groupId>${project.groupId}</groupId>
+            <groupId>org.netbeans.html</groupId>
             <artifactId>generic</artifactId>
-            <version>${project.version}</version>
+            <version>${net.java.html.version}</version>
         </dependency>
         <dependency>
             <groupId>org.netbeans.html</groupId>
