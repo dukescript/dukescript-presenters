@@ -68,6 +68,7 @@
                     <artifactSet>
                         <includes>
                             <include>com.dukescript.presenters:*</include>
+                            <include>org.netbeans.html:generic</include>
                         </includes>
                     </artifactSet>
                 </configuration>
