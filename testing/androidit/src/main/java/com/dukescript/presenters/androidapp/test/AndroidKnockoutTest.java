@@ -50,6 +50,7 @@ import org.netbeans.html.json.tck.KOTest;
     tests = {
         net.java.html.js.tests.JavaScriptBodyTest.class,
         net.java.html.js.tests.GCBodyTest.class,
+        net.java.html.js.tests.ExposedPropertiesTest.class,
         net.java.html.json.tests.ConvertTypesTest.class,
         net.java.html.json.tests.JSONTest.class,
         net.java.html.json.tests.KnockoutTest.class,
