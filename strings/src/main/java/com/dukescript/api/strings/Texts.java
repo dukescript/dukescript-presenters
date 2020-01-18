@@ -46,7 +46,6 @@ import java.lang.annotation.RetentionPolicy;
  *   <li><b>stringSize</b> - the size of string chunks to use - by default all characters</li>
  *   <li><b>stringSeed</b> - the seed to use to shuffle the texts - random if not specified</li>
  * </ul>
- * <p>
  */
 @Retention(RetentionPolicy.SOURCE)
 public @interface Texts {

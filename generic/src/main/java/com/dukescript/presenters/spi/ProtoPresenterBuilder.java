@@ -3,8 +3,6 @@ package com.dukescript.presenters.spi;
 import java.io.IOException;
 import java.io.Reader;
 import java.net.URL;
-import java.util.ArrayList;
-import java.util.List;
 import java.util.concurrent.Executor;
 import org.netbeans.html.boot.spi.Fn;
 
@@ -46,6 +44,7 @@ public final class ProtoPresenterBuilder {
     /**
      * @deprecated Use
      * {@link org.netbeans.html.presenters.spi.ProtoPresenterBuilder}.
+     * @return new builder
      */
     @Deprecated
     public static ProtoPresenterBuilder newBuilder() {
@@ -69,6 +68,9 @@ public final class ProtoPresenterBuilder {
     /**
      * @deprecated Use
      * {@link org.netbeans.html.presenters.spi.ProtoPresenterBuilder}.
+     * @param loadScript the evaluator to use
+     * @param synchronous is the evaluator synchronous or asynchronous
+     * @return this builder
      */
     @Deprecated
     public ProtoPresenterBuilder loadJavaScript(Evaluator loadScript, boolean synchronous) {
@@ -79,6 +81,11 @@ public final class ProtoPresenterBuilder {
     /**
      * @deprecated Use
      * {@link org.netbeans.html.presenters.spi.ProtoPresenterBuilder}.
+     * @param executor the executor
+     * @param implementExecutor {@code true} if the presenter created
+     *   by {@link #build()} method should also implement the {@link Executor}
+     *   interface
+     * @return this builder
      */
     @Deprecated
     public ProtoPresenterBuilder dispatcher(Executor executor, boolean implementExecutor) {
@@ -116,6 +123,10 @@ public final class ProtoPresenterBuilder {
     /**
      * @deprecated Use
      * {@link org.netbeans.html.presenters.spi.ProtoPresenterBuilder}.
+     * @param onReady the instance to use
+     * @param evalJavaScript is the result of function registered by {@link OnPrepared#callbackIsPrepared(java.lang.String)}
+     *   just a string (return {@code true}) or real JavaScript object (return {@code false})?
+     * @return this builder
      */
     @Deprecated
     public ProtoPresenterBuilder preparator(Preparator onReady, boolean evalJavaScript) {
@@ -133,6 +144,8 @@ public final class ProtoPresenterBuilder {
     /**
      * @deprecated Use
      * {@link org.netbeans.html.presenters.spi.ProtoPresenterBuilder}.
+     * @param type string to identify the presenter
+     * @return this builder
      */
     @Deprecated
     public ProtoPresenterBuilder type(String type) {
@@ -143,6 +156,8 @@ public final class ProtoPresenterBuilder {
     /**
      * @deprecated Use
      * {@link org.netbeans.html.presenters.spi.ProtoPresenterBuilder}.
+     * @param app string to identify the application
+     * @return this builder
      */
     @Deprecated
     public ProtoPresenterBuilder app(String app) {
@@ -168,6 +183,8 @@ public final class ProtoPresenterBuilder {
     /**
      * @deprecated Use
      * {@link org.netbeans.html.presenters.spi.ProtoPresenterBuilder}.
+     * @param displayer the instance of displayer.
+     * @return this builder
      */
     @Deprecated
     public ProtoPresenterBuilder displayer(Displayer displayer) {
@@ -178,6 +195,8 @@ public final class ProtoPresenterBuilder {
     /**
      * @deprecated Use
      * {@link org.netbeans.html.presenters.spi.ProtoPresenterBuilder}.
+     * @param data instance of some data
+     * @return this builder
      */
     @Deprecated
     public ProtoPresenterBuilder register(Object data) {
@@ -205,6 +224,8 @@ public final class ProtoPresenterBuilder {
     /**
      * @deprecated Use
      * {@link org.netbeans.html.presenters.spi.ProtoPresenterBuilder}.
+     * @param logger instance of logger - may be {@code null}
+     * @return this builder
      */
     @Deprecated
     public ProtoPresenterBuilder logger(Logger logger) {
@@ -215,16 +236,17 @@ public final class ProtoPresenterBuilder {
     /**
      * @deprecated Use
      * {@link org.netbeans.html.presenters.spi.ProtoPresenterBuilder}.
+     * @return instance of presenter
      */
     @Deprecated
     public ProtoPresenter build() {
         org.netbeans.html.presenters.spi.ProtoPresenter p = delegate.build();
         if (p instanceof Executor) {
             return new GenPresenterWithExecutor(p);
-        }
+    }
         return new GenPresenter(p);
     }
-    
+
     private class GenPresenter implements ProtoPresenter {
         final org.netbeans.html.presenters.spi.ProtoPresenter delegate;
 
@@ -267,7 +289,7 @@ public final class ProtoPresenterBuilder {
             delegate.flush();
         }
     }
-    
+
     private final class GenPresenterWithExecutor extends GenPresenter implements Executor {
         public GenPresenterWithExecutor(org.netbeans.html.presenters.spi.ProtoPresenter p) {
             super(p);

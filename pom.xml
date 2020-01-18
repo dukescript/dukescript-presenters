@@ -124,18 +124,33 @@
                 <artifactId>maven-javadoc-plugin</artifactId>
                 <version>3.1.1</version>
                 <configuration>
-                    <excludePackageNames>android.*</excludePackageNames>
                     <groups>
                         <group>
-                            <title>DukeScript Presenters</title>
+                            <title>iOS and Android presenters</title>
                             <packages>com.dukescript.presenters</packages>
                         </group>
+                        <group>
+                            <title>Text Utilities</title>
+                            <packages>com.dukescript.api.strings</packages>
+                        </group>
+                        <group>
+                            <title>Deprecated Helpers</title>
+                            <packages>com.dukescript.presenters.spi:com.dukescript.presenters.webkit</packages>
+                        </group>
                     </groups>
+                    <excludePackageNames>
+                        android.*,
+                        com.dukescript.presenters.ios,
+                        com.dukescript.presenters.moe,
+                        com.dukescript.presenters.renderer,
+                        com.dukescript.presenters.robovm,
+                        com.dukescript.presenters.strings
+                    </excludePackageNames>
                     <nodeprecated>false</nodeprecated>
                     <detectJavaApiLink>false</detectJavaApiLink>
                     <links>
-                        <link>https://docs.oracle.com/en/java/javase/11/docs/api/</link>
-                        <link>https://dukescript.com/javadoc/html+java/${net.java.html.version}/</link>
+                        <link>https://docs.oracle.com/javase/8/docs/api/</link>
+                        <link>http://bits.netbeans.org/html+java/${net.java.html.version}/</link>
                         <link>https://developer.android.com/reference/</link>
                     </links>
                 </configuration>
