@@ -19,6 +19,7 @@
                 <artifactId>maven-javadoc-plugin</artifactId>
                 <configuration>
                     <skip>false</skip>
+                    <excludePackageNames>android.*</excludePackageNames>
                 </configuration>
                 <executions>
                     <execution>
