@@ -68,7 +68,6 @@
                     <artifactSet>
                         <includes>
                             <include>com.dukescript.presenters:*</include>
-                            <include>org.netbeans.html:generic</include>
                         </includes>
                     </artifactSet>
                 </configuration>
@@ -123,6 +122,11 @@
             <artifactId>org-openide-util-lookup</artifactId>
             <version>${netbeans.version}</version>
             <scope>provided</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.netbeans.html</groupId>
+            <artifactId>generic</artifactId>
+            <version>${net.java.html.version}</version>
         </dependency>
         <dependency>
             <groupId>org.netbeans.html</groupId>

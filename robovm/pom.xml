@@ -131,6 +131,11 @@
         </dependency>
         <dependency>
             <groupId>org.netbeans.html</groupId>
+            <artifactId>generic</artifactId>
+            <version>${net.java.html.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.netbeans.html</groupId>
             <artifactId>net.java.html.geo</artifactId>
             <version>${net.java.html.version}</version>
         </dependency>
