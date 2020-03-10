@@ -97,7 +97,7 @@ import org.netbeans.html.sound.spi.AudioEnvironment;
  * &lt;dependency&gt;
  *   &lt;groupId&gt;com.dukescript.presenters&lt;/groupId&gt;
  *   &lt;artifactId&gt;android&lt;/artifactId&gt;
- *   &lt;version&gt;<a target="blank" href="http://search.maven.org/#search%7Cgav%7C1%7Cg%3A%22com.dukescript.presenters%22%20AND%20a%3A%22android%22">1.3</a>&lt;/version&gt;
+ *   &lt;version&gt;<a target="blank" href="http://search.maven.org/#search%7Cgav%7C1%7Cg%3A%22com.dukescript.presenters%22%20AND%20a%3A%22android%22">1.7</a>&lt;/version&gt;
  * &lt;/dependency&gt;
  * </pre>
  * <p>
