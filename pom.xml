@@ -239,16 +239,5 @@
                 </plugins>
             </build>
         </profile>
-        <profile>
-            <id>surefire</id>
-            <activation>
-                <property>
-                    <name>!skipTests</name>
-                </property>
-            </activation>
-            <modules>
-                <module>testing</module>
-            </modules>
-        </profile>
     </profiles>
 </project>

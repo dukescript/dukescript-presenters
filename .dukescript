@@ -13,9 +13,9 @@ node ('Mac') {
 
         pom = readFile 'pom.xml'
         if (pom.contains('-SNAPSHOT</version>')) {
-            mvnargs = ""
+            integrationTests = true
         } else {
-            mvnargs = "-DskipTests=true"
+            integrationTests = false
         }
 
         withMaven(
@@ -33,8 +33,11 @@ node ('Mac') {
                         sh "${env.GPG_PASSPHRASE} --preset --passphrase ${GPG_PASSWD} ${GPG_ID}"
                     }
                 }
-                sh "mvn ${mvnargs} clean deploy -Prelease -Dgpg.useagent=true"
+                sh "mvn clean deploy -Prelease -Dgpg.useagent=true"
                 sh "mvn -DskipTests javadoc:aggregate -Dgpg.useagent=true"
+                if (integrationTests) {
+                    sh "mvn -f testing verify -Dgpg.useagent=true"
+                }
             }
         }
     }
