@@ -50,7 +50,7 @@
         <module>iosgeneric</module>
         <module>robovm</module>
         <module>moe</module>
-        <module>fakeandroidemul</module>
+        <!--<module>fakeandroidemul</module>-->
         <module>fakeiosemul</module>
         <module>webkit</module>
         <module>renderer</module>
