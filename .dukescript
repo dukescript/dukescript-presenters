@@ -18,7 +18,7 @@ node ('Mac') {
             integrationTests = false
         }
         if (env.ANDROID_HOME) {
-            mvnargs +=" -Dandroid.sdk.path='${env.ANDROID_HOME}'"
+            mvnargs =" -Dandroid.sdk.path='${env.ANDROID_HOME}'"
         }
         withMaven(
             maven : 'M3',
@@ -35,7 +35,7 @@ node ('Mac') {
                         sh "${env.GPG_PASSPHRASE} --preset --passphrase ${GPG_PASSWD} ${GPG_ID}"
                     }
                 }
-                sh "mvn clean deploy -Prelease -Dgpg.useagent=true"
+                sh "mvn ${mvnargs} clean deploy -Prelease -Dgpg.useagent=true"
                 sh "mvn -DskipTests javadoc:aggregate -Dgpg.useagent=true"
                 if (integrationTests) {
                     sh "mvn -f testing verify -Dgpg.useagent=true"
