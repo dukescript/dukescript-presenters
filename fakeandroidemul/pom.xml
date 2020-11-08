@@ -41,7 +41,9 @@
         <dependency>
             <groupId>com.google.android</groupId>
             <artifactId>android</artifactId>
-            <version>4.1.1.4</version>
+            <version>10.0</version>
+            <scope>system</scope>
+            <systemPath>${android.sdk.path}/platforms/android-29/android.jar</systemPath>
         </dependency>
     </dependencies>    
 </project>
