@@ -18,7 +18,7 @@
           <groupId>com.google.android</groupId>
           <artifactId>android</artifactId>
           <scope>provided</scope>
-          <version>4.1.1.4</version>
+          <version>10.0</version>
       </dependency>
         <dependency>
             <groupId>org.netbeans.html</groupId>
