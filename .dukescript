@@ -17,7 +17,9 @@ node ('Mac') {
         } else {
             integrationTests = false
         }
-
+        if (env.ANDROID_HOME) {
+            mvnargs +=" -Dandroid.sdk.path='${env.ANDROID_HOME}'"
+        }
         withMaven(
             maven : 'M3',
             mavenSettingsConfig : '1745afa9-9479-4838-b15d-14029f4cfc8d'
