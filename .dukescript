@@ -36,9 +36,9 @@ node ('Mac') {
                     }
                 }
                 sh "mvn ${mvnargs} clean deploy -Prelease -Dgpg.useagent=true"
-                sh "mvn -DskipTests javadoc:aggregate -Dgpg.useagent=true"
+                sh "mvn ${mvnargs} -DskipTests javadoc:aggregate -Dgpg.useagent=true"
                 if (integrationTests) {
-                    sh "mvn -f testing verify -Dgpg.useagent=true"
+                    sh "mvn ${mvnargs} -f testing verify -Dgpg.useagent=true"
                 }
             }
         }
