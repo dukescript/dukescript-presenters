@@ -32,6 +32,18 @@
             </exclusions>
         </dependency>
         <dependency>
+            <groupId>com.google.android</groupId>
+            <artifactId>android-test-base</artifactId>
+            <scope>provided</scope>
+            <version>10.0</version>
+            <exclusions>
+                <exclusion>
+                    <groupId>junit</groupId>
+                    <artifactId>junit</artifactId>
+                </exclusion>
+            </exclusions>
+        </dependency>
+        <dependency>
             <groupId>${project.groupId}</groupId>
             <artifactId>androidapp</artifactId>
             <type>apk</type>
