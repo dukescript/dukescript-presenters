@@ -14,6 +14,54 @@
     </properties>
     <build>
         <plugins>
+             <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-install-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <id>install-android</id>
+                        <phase>install</phase>
+                        <goals>
+                            <goal>install-file</goal>
+                        </goals>
+                        <configuration>
+                            <file>${android.sdk.path}/platforms/android-29/android.jar</file>
+                            <groupId>com.google.android</groupId>
+                            <artifactId>android</artifactId>
+                            <version>10.0</version>
+                            <packaging>jar</packaging>
+                        </configuration>
+                    </execution>
+                    <execution>
+                        <id>install-android-test</id>
+                        <phase>install</phase>
+                        <goals>
+                            <goal>install-file</goal>
+                        </goals>
+                        <configuration>
+                            <file>${android.sdk.path}/platforms/android-29/optional/android.test.runner.jar</file>
+                            <groupId>com.google.android</groupId>
+                            <artifactId>android-test</artifactId>
+                            <version>10.0</version>
+                            <packaging>jar</packaging>
+                        </configuration>
+                    </execution>
+                    <execution>
+                        <id>install-android-test-base</id>
+                        <phase>install</phase>
+                        <goals>
+                            <goal>install-file</goal>
+                        </goals>
+                        <configuration>
+                            <file>${android.sdk.path}/platforms/android-29/optional/android.test.base.jar</file>
+                            <groupId>com.google.android</groupId>
+                            <artifactId>android-test-base</artifactId>
+                            <version>10.0</version>
+                            <packaging>jar</packaging>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-deploy-plugin</artifactId>
@@ -36,14 +84,5 @@
                 </configuration>
             </plugin>
         </plugins>
-    </build>
-    <dependencies>
-        <dependency>
-            <groupId>com.google.android</groupId>
-            <artifactId>android</artifactId>
-            <version>10.0</version>
-            <scope>system</scope>
-            <systemPath>${android.sdk.path}/platforms/android-29/android.jar</systemPath>
-        </dependency>
-    </dependencies>    
+    </build> 
 </project>

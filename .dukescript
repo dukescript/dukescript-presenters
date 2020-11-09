@@ -35,9 +35,6 @@ node ('Mac') {
                         sh "${env.GPG_PASSPHRASE} --preset --passphrase ${GPG_PASSWD} ${GPG_ID}"
                     }
                 }
-                sh "mvn install:install-file -Dfile=${env.ANDROID_HOME}/platforms/android-29/android.jar -DgroupId=com.google.android -DartifactId=android -Dversion=10.0 -Dpackaging=jar"
-                sh "mvn install:install-file -Dfile=${env.ANDROID_HOME}/platforms/android-29/optional/android.test.runner.jar -DgroupId=com.google.android -DartifactId=android-test -Dversion=10.0 -Dpackaging=jar"
-                sh "mvn install:install-file -Dfile=${env.ANDROID_HOME}/platforms/android-29/optional/android.test.base.jar -DgroupId=com.google.android -DartifactId=android-test-base -Dversion=10.0 -Dpackaging=jar"
                 sh "mvn ${mvnargs} clean deploy -Prelease -Dgpg.useagent=true"
                 sh "mvn ${mvnargs} -DskipTests javadoc:aggregate -Dgpg.useagent=true"
                 if (integrationTests) {
