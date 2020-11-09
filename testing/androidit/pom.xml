@@ -24,6 +24,7 @@
             <artifactId>android-test</artifactId>
             <scope>provided</scope>
             <version>10.0</version>
+            <type>jar</type>
             <exclusions>
                 <exclusion>
                     <groupId>junit</groupId>
