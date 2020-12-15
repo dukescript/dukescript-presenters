@@ -118,7 +118,16 @@ import org.netbeans.html.sound.spi.AudioEnvironment;
  * can be found in the {@link #onCreate(android.os.Bundle) activity definition} section.
  */
 public final class Android extends Activity {
+    private static Activity INSTANCE;
+
     public Android() {
+    }
+    
+    /**
+     * Get the running instance
+     */
+    public static Activity getInstance() {
+        return INSTANCE;
     }
 
     /**
@@ -306,6 +315,7 @@ public final class Android extends Activity {
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        INSTANCE = this;
         WebView webView = new WebView(this);
         setContentView(webView);
         String aPkg = getPackageName();
