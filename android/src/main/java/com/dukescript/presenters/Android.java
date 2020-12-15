@@ -360,6 +360,12 @@ public final class Android extends Activity {
         presenter.execute(presenter);
         doInit(presenter, webView);
     }
+    
+    
+    @Override
+    public void onBackPressed() {
+        // do nothing
+    }
 
     static void androidLog(Level severity, String msg, Object... args) {
         int priority = Log.WARN;
