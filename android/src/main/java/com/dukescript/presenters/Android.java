@@ -30,6 +30,7 @@ import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.Context;
 import android.content.DialogInterface;
+import android.content.Intent;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
 import android.content.res.AssetFileDescriptor;
@@ -480,6 +481,19 @@ public final class Android extends Activity {
                 public void onLoadResource(WebView view, String url) {
                     androidLog(Level.FINE, "onLoadResource {0}", url);
                 }
+                
+                @Override
+                public boolean shouldOverrideUrlLoading(WebView view, String url) {
+                    if (url.startsWith("http")) {
+                        Intent intent = new Intent(Intent.ACTION_VIEW, Uri.parse(url));
+                        view.getContext().startActivity(intent);
+                        return true;
+                    } else {
+                        return super.shouldOverrideUrlLoading(view, url);
+                    }
+                }
+
+                
             });
             androidLog(Level.FINE, "displayPage {0}", page.toExternalForm());
             view.loadUrl(page.toExternalForm());
