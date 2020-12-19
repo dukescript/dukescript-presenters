@@ -59,6 +59,7 @@ public class TestActivity extends Activity {
         super.onCreate(savedInstanceState);
         view = new WebView(this);
         view.getSettings().setJavaScriptEnabled(true);
+        WebView.setWebContentsDebuggingEnabled(true);
         button = new Button(this);
         button.setText("Run me");
         final LinearLayout ll = new LinearLayout(this);
