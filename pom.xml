@@ -43,17 +43,13 @@
     </scm>
     
     <modules>
-        <module>browser</module>
         <module>strings</module>
-        <module>generic</module>
         <module>android</module>
         <module>iosgeneric</module>
         <module>robovm</module>
         <module>moe</module>
         <module>fakeandroidemul</module>
         <module>fakeiosemul</module>
-        <module>webkit</module>
-        <module>renderer</module>
     </modules>
 
     <properties>
