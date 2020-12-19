@@ -239,14 +239,16 @@ public final class Android extends Activity {
     }
 
     private static void doInit(final Presenter p, final WebView view) {
-        p.dispatch(new Runnable() {
+        Runnable initialize = new Runnable() {
             @Override
             public void run() {
                 androidLog(Level.FINE, "Initializing presenter for {0}", view);
                 p.presenter.displayPage(null, null);
                 androidLog(Level.FINE, "Init done for {0}", view);
             }
-        }, false);
+        };
+        Thread thread = new Thread(initialize, "Initialize " + view);
+        thread.start();
     }
 
     /**
