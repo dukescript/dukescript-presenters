@@ -55,6 +55,7 @@ import org.netbeans.html.json.tck.KOTest;
         net.java.html.json.tests.JSONTest.class,
         net.java.html.json.tests.KnockoutTest.class,
         net.java.html.json.tests.MinesTest.class,
+        net.java.html.json.tests.ObtainAndComputeTest.class,
         net.java.html.json.tests.OperationsTest.class,
         net.java.html.json.tests.WebSocketTest.class,
         net.java.html.json.tests.GCKnockoutTest.class

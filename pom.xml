@@ -54,9 +54,9 @@
 
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-        <net.java.html.version>1.7</net.java.html.version>
+        <net.java.html.version>1.7.1</net.java.html.version>
         <testng.version>6.7</testng.version>
-        <netbeans.version>RELEASE111</netbeans.version>
+        <netbeans.version>RELEASE122</netbeans.version>
         <grizzly.version>2.3.8</grizzly.version>
         <netbeans.compile.on.save>none</netbeans.compile.on.save>
         <robovm.version>2.3.5</robovm.version>
